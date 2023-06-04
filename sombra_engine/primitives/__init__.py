@@ -52,7 +52,8 @@ class Triangle:
 
 
 class VertexGroup:
-    def __init__(self, indices: list[int], material: Material):
+    def __init__(self, name: str, indices: list[int], material: Material):
+        self.name = name
         self.indices = indices
         self.material = material
 
