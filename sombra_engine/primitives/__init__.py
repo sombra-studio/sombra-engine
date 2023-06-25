@@ -1,27 +1,30 @@
-import pyglet
 from pyglet.math import Vec2, Vec3
 
 
 class Vertex:
     def __init__(
         self,
-        id: int,
+        vertex_id: int,
         position: Vec3 = Vec3(),
         color: Vec3 = Vec3(1.0),
         normal: Vec3 = Vec3(0.0, 1.0, 0.0),
         tex_coords: Vec2 = Vec2()
     ):
-        self.id = id
+        self.vertex_id = vertex_id
         self.position = position
         self.color = color
         self.normal = normal
         self.tex_coords = tex_coords
 
+    def get_attr_tuple(self, name: str) -> tuple[float, float, float]:
+        vec: Vec3 = getattr(self, name)
+        return vec.x, vec.y, vec.z
+
 
 class Material:
     def __init__(
         self,
-        id: int,
+        material_id: int,
         name: str = "default",
         ambient: Vec3 = Vec3(1.0),
         diffuse: Vec3 = Vec3(1.0),
@@ -30,7 +33,7 @@ class Material:
         roughness: float = 1.0,
         ior: float = 1.0
     ):
-        self.id = id
+        self.material_id = material_id
         self.name = name
         self.ambient = ambient
         self.diffuse = diffuse

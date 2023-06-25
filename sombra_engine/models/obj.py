@@ -4,23 +4,69 @@ from pyglet.math import Vec2, Vec3
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 
-
+from sombra_engine.constants import *
 from sombra_engine.models import Mesh, Model
 from sombra_engine.primitives import Material, Vertex, VertexGroup
 
 
 class MtlParser:
     def __init__(self):
-        self.current_data = {}
+        self.current_name = None
         self.materials = {}
+        self.commands_map = {
+            'newmtl': self.set_new_material,
+            'Ka': self.set_ambient,
+            'Kd': self.set_diffuse,
+            'Ks': self.set_specular,
+            'Ns': self.set_specular_exponent,
+            'Ni': self.set_ior,
+        }
 
     def parse(self, file: TextIO):
+        """
+        Read a MTL file line by line parsing the commands and storing the
+        information into data structures that are attributes of this class
+        Args:
+            file: A MTL file
+        """
         for line in file:
             if not line or line[0] == '#':
                 continue
             args = line.split(' ')
-            # TODO implement the mtl commands
-            pass
+            command = args[0]
+            if command in self.commands_map:
+                self.commands_map[command](*args[1:])
+
+    def set_new_material(self, name: str):
+        self.current_name = name
+        self.materials[name] = {}
+
+    def set_color_by_key(self, key: str, r: str, g: str, b: str):
+        if self.current_name is None:
+            self.current_name = DEFAULT_MATERIAL_NAME
+        self.materials[self.current_name][key] = Vec3(
+            float(r), float(g), float(b)
+        )
+
+    def set_value_by_key(self, key: str, value: str):
+        if self.current_name is None:
+            self.current_name = DEFAULT_MATERIAL_NAME
+        self.materials[self.current_name][key] = float(value)
+
+    def set_ambient(self, r: str, g: str, b: str):
+        self.set_color_by_key('ambient', r, g, b)
+
+    def set_diffuse(self, r: str, g: str, b: str):
+        self.set_color_by_key('diffuse', r, g, b)
+
+    def set_specular(self, r: str, g: str, b: str):
+        self.set_color_by_key('specular', r, g, b)
+
+    def set_specular_exponent(self, value: str):
+        self.set_value_by_key('specular_exponent', value)
+
+    def set_ior(self, value: str):
+        self.set_value_by_key('ior', value)
 
 
 class MtlLoader:
@@ -35,10 +81,51 @@ class MtlLoader:
 class OBJParser:
     def __init__(self):
         self.meshes_data = []
+        self.vertex_groups_data = []
         self.current_mesh_data = {}
         self.current_vertex_group = {}
         self.materials = {}
         self.mtl_loader = MtlLoader()
+
+    def parse(self, file: TextIO):
+        """
+        Parse a given OBJ file reading line by line and stores the model
+        information into data structures that are attributes of this class.
+        Args:
+            file: An OBJ file
+        """
+        for line in file:
+            if not line or line[0] == '#':
+                continue
+            args = line.split(' ')
+            if args[0] == 'o':
+                self.set_name(args[1])
+            elif args[0] == 'v':
+                self.set_vertex(args[1:])
+            elif args[0] == 'vt':
+                self.set_tex_coords(args[1:])
+            elif args[0] == 'vn':
+                self.set_normal(args[1:])
+            elif args[0] == 'f':
+                self.set_face(args[1:])
+            elif args[0] == 's' or args[0] == 'g':
+                self.set_vertex_group(args[1])
+            elif args[0] == 'mtllib':
+                self.load_materials(args[1])
+            elif args[0] == 'usemtl':
+                self.set_material(args[1])
+
+        # Finally add the current pending data
+        vg_data = self.current_vertex_group
+        if vg_data:
+            if 'vertex_groups' in self.current_mesh_data:
+                new_vertex_group = VertexGroup(
+                    vg_data['name'], vg_data['indices'], vg_data['material']
+                )
+                self.current_mesh_data['vertex_groups'].append(new_vertex_group)
+        mesh_data = self.current_mesh_data
+        if mesh_data:
+            self.meshes_data.append(mesh_data)
 
     def set_name(self, name: str):
         # If we already have a current mesh data we append it
@@ -121,40 +208,6 @@ class OBJParser:
             
     def load_materials(self, filename: str):
         self.materials = self.mtl_loader.load(filename)
-
-    def parse(self, file: TextIO):
-        for line in file:
-            if not line or line[0] == '#':
-                continue
-            args = line.split(' ')
-            if args[0] == 'o':
-                self.set_name(args[1])
-            elif args[0] == 'v':
-                self.set_vertex(args[1:])
-            elif args[0] == 'vt':
-                self.set_tex_coords(args[1:])
-            elif args[0] == 'vn':
-                self.set_normal(args[1:])
-            elif args[0] == 'f':
-                self.set_face(args[1:])
-            elif args[0] == 's' or args[0] == 'g':
-                self.set_vertex_group(args[1])
-            elif args[0] == 'mtllib':
-                self.load_materials(args[1])
-            elif args[0] == 'usemtl':
-                self.set_material(args[1])
-
-        # Finally add the current pending data
-        vg_data = self.current_vertex_group
-        if vg_data:
-            if 'vertex_groups' in self.current_mesh_data:
-                new_vertex_group = VertexGroup(
-                    vg_data['name'], vg_data['indices'], vg_data['material']
-                )
-                self.current_mesh_data['vertex_groups'].append(new_vertex_group)
-        mesh_data = self.current_mesh_data
-        if mesh_data:
-            self.meshes_data.append(mesh_data)
 
 
 class OBJLoader:
