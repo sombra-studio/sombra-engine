@@ -1,5 +1,4 @@
-from typing import TextIO
-
+import os
 from pyglet.math import Vec2, Vec3
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
@@ -9,7 +8,7 @@ from sombra_engine.models import Mesh, Model
 from sombra_engine.primitives import Material, Vertex, VertexGroup
 
 
-class MtlParser:
+class MTLParser:
     def __init__(self):
         self.current_name = None
         self.materials = {}
@@ -22,20 +21,24 @@ class MtlParser:
             'Ni': self.set_ior,
         }
 
-    def parse(self, file: TextIO):
+    def parse(self, filename: str):
         """
         Read a MTL file line by line parsing the commands and storing the
         information into data structures that are attributes of this class
         Args:
-            file: A MTL file
+            filename: Path of a MTL file
         """
-        for line in file:
-            if not line or line[0] == '#':
-                continue
-            args = line.split(' ')
-            command = args[0]
-            if command in self.commands_map:
-                self.commands_map[command](*args[1:])
+        with open(filename) as file:
+            for line in file:
+                if not line or line[0] == '#':
+                    continue
+                # Remove end of line character
+                if len(line) > 1 and line[-1] == '\n':
+                    line = line[:-1]
+                args = line.split(' ')
+                command = args[0]
+                if command in self.commands_map:
+                    self.commands_map[command](*args[1:])
 
     def set_new_material(self, name: str):
         self.current_name = name
@@ -69,12 +72,11 @@ class MtlParser:
         self.set_value_by_key('ior', value)
 
 
-class MtlLoader:
+class MTLLoader:
     @staticmethod
     def load(filename: str) -> dict[str, Material]:
-        mtl_parser = MtlParser()
-        with open(filename) as f:
-            mtl_parser.parse(f)
+        mtl_parser = MTLParser()
+        mtl_parser.parse(filename)
         return mtl_parser.materials
 
 
@@ -85,18 +87,22 @@ class OBJParser:
         self.current_mesh_data = {}
         self.current_vertex_group = {}
         self.materials = {}
-        self.mtl_loader = MtlLoader()
 
-    def parse(self, file: TextIO):
+    def parse(self, filename: str):
         """
         Parse a given OBJ file reading line by line and stores the model
         information into data structures that are attributes of this class.
         Args:
-            file: An OBJ file
+            filename: Path of an OBJ file
         """
+        file = open(filename)
+        path = os.path.dirname(filename)
         for line in file:
             if not line or line[0] == '#':
                 continue
+            # Remove end of line character
+            if len(line) > 1 and line[-1] == '\n':
+                line = line[:-1]
             args = line.split(' ')
             if args[0] == 'o':
                 self.set_name(args[1])
@@ -111,13 +117,14 @@ class OBJParser:
             elif args[0] == 's' or args[0] == 'g':
                 self.set_vertex_group(args[1])
             elif args[0] == 'mtllib':
-                self.load_materials(args[1])
+                self.load_materials(os.path.join(path, args[1]))
             elif args[0] == 'usemtl':
                 self.set_material(args[1])
 
         # Finally add the current pending data
         vg_data = self.current_vertex_group
         if vg_data:
+            # TODO re think vertex group creation
             if 'vertex_groups' in self.current_mesh_data:
                 new_vertex_group = VertexGroup(
                     vg_data['name'], vg_data['indices'], vg_data['material']
@@ -126,6 +133,7 @@ class OBJParser:
         mesh_data = self.current_mesh_data
         if mesh_data:
             self.meshes_data.append(mesh_data)
+        file.close()
 
     def set_name(self, name: str):
         # If we already have a current mesh data we append it
@@ -154,10 +162,16 @@ class OBJParser:
             args: the arguments of the set face command as a list,
                 for ex. ['6/5/1', '7/3/2', '8/6/3']
         """
+        if 'indices' not in self.current_mesh_data:
+            self.current_mesh_data['indices'] = []
+
         vertices = self.current_mesh_data['vertices']
         normals = self.current_mesh_data['normals']
         tex_coords = self.current_mesh_data['tex_coords']
         vg_data = self.current_vertex_group
+
+        if 'indices' not in vg_data:
+            vg_data['indices'] = []
 
         for indices_str in args:
             # Split by '/' and transform the values to int
@@ -166,7 +180,7 @@ class OBJParser:
             idx = int(values_str[0]) - 1
             self.current_mesh_data['indices'].append(idx)
             if vg_data:
-                self.current_vertex_group['indices'].append(idx)
+                vg_data['indices'].append(idx)
             vertex = vertices[idx]
             if values_str[1]:
                 tex_coords_idx = int(values_str[1]) - 1
@@ -194,11 +208,13 @@ class OBJParser:
     def set_vertex_group(self, name: str):
         vg_data = self.current_vertex_group
         if vg_data:
+            new_vertex_group = VertexGroup(
+                vg_data['name'], vg_data['indices'], vg_data['material']
+            )
             if 'vertex_groups' in self.current_mesh_data:
-                new_vertex_group = VertexGroup(
-                    vg_data['name'], vg_data['indices'], vg_data['material']
-                )
                 self.current_mesh_data['vertex_groups'].append(new_vertex_group)
+            else:
+                self.current_mesh_data['vertex_groups'] = [new_vertex_group]
         vg_data['name'] = name
 
     def set_material(self, name: str):
@@ -207,7 +223,7 @@ class OBJParser:
             vg_data['material'] = self.materials[name]
             
     def load_materials(self, filename: str):
-        self.materials = self.mtl_loader.load(filename)
+        self.materials = MTLLoader.load(filename)
 
 
 class OBJLoader:
@@ -218,8 +234,7 @@ class OBJLoader:
     ) -> Model:
         obj_parser = OBJParser()
         # Parse the file
-        with open(filename) as f:
-            obj_parser.parse(f)
+        obj_parser.parse(filename)
 
         # Now create the Model
         meshes = []

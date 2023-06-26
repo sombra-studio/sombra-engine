@@ -1,15 +1,40 @@
 from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.math import Mat4, Vec3
+from pyglet.math import Mat4
 import unittest
 
 
-from sombra_engine.models.obj import OBJLoader
+from sombra_engine.models.obj import MTLLoader, OBJLoader
+
+
+class MTLTestCase(unittest.TestCase):
+    def setUp(self):
+        self.filename = 'data/plane.mtl'
+        self.materials = MTLLoader.load(self.filename)
+
+    def test_mtl_loader(self):
+        name = 'Material.001'
+        self.assertIn(name, self.materials)
+
+"""
+newmtl Material.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.279282 0.015609 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+"""
+
 
 class OBJTestCase(unittest.TestCase):
     def setUp(self):
         self.filename = 'data/plane.obj'
-        self.vert_shader = Shader('data/test.vert', 'vertex')
-        self.frag_shader = Shader('data/test.frag', 'fragment')
+        with open('data/test.vert') as f:
+            self.vert_shader = Shader(f.read(), 'vertex')
+        with open('data/test.frag') as f:
+            self.frag_shader = Shader(f.read(), 'fragment')
         self.program = ShaderProgram(self.vert_shader, self.frag_shader)
         self.program['mv'] = Mat4()
         self.program['proj'] = Mat4()
@@ -28,7 +53,7 @@ class OBJTestCase(unittest.TestCase):
         for i, vertex in enumerate(plane.vertices):
             self.assertEqual(vertex.get_attr_tuple('position'), vertices[i])
 
-        self.assertEqual(plane,indices, indices)
+        self.assertEqual(plane, indices, indices)
         self.assertEqual(plane.vertices[0].normal, normal)
 
         for idx in indices:
