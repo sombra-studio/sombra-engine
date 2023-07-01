@@ -44,7 +44,7 @@ class OBJTestCase(unittest.TestCase):
         vertices = [(-1, 0, 1), (1, 0, 1), (-1, 0, -1), (1, 0, -1)]
         normal = (0, 1, 0)
         tex_coords = [(0, 0), (1, 0), (0, 1), (1, 1)]
-        indices = [2, 3, 1, 2, 4, 3]
+        indices = [1, 2, 0, 1, 3, 2]
 
         model = OBJLoader.load(self.filename, 'test', self.program)
         self.assertEqual(model.name, name)
@@ -53,7 +53,7 @@ class OBJTestCase(unittest.TestCase):
         for i, vertex in enumerate(plane.vertices):
             self.assertEqual(vertex.get_attr_tuple('position'), vertices[i])
 
-        self.assertEqual(plane, indices, indices)
+        self.assertEqual(plane.indices, indices)
         self.assertEqual(plane.vertices[0].normal, normal)
 
         for idx in indices:

@@ -23,10 +23,10 @@ class MTLParser:
 
     def parse(self, filename: str):
         """
-        Read a MTL file line by line parsing the commands and storing the
+        Read an MTL file line by line parsing the commands and storing the
         information into data structures that are attributes of this class
         Args:
-            filename: Path of a MTL file
+            filename: Path of an MTL file
         """
         with open(filename) as file:
             for line in file:
@@ -82,11 +82,10 @@ class MTLLoader:
 
 class OBJParser:
     def __init__(self):
-        self.meshes_data = []
-        self.vertex_groups_data = []
-        self.current_mesh_data = {}
-        self.current_vertex_group = {}
-        self.materials = {}
+        self.meshes_data = {}
+        self.current_mesh_name = None
+        self.current_vertex_group_name = None
+        self.materials: dict[str, Material] = {}
 
     def parse(self, filename: str):
         """
@@ -120,37 +119,37 @@ class OBJParser:
                 self.load_materials(os.path.join(path, args[1]))
             elif args[0] == 'usemtl':
                 self.set_material(args[1])
-
-        # Finally add the current pending data
-        vg_data = self.current_vertex_group
-        if vg_data:
-            # TODO re think vertex group creation
-            if 'vertex_groups' in self.current_mesh_data:
-                new_vertex_group = VertexGroup(
-                    vg_data['name'], vg_data['indices'], vg_data['material']
-                )
-                self.current_mesh_data['vertex_groups'].append(new_vertex_group)
-        mesh_data = self.current_mesh_data
-        if mesh_data:
-            self.meshes_data.append(mesh_data)
         file.close()
 
+    def get_current_mesh_data(self):
+        if self.current_mesh_name in self.meshes_data:
+            return self.meshes_data[self.current_mesh_name]
+        else:
+            raise Exception("Error: no current mesh data")
+
+    def get_current_vertex_group(self):
+        data = self.get_current_mesh_data()
+        if self.current_vertex_group_name in data['vertex_groups']:
+            return data['vertex_groups'][self.current_vertex_group_name]
+        else:
+            return None
+
     def set_name(self, name: str):
-        # If we already have a current mesh data we append it
-        if self.current_mesh_data:
-            self.meshes_data.append(self.current_mesh_data)
-        self.current_mesh_data = {'name': name}
+        self.meshes_data[name] = {
+            'name': name,
+            'indices': [],
+            'vertices': [],
+            'tex_coords': [],
+            'normals': [],
+            'vertex_groups': {}
+        }
+        self.current_mesh_name = name
 
     def set_vertex(self, args: list[str]):
-        if 'vertices' not in self.current_mesh_data:
-            self.current_mesh_data['vertices'] = []
-
+        data = self.get_current_mesh_data()
         positions = map(float, args)
-        new_vert = Vertex(
-            len(self.current_mesh_data['vertices']) + 1,
-            position=Vec3(*positions)
-        )
-        self.current_mesh_data['vertices'].append(new_vert)
+        new_vert = Vertex(len(data['vertices']) + 1, position=Vec3(*positions))
+        data['vertices'].append(new_vert)
 
     def set_face(self, args: list[str]):
         """
@@ -162,23 +161,18 @@ class OBJParser:
             args: the arguments of the set face command as a list,
                 for ex. ['6/5/1', '7/3/2', '8/6/3']
         """
-        if 'indices' not in self.current_mesh_data:
-            self.current_mesh_data['indices'] = []
-
-        vertices = self.current_mesh_data['vertices']
-        normals = self.current_mesh_data['normals']
-        tex_coords = self.current_mesh_data['tex_coords']
-        vg_data = self.current_vertex_group
-
-        if 'indices' not in vg_data:
-            vg_data['indices'] = []
+        data = self.get_current_mesh_data()
+        vertices = data['vertices']
+        normals = data['normals']
+        tex_coords = data['tex_coords']
+        vg_data = self.get_current_vertex_group()
 
         for indices_str in args:
             # Split by '/' and transform the values to int
             values_str = indices_str.split('/')
 
-            idx = int(values_str[0]) - 1
-            self.current_mesh_data['indices'].append(idx)
+            idx = int(values_str[0]) - 1    # indices start from 0
+            data['indices'].append(idx)
             if vg_data:
                 vg_data['indices'].append(idx)
             vertex = vertices[idx]
@@ -190,35 +184,28 @@ class OBJParser:
                 vertex.normal = normals[normal_idx]
 
     def set_tex_coords(self, args: list[str]):
-        if 'tex_coords' not in self.current_mesh_data:
-            self.current_mesh_data['tex_coords'] = []
-
+        data = self.get_current_mesh_data()
         values = [float(x) for x in args]
         new_tex_coords = Vec2(values[0], values[1])
-        self.current_mesh_data['tex_coords'].append(new_tex_coords)
+        data['tex_coords'].append(new_tex_coords)
 
     def set_normal(self, args: list[str]):
-        if 'normals' not in self.current_mesh_data:
-            self.current_mesh_data['normals'] = []
-
+        data = self.get_current_mesh_data()
         values = [float(x) for x in args]
         new_normal = Vec2(values[0], values[1])
-        self.current_mesh_data['normals'].append(new_normal)
+        data['normals'].append(new_normal)
 
     def set_vertex_group(self, name: str):
-        vg_data = self.current_vertex_group
-        if vg_data:
-            new_vertex_group = VertexGroup(
-                vg_data['name'], vg_data['indices'], vg_data['material']
-            )
-            if 'vertex_groups' in self.current_mesh_data:
-                self.current_mesh_data['vertex_groups'].append(new_vertex_group)
-            else:
-                self.current_mesh_data['vertex_groups'] = [new_vertex_group]
-        vg_data['name'] = name
+        data = self.get_current_mesh_data()
+        self.current_vertex_group_name = name
+        new_vg_data = {
+            'name': name,
+            'indices': []
+        }
+        data['vertex_groups'][name] = new_vg_data
 
     def set_material(self, name: str):
-        vg_data = self.current_vertex_group
+        vg_data = self.get_current_vertex_group()
         if vg_data:
             vg_data['material'] = self.materials[name]
             
@@ -238,14 +225,20 @@ class OBJLoader:
 
         # Now create the Model
         meshes = []
-        for mesh_data in obj_parser.meshes_data:
+        for mesh_data in obj_parser.meshes_data.values():
+            # Create Vertex Groups
+            vertex_groups: dict[str, VertexGroup] = {}
+            for vg_data in mesh_data['vertex_groups'].values():
+                vertex_groups[vg_data['name']] = VertexGroup(
+                    vg_data['name'], vg_data['indices'], vg_data['material']
+                )
             # Create Mesh
             new_mesh = Mesh(
                 mesh_data['name'],
                 mesh_data['vertices'],
                 mesh_data['indices'],
-                vertex_groups=mesh_data['vertex_groups'],
-                materials=mesh_data['materials'],
+                vertex_groups=vertex_groups,
+                materials=obj_parser.materials,
                 batch=batch,
                 group=group,
                 program=program

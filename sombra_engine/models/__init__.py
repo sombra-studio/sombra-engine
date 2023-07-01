@@ -17,8 +17,8 @@ class Mesh:
         name: str,
         vertices: list[Vertex],
         indices: list[int],
-        vertex_groups: list[VertexGroup] = None,
-        materials: list[Material] = None,
+        vertex_groups: dict[str, VertexGroup] = None,
+        materials: dict[str, Material] = None,
         mode: int = GL_TRIANGLES,
         batch: Batch = None,
         group: Group = None,
@@ -42,7 +42,7 @@ class Mesh:
 
     def create_vertex_list(self):
         vao = self.program.vertex_list_indexed(
-            len(self.indices), self.mode, self.batch, self.group,
+            len(self.indices), self.mode, self.indices, self.batch, self.group,
             position=('f', self.get_vertices_array())
         )
         return vao
