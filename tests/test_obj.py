@@ -1,5 +1,5 @@
 from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.math import Mat4
+from pyglet.math import Mat4, Vec2, Vec3
 import unittest
 
 
@@ -14,6 +14,7 @@ class MTLTestCase(unittest.TestCase):
     def test_mtl_loader(self):
         name = 'Material.001'
         self.assertIn(name, self.materials)
+
 
 """
 newmtl Material.001
@@ -41,9 +42,11 @@ class OBJTestCase(unittest.TestCase):
 
     def test_model(self):
         name = 'test'
-        vertices = [(-1, 0, 1), (1, 0, 1), (-1, 0, -1), (1, 0, -1)]
-        normal = (0, 1, 0)
-        tex_coords = [(0, 0), (1, 0), (0, 1), (1, 1)]
+        vertices = [
+            Vec3(-1, 0, 1), Vec3(1, 0, 1), Vec3(-1, 0, -1), Vec3(1, 0, -1)
+        ]
+        normal = Vec3(0, 1, 0)
+        tex_coords = [Vec2(0, 0), Vec2(1, 0), Vec2(0, 1), Vec2(1, 1)]
         indices = [1, 2, 0, 1, 3, 2]
 
         model = OBJLoader.load(self.filename, 'test', self.program)
@@ -51,14 +54,14 @@ class OBJTestCase(unittest.TestCase):
         plane = model.meshes[0]
         self.assertEqual(plane.name, 'Plane')
         for i, vertex in enumerate(plane.vertices):
-            self.assertEqual(vertex.get_attr_tuple('position'), vertices[i])
+            self.assertEqual(vertex.position, vertices[i])
 
         self.assertEqual(plane.indices, indices)
         self.assertEqual(plane.vertices[0].normal, normal)
 
         for idx in indices:
             self.assertEqual(
-                plane.vertices[idx - 1].tex_coords.x, tex_coords[idx - 1]
+                plane.vertices[idx - 1].tex_coords, tex_coords[idx - 1]
             )
 
 

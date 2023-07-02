@@ -186,13 +186,13 @@ class OBJParser:
     def set_tex_coords(self, args: list[str]):
         data = self.get_current_mesh_data()
         values = [float(x) for x in args]
-        new_tex_coords = Vec2(values[0], values[1])
+        new_tex_coords = Vec2(*values)
         data['tex_coords'].append(new_tex_coords)
 
     def set_normal(self, args: list[str]):
         data = self.get_current_mesh_data()
         values = [float(x) for x in args]
-        new_normal = Vec2(values[0], values[1])
+        new_normal = Vec3(*values)
         data['normals'].append(new_normal)
 
     def set_vertex_group(self, name: str):
