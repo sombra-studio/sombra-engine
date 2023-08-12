@@ -14,6 +14,7 @@ class MTLTestCase(unittest.TestCase):
     def test_mtl_loader(self):
         name = 'Material.001'
         self.assertIn(name, self.materials)
+        # TODO finish material test
 
 
 """
@@ -55,9 +56,9 @@ class OBJTestCase(unittest.TestCase):
         self.assertEqual(plane.name, 'Plane')
         for i, vertex in enumerate(plane.vertices):
             self.assertEqual(vertex.position, vertices[i])
+            self.assertEqual(vertex.normal, normal)
 
         self.assertEqual(plane.indices, indices)
-        self.assertEqual(plane.vertices[0].normal, normal)
 
         for idx in indices:
             self.assertEqual(
