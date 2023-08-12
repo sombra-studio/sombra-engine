@@ -1,6 +1,6 @@
 #version 330
 
-uniform Material {
+uniform TexturedMaterial {
     sampler2D ambient_map;
     sampler2D diffuse_map;
     sampler2D specular_map;

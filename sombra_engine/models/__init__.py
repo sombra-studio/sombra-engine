@@ -1,8 +1,9 @@
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics.vertexdomain import VertexDomain
 
-
+from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import *
 
 
@@ -38,24 +39,31 @@ class Mesh:
         self.transform = transform
         self.parent = parent
 
-        self.vertex_list = self.create_vertex_list()
+        self.material_groups = self.create_material_groups()
+        self.vertex_lists = self.create_vertex_lists()
 
+    def create_material_groups(self) -> dict[str, MaterialGroup]:
+        pass
 
-    # TODO This is wrong we should do one vertex list per vertex group
-    def create_vertex_list(self):
-        vao = self.program.vertex_list_indexed(
-            len(self.indices), self.mode, self.indices, self.batch, self.group,
-            position=('f', self.get_positions_array()),
-            normals=('f', self.get_normals_array()),
-            tex_coords=('f', self.get_tex_coords_array())
-        )
-        return vao
+    def create_vertex_lists(self) -> list[VertexDomain]:
+        answer = []
+        for name, vertex_group in self.vertex_groups:
+            pass
+        return answer
 
     def get_vertex_attr_array(self, attrib_name):
         answer = []
         for v in self.vertices:
             attrib = getattr(v, attrib_name)
-            answer += [attrib.x, attrib.y, attrib.z]
+            if isinstance(attrib, Vec3):
+                answer += [attrib.x, attrib.y, attrib.z]
+            elif isinstance(attrib, Vec2):
+                answer += [attrib.x, attrib.y]
+            else:
+                raise Exception(
+                    f"invalid type {type(attrib)} for vertex attribute "
+                    f"{attrib_name}"
+                )
         return answer
 
     def get_positions_array(self):
@@ -63,11 +71,13 @@ class Mesh:
         return answer
 
     def get_normals_array(self):
-        answer = self.get_vertex_attr_array('normals')
+        answer = self.get_vertex_attr_array('normal')
         return answer
 
     def get_tex_coords_array(self):
-        answer = self.get_vertex_attr_array('tex_coords')
+        answer = []
+        for v in self.vertices:
+            answer += [v.tex_coords.x, v.tex_coords.y]
         return answer
 
 
