@@ -40,17 +40,34 @@ class Mesh:
 
         self.vertex_list = self.create_vertex_list()
 
+
+    # TODO This is wrong we should do one vertex list per vertex group
     def create_vertex_list(self):
         vao = self.program.vertex_list_indexed(
             len(self.indices), self.mode, self.indices, self.batch, self.group,
-            position=('f', self.get_vertices_array())
+            position=('f', self.get_positions_array()),
+            normals=('f', self.get_normals_array()),
+            tex_coords=('f', self.get_tex_coords_array())
         )
         return vao
 
-    def get_vertices_array(self):
+    def get_vertex_attr_array(self, attrib_name):
         answer = []
         for v in self.vertices:
-            answer += [v.position.x, v.position.y, v.position.z]
+            attrib = getattr(v, attrib_name)
+            answer += [attrib.x, attrib.y, attrib.z]
+        return answer
+
+    def get_positions_array(self):
+        answer = self.get_vertex_attr_array('position')
+        return answer
+
+    def get_normals_array(self):
+        answer = self.get_vertex_attr_array('normals')
+        return answer
+
+    def get_tex_coords_array(self):
+        answer = self.get_vertex_attr_array('tex_coords')
         return answer
 
 

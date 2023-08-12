@@ -1,4 +1,5 @@
 from pyglet.math import Vec2, Vec3
+from pyglet.image import Texture
 
 
 class Vertex:
@@ -6,13 +7,11 @@ class Vertex:
         self,
         vertex_id: int,
         position: Vec3 = Vec3(),
-        color: Vec3 = Vec3(1.0),
         normal: Vec3 = Vec3(0.0, 1.0, 0.0),
         tex_coords: Vec2 = Vec2()
     ):
         self.vertex_id = vertex_id
         self.position = position
-        self.color = color
         self.normal = normal
         self.tex_coords = tex_coords
 
@@ -30,8 +29,10 @@ class Material:
         diffuse: Vec3 = Vec3(1.0),
         specular: Vec3 = Vec3(1.0),
         specular_exponent: int = 0,
-        roughness: float = 1.0,
-        ior: float = 1.0
+        ior: float = 1.0,
+        ambient_map: Texture = None,
+        diffuse_map: Texture = None,
+        specular_map: Texture = None
     ):
         self.material_id = material_id
         self.name = name
@@ -39,12 +40,10 @@ class Material:
         self.diffuse = diffuse
         self.specular = specular
         self.specular_exponent = specular_exponent
-        self.roughness = roughness
         self.ior = ior
-        self.ambient_map = None
-        self.diffuse_map = None
-        self.specular_map = None
-        self.roughness_map = None
+        self.ambient_map = ambient_map
+        self.diffuse_map = diffuse_map
+        self.specular_map = specular_map
 
 
 class Triangle:

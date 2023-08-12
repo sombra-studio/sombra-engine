@@ -81,6 +81,25 @@ class MTLLoader:
 
 
 class OBJParser:
+    """
+    Class for parsing an OBJ file and storing the data in dictionaries.
+
+    This class implements the parse method that reads an OBJ file and stores the
+    information into dictionaries that are useful for another OBJLoader class.
+    The OBJLoader class is the one responsible for creating a 3D model from an
+    OBJ file, on the other hand this class only deals with transforming the text
+    into dictionaries, and loading the materials.
+
+    Attributes:
+        meshes_data: This dictionary has the name of a mesh as key and then
+            another dictionary representing the data of that mesh as value.
+        current_mesh_name: This string stores the name of the mesh that is
+            currently being read in the OBJ file.
+        current_vertex_group_name: This string stores the name of the vertex
+            group that is currently being read in the OBJ file.
+        materials: This dictionary has the name of a Material as key and that
+            Material object as value.
+    """
     def __init__(self):
         self.meshes_data = {}
         self.current_mesh_name = None
@@ -91,6 +110,7 @@ class OBJParser:
         """
         Parse a given OBJ file reading line by line and stores the model
         information into data structures that are attributes of this class.
+
         Args:
             filename: Path of an OBJ file
         """
@@ -216,8 +236,8 @@ class OBJParser:
 class OBJLoader:
     @staticmethod
     def load(
-        filename: str, name: str, program: ShaderProgram, batch: Batch = None,
-        group: Group = None
+        filename: str, name: str, program: ShaderProgram = None,
+        batch: Batch = None, group: Group = None
     ) -> Model:
         obj_parser = OBJParser()
         # Parse the file
