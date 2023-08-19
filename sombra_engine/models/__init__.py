@@ -46,10 +46,7 @@ class Mesh:
         pass
 
     def create_vertex_lists(self) -> list[VertexDomain]:
-        answer = []
-        for name, vertex_group in self.vertex_groups:
-            pass
-        return answer
+        pass
 
     def get_vertex_attr_array(self, attrib_name):
         answer = []

@@ -1,6 +1,5 @@
 from pyglet.gl import *
 from pyglet.graphics import ShaderGroup, Group
-from pyglet.image import Texture
 
 
 from sombra_engine.primitives import Material
@@ -22,30 +21,12 @@ class MaterialGroup(ShaderGroup):
         material.diffuse = self.material.diffuse
         material.specular = self.material.specular
         material.specular_exponent = self.material.specular_exponent
-
-
-class TexturedMaterialGroup(MaterialGroup):
-    def set_state(self):
-        glEnable(GL_DEPTH_TEST)
-        material = self.program.uniform_blocks['TexturedMaterial'].create_ubo()
-        ambient_map = self.get_ambient_map()
+        ambient_map = self.material.ambient_map
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(ambient_map.target, ambient_map.id)
-        diffuse_map = self.get_diffuse_map()
-        glActiveTexture(GL_TEXTURE0)
+        diffuse_map = self.material.diffuse_map
+        glActiveTexture(GL_TEXTURE1)
         glBindTexture(diffuse_map.target, diffuse_map.id)
-        specular_map = self.get_specular_map()
-        glActiveTexture(GL_TEXTURE0)
+        specular_map = self.material.specular_map
+        glActiveTexture(GL_TEXTURE2)
         glBindTexture(specular_map.target, specular_map.id)
-        material.specular_exponent = self.material.specular_exponent
-
-    def get_ambient_map(self) -> Texture:
-        if self.material.ambient_map:
-            return self.material.ambient_map
-
-    def get_diffuse_map(self) -> Texture:
-        pass
-
-    def get_specular_map(self) -> Texture:
-        pass
-
