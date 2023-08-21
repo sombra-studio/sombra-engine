@@ -1,5 +1,4 @@
 from pyglet.math import Vec2, Vec3
-from pyglet.image import Texture
 
 
 class Vertex:
@@ -30,9 +29,9 @@ class Material:
         specular: Vec3 = Vec3(1.0),
         specular_exponent: int = 0,
         ior: float = 1.0,
-        ambient_map: Texture = None,
-        diffuse_map: Texture = None,
-        specular_map: Texture = None
+        ambient_map: str = "",
+        diffuse_map: str = "",
+        specular_map: str = ""
     ):
         self.material_id = material_id
         self.name = name

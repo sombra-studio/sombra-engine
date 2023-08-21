@@ -1,8 +1,9 @@
 from pyglet.gl import *
 from pyglet.graphics import ShaderGroup, Group
-
+import pyglet.resource
 
 from sombra_engine.primitives import Material
+from sombra_engine import utils
 
 
 class MaterialGroup(ShaderGroup):
@@ -11,22 +12,41 @@ class MaterialGroup(ShaderGroup):
         order: int = 0, parent: Group = None
     ):
         super().__init__(program, order, parent)
-        self.material = material
+        # Set ambient
+        self.ambient = material.ambient
+        if material.ambient_map:
+            self.ambient_map = pyglet.resource.image(material.ambient_map)
+        else:
+            self.ambient_map = utils.create_white_tex()
+
+        # Set diffuse
+        self.diffuse = material.diffuse
+        if material.diffuse_map:
+            self.diffuse_map = pyglet.resource.image(material.diffuse_map)
+        else:
+            self.diffuse_map = utils.create_white_tex()
+
+        # Set specular
+        self.specular = material.specular
+        if material.specular_map:
+            self.specular_map = pyglet.resource.image(material.specular_map)
+        else:
+            self.specular_map = utils.create_black_tex()
+
+        # Set specular exponent
+        self.specular_exponent = material.specular_exponent
 
 
     def set_state(self):
         glEnable(GL_DEPTH_TEST)
         material = self.program.uniform_blocks['Material'].create_ubo()
-        material.ambient = self.material.ambient
-        material.diffuse = self.material.diffuse
-        material.specular = self.material.specular
-        material.specular_exponent = self.material.specular_exponent
-        ambient_map = self.material.ambient_map
+        material.ambient = self.ambient
+        material.diffuse = self.diffuse
+        material.specular = self.specular
+        material.specular_exponent = self.specular_exponent
         glActiveTexture(GL_TEXTURE0)
-        glBindTexture(ambient_map.target, ambient_map.id)
-        diffuse_map = self.material.diffuse_map
+        glBindTexture(self.ambient_map.target, self.ambient_map.id)
         glActiveTexture(GL_TEXTURE1)
-        glBindTexture(diffuse_map.target, diffuse_map.id)
-        specular_map = self.material.specular_map
+        glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glActiveTexture(GL_TEXTURE2)
-        glBindTexture(specular_map.target, specular_map.id)
+        glBindTexture(self.specular_map.target, self.specular_map.id)

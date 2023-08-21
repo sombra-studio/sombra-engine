@@ -43,10 +43,24 @@ class Mesh:
         self.vertex_lists = self.create_vertex_lists()
 
     def create_material_groups(self) -> dict[str, MaterialGroup]:
-        pass
+        groups = {}
+        for name, material in self.materials.items():
+            new_group = MaterialGroup(
+                material, self.program, order=0, parent=self.group
+            )
+            groups[name] = new_group
+        return groups
 
     def create_vertex_lists(self) -> list[VertexDomain]:
-        pass
+        vlists = []
+        for vg in self.vertex_groups.values():
+            material_group = self.material_groups[vg.material.name]
+            vl = self.program.vertex_list_indexed(
+                len(vg.indices), self.mode, vg.indices,
+                batch=self.batch, group=material_group
+            )
+            vlists.append(vl)
+        return vlists
 
     def get_vertex_attr_array(self, attrib_name):
         answer = []
@@ -72,9 +86,7 @@ class Mesh:
         return answer
 
     def get_tex_coords_array(self):
-        answer = []
-        for v in self.vertices:
-            answer += [v.tex_coords.x, v.tex_coords.y]
+        answer = self.get_vertex_attr_array('tex_coords')
         return answer
 
 
