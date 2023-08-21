@@ -19,6 +19,11 @@ class MTLParser:
             'Ks': self.set_specular,
             'Ns': self.set_specular_exponent,
             'Ni': self.set_ior,
+            'map_Ka': self.set_ambient_map,
+            'map_Kd': self.set_diffuse_map,
+            'map_Ks': self.set_specular_map,
+            'map_bump': self.set_bump_map,
+            'bump': self.set_bump_map
         }
 
     def parse(self, filename: str):
@@ -42,7 +47,7 @@ class MTLParser:
 
     def set_new_material(self, name: str):
         self.current_name = name
-        self.materials[name] = {}
+        self.materials[name] = {'name': name}
 
     def set_color_by_key(self, key: str, r: str, g: str, b: str):
         if self.current_name is None:
@@ -55,6 +60,11 @@ class MTLParser:
         if self.current_name is None:
             self.current_name = DEFAULT_MATERIAL_NAME
         self.materials[self.current_name][key] = float(value)
+
+    def set_map_by_key(self, key: str, filename: str):
+        if self.current_name is None:
+            self.current_name = DEFAULT_MATERIAL_NAME
+            self.materials[self.current_name][key] = filename
 
     def set_ambient(self, r: str, g: str, b: str):
         self.set_color_by_key('ambient', r, g, b)
@@ -71,13 +81,29 @@ class MTLParser:
     def set_ior(self, value: str):
         self.set_value_by_key('ior', value)
 
+    def set_ambient_map(self, filename: str):
+        self.set_map_by_key('ambient_map', filename)
+
+    def set_diffuse_map(self, filename: str):
+        self.set_map_by_key('diffuse_map', filename)
+
+    def set_specular_map(self, filename: str):
+        self.set_map_by_key('specular_map', filename)
+
+    def set_bump_map(self, filename: str):
+        self.set_map_by_key('bump_map', filename)
+
 
 class MTLLoader:
     @staticmethod
     def load(filename: str) -> dict[str, Material]:
+        materials = {}
         mtl_parser = MTLParser()
         mtl_parser.parse(filename)
-        return mtl_parser.materials
+        material_id = 1
+        for name, data in mtl_parser.materials.items():
+            materials[name] = Material(material_id=material_id, **data)
+        return materials
 
 
 class OBJParser:
