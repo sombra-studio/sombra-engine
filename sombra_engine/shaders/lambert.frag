@@ -21,7 +21,7 @@ const float c0 = 0.2;
 void main() {
     vec3 ambient = material.ambient;
     vec3 l = normalize(light.position - fragPos);
-    float diffuse = clamp(dot(l, fragNormal), 0.0, 1.0) * material.diffuse;
-    vec3 color = ligth.color * (c0 * ambient + (1.0 - c0) * diffuse);
+    vec3 diffuse = clamp(dot(l, fragNormal), 0.0, 1.0) * material.diffuse;
+    vec3 color = light.color * (c0 * ambient + (1.0 - c0) * diffuse);
     gl_FragColor = vec4(color, 1.0);
 }
