@@ -3,17 +3,26 @@ from pyglet.math import Mat4
 import pyglet
 
 
+from sombra_engine.camera import FPSCamera
 from sombra_engine.models.obj import OBJLoader
 
 
 window = pyglet.window.Window()
+camera = FPSCamera(window)
 batch = pyglet.graphics.Batch()
+model = None
+
+@window.event
+def on_draw():
+    window.clear()
+    batch.draw()
 
 
 def main():
-    with open('tests/data/test.vert') as f:
+    global model
+    with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    with open('tests/data/test.frag') as f:
+    with open('sombra_engine/shaders/lambert.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
     program['mv'] = Mat4()
