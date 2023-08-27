@@ -39,11 +39,12 @@ class MaterialGroup(ShaderGroup):
 
     def set_state(self):
         glEnable(GL_DEPTH_TEST)
-        material = self.program.uniform_blocks['Material'].create_ubo()
-        material.ambient = self.ambient
-        material.diffuse = self.diffuse
-        material.specular = self.specular
-        material.specular_exponent = self.specular_exponent
+        material_ubo = self.program.uniform_blocks['Material'].create_ubo()
+        with material_ubo as material:
+            material.ambient = self.ambient
+            material.diffuse = self.diffuse
+            material.specular = self.specular
+            material.specular_exponent = self.specular_exponent
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(self.ambient_map.target, self.ambient_map.id)
         glActiveTexture(GL_TEXTURE1)
