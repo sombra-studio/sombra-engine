@@ -69,3 +69,8 @@ class Transform:
         self.translation = translation
         self.rotation = rotation
         self.scale = scale
+
+
+class SceneObject:
+    def __init__(self, transform: Transform = Transform()):
+        self.transform = transform

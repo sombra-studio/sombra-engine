@@ -3,6 +3,7 @@ from pyglet.math import Vec3
 
 from sombra_engine.models import Mesh
 
+
 class Light:
     def __init__(self, position: Vec3, color: Vec3):
         self.position = position
