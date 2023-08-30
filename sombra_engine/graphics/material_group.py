@@ -37,14 +37,15 @@ class MaterialGroup(Group):
         # Set specular exponent
         self.specular_exponent = material.specular_exponent
 
+        # material_ubo = self.program.uniform_blocks['Material'].create_ubo()
+        # with material_ubo as mtl:
+        #     mtl.ambient[:] = tuple(self.ambient)
+        #     mtl.diffuse[:] = tuple(self.diffuse)
+        #     mtl.specular[:] = tuple(self.specular)
+        #     mtl.specular_exponent = self.specular_exponent
+
     def set_state(self):
         glEnable(GL_DEPTH_TEST)
-        # material_ubo = self.program.uniform_blocks['Material'].create_ubo()
-        # with material_ubo as material:
-        #     material.ambient[:] = tuple(self.ambient)
-        #     material.diffuse[:] = tuple(self.diffuse)
-        #     material.specular[:] = tuple(self.specular)
-        #     material.specular_exponent = self.specular_exponent
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(self.ambient_map.target, self.ambient_map.id)
         glActiveTexture(GL_TEXTURE1)
@@ -55,3 +56,4 @@ class MaterialGroup(Group):
 
     def unset_state(self):
         self.program.stop()
+        glDisable(GL_DEPTH_TEST)

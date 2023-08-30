@@ -32,7 +32,7 @@ void main() {
 //        material.diffuse * texture(diffuseMap, fragTexCoords).rgb
 //    );
 //    vec3 color = light.color * (c0 * ambient + (1.0 - c0) * diffuse);
-//    finalColor = vec4(material.ambient, 1.0);
+//    finalColor = vec4(material.diffuse, 1.0);
 //    finalColor = vec4(fragNormal, 1.0);
     finalColor = vec4(1.0, 0.0, 1.0, 1.0);
 }
