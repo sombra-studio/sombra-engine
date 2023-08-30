@@ -26,8 +26,8 @@ def main():
     global model
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    # with open('sombra_engine/shaders/lambert.frag') as f:
-    with open('sombra_engine/shaders/solid.frag') as f:
+    with open('sombra_engine/shaders/lambert.frag') as f:
+    # with open('sombra_engine/shaders/solid.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
     scene = Scene()
