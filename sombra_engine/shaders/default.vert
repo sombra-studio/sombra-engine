@@ -16,8 +16,8 @@ out vec3 fragNormal;
 
 void main()
 {
-    gl_Position = window.projection * window.view * vec4(position, 1.0);
     fragPos = position;
     fragTexCoords = texCoords;
     fragNormal = normal;
+    gl_Position = window.projection * window.view * vec4(position, 1.0);
 }

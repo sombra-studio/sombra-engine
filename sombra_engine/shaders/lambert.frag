@@ -1,5 +1,8 @@
 #version 330
 
+uniform sampler2D ambientMap;
+uniform sampler2D diffuseMap;
+
 uniform Material {
     vec3 ambient;
     vec3 diffuse;
@@ -13,6 +16,7 @@ uniform Light {
 } light;
 
 in vec3 fragPos;
+in vec2 fragTexCoords;
 in vec3 fragNormal;
 
 const float c0 = 0.2;
@@ -20,10 +24,12 @@ const float c0 = 0.2;
 out vec4 finalColor;
 
 void main() {
-    vec3 ambient = material.ambient;
+    vec3 ambient = material.ambient * texture(ambientMap, fragTexCoords).rgb;
     vec3 l = normalize(light.position - fragPos);
-    vec3 diffuse = clamp(dot(l, fragNormal), 0.0, 1.0) * material.diffuse;
+    float nDotL = clamp(dot(l, fragNormal), 0.0, 1.0);
+    vec3 diffuse = nDotL * (
+        material.diffuse * texture(diffuseMap, fragTexCoords).rgb
+    );
     vec3 color = light.color * (c0 * ambient + (1.0 - c0) * diffuse);
-    finalColor = vec4(color, 1.0);
-    //finalColor = vec4(1.0);
+    finalColor = vec4(material.diffuse, 1.0);
 }
