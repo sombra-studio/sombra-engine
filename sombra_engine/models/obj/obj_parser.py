@@ -1,110 +1,9 @@
 import os
 from pyglet.math import Vec2, Vec3
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import ShaderProgram
-
-from sombra_engine.constants import *
-from sombra_engine.models import Mesh, Model
-from sombra_engine.primitives import Material, Vertex, VertexGroup
 
 
-class MTLParser:
-    def __init__(self):
-        self.current_name = None
-        self.materials = {}
-        self.commands_map = {
-            'newmtl': self.set_new_material,
-            'Ka': self.set_ambient,
-            'Kd': self.set_diffuse,
-            'Ks': self.set_specular,
-            'Ns': self.set_specular_exponent,
-            'Ni': self.set_ior,
-            'map_Ka': self.set_ambient_map,
-            'map_Kd': self.set_diffuse_map,
-            'map_Ks': self.set_specular_map,
-            'map_bump': self.set_bump_map,
-            'bump': self.set_bump_map
-        }
-
-    def parse(self, filename: str):
-        """
-        Read an MTL file line by line parsing the commands and storing the
-        information into data structures that are attributes of this class
-        Args:
-            filename: Path of an MTL file
-        """
-        with open(filename) as file:
-            for line in file:
-                if not line or line[0] == '#':
-                    continue
-                # Remove end of line character
-                if len(line) > 1 and line[-1] == '\n':
-                    line = line[:-1]
-                args = line.split(' ')
-                command = args[0]
-                if command in self.commands_map:
-                    self.commands_map[command](*args[1:])
-
-    def set_new_material(self, name: str):
-        self.current_name = name
-        self.materials[name] = {'name': name}
-
-    def set_color_by_key(self, key: str, r: str, g: str, b: str):
-        if self.current_name is None:
-            self.current_name = DEFAULT_MATERIAL_NAME
-        self.materials[self.current_name][key] = Vec3(
-            float(r), float(g), float(b)
-        )
-
-    def set_value_by_key(self, key: str, value: str):
-        if self.current_name is None:
-            self.current_name = DEFAULT_MATERIAL_NAME
-        self.materials[self.current_name][key] = float(value)
-
-    def set_map_by_key(self, key: str, filename: str):
-        if self.current_name is None:
-            self.current_name = DEFAULT_MATERIAL_NAME
-            self.materials[self.current_name][key] = filename
-
-    def set_ambient(self, r: str, g: str, b: str):
-        self.set_color_by_key('ambient', r, g, b)
-
-    def set_diffuse(self, r: str, g: str, b: str):
-        self.set_color_by_key('diffuse', r, g, b)
-
-    def set_specular(self, r: str, g: str, b: str):
-        self.set_color_by_key('specular', r, g, b)
-
-    def set_specular_exponent(self, value: str):
-        self.set_value_by_key('specular_exponent', value)
-
-    def set_ior(self, value: str):
-        self.set_value_by_key('ior', value)
-
-    def set_ambient_map(self, filename: str):
-        self.set_map_by_key('ambient_map', filename)
-
-    def set_diffuse_map(self, filename: str):
-        self.set_map_by_key('diffuse_map', filename)
-
-    def set_specular_map(self, filename: str):
-        self.set_map_by_key('specular_map', filename)
-
-    def set_bump_map(self, filename: str):
-        self.set_map_by_key('bump_map', filename)
-
-
-class MTLLoader:
-    @staticmethod
-    def load(filename: str) -> dict[str, Material]:
-        materials = {}
-        mtl_parser = MTLParser()
-        mtl_parser.parse(filename)
-        material_id = 1
-        for name, data in mtl_parser.materials.items():
-            materials[name] = Material(material_id=material_id, **data)
-            material_id += 1
-        return materials
+from .mtl_loader import MTLLoader
+from sombra_engine.primitives import Material, Vertex
 
 
 class OBJParser:
@@ -127,6 +26,7 @@ class OBJParser:
         materials: This dictionary has the name of a Material as key and that
             Material object as value.
     """
+
     def __init__(self):
         self.meshes_data = {}
         self.current_mesh_name = None
@@ -218,7 +118,7 @@ class OBJParser:
             # Split by '/' and transform the values to int
             values_str = indices_str.split('/')
 
-            idx = int(values_str[0]) - 1    # indices start from 0
+            idx = int(values_str[0]) - 1  # indices start from 0
             data['indices'].append(idx)
             if vg_data:
                 vg_data['indices'].append(idx)
@@ -255,41 +155,6 @@ class OBJParser:
         vg_data = self.get_current_vertex_group()
         if vg_data:
             vg_data['material'] = self.materials[name]
-            
+
     def load_materials(self, filename: str):
         self.materials = MTLLoader.load(filename)
-
-
-class OBJLoader:
-    @staticmethod
-    def load(
-        filename: str, name: str, program: ShaderProgram = None,
-        batch: Batch = None, group: Group = None
-    ) -> Model:
-        obj_parser = OBJParser()
-        # Parse the file
-        obj_parser.parse(filename)
-
-        # Now create the Model
-        meshes = []
-        for mesh_data in obj_parser.meshes_data.values():
-            # Create Vertex Groups
-            vertex_groups: dict[str, VertexGroup] = {}
-            for vg_data in mesh_data['vertex_groups'].values():
-                vertex_groups[vg_data['name']] = VertexGroup(
-                    vg_data['name'], vg_data['indices'], vg_data['material']
-                )
-            # Create Mesh
-            new_mesh = Mesh(
-                mesh_data['name'],
-                mesh_data['vertices'],
-                mesh_data['indices'],
-                vertex_groups=vertex_groups,
-                materials=obj_parser.materials,
-                batch=batch,
-                group=group,
-                program=program
-            )
-            meshes.append(new_mesh)
-        model = Model(name, meshes)
-        return model
