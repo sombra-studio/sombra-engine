@@ -26,12 +26,12 @@ def main():
     global model
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    with open('sombra_engine/shaders/lambert.frag') as f:
-    # with open('sombra_engine/shaders/solid.frag') as f:
+    # with open('sombra_engine/shaders/lambert.frag') as f:
+    with open('sombra_engine/shaders/solid_textured.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
-    scene = Scene()
-    scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0))
+    # scene = Scene()
+    # scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0))
     # light_ubo = program.uniform_blocks['Light'].create_ubo()
     # with light_ubo as light:
     #     light.position[:] = tuple(scene.lights[0].position)
@@ -39,7 +39,6 @@ def main():
     model = OBJLoader.load(
         "tests/data/shoe_box2.obj", "House", program, batch=batch
     )
-    print(model.name)
     pyglet.app.run()
 
 

@@ -13,38 +13,29 @@ class MaterialGroup(Group):
     ):
         super().__init__(order, parent)
         self.program = program
-        # Set ambient
-        self.ambient = material.ambient
+        self.material = material
+        # Set ambient map
         if material.ambient_map:
             self.ambient_map = pyglet.resource.image(material.ambient_map)
         else:
             self.ambient_map = utils.create_white_tex()
 
-        # Set diffuse
-        self.diffuse = material.diffuse
+        # Set diffuse map
         if material.diffuse_map:
             self.diffuse_map = pyglet.resource.image(material.diffuse_map)
         else:
             self.diffuse_map = utils.create_white_tex()
 
-        # Set specular
-        self.specular = material.specular
+        # Set specular map
         if material.specular_map:
             self.specular_map = pyglet.resource.image(material.specular_map)
         else:
             self.specular_map = utils.create_black_tex()
 
-        # Set specular exponent
-        self.specular_exponent = material.specular_exponent
-
-        # material_ubo = self.program.uniform_blocks['Material'].create_ubo()
-        # with material_ubo as mtl:
-        #     mtl.ambient[:] = tuple(self.ambient)
-        #     mtl.diffuse[:] = tuple(self.diffuse)
-        #     mtl.specular[:] = tuple(self.specular)
-        #     mtl.specular_exponent = self.specular_exponent
+        self.program.uniforms['material.diffuse'].set(self.material.diffuse)
 
     def set_state(self):
+        self.program.use()
         glEnable(GL_DEPTH_TEST)
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(self.ambient_map.target, self.ambient_map.id)
@@ -52,8 +43,21 @@ class MaterialGroup(Group):
         glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
-        self.program.use()
 
     def unset_state(self):
         self.program.stop()
         glDisable(GL_DEPTH_TEST)
+
+    def __hash__(self):
+        return hash(
+            (self.material, self.program, self.order, self.parent)
+        )
+
+    def __eq__(self, other):
+        return (
+            self.__class__ is other.__class__ and
+            self.material == other.material and
+            self.program == other.program and
+            self.order == other.order and
+            self.parent == other.parent
+        )

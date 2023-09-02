@@ -4,17 +4,21 @@ uniform sampler2D ambientMap;
 uniform sampler2D diffuseMap;
 uniform sampler2D specularMap;
 
-//uniform Material {
-//    vec3 ambient;
-//    vec3 diffuse;
-//    vec3 specular;
-//    float specular_exponent;
-//} material;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float specular_exponent;
+};
 
-//uniform Light {
+uniform Material material;
+
+//struct Light {
 //    vec3 position;
 //    vec3 color;
-//} light;
+//};
+//
+//uniform Light light;
 
 in vec3 fragPos;
 in vec2 fragTexCoords;
@@ -32,7 +36,9 @@ void main() {
 //        material.diffuse * texture(diffuseMap, fragTexCoords).rgb
 //    );
 //    vec3 color = light.color * (c0 * ambient + (1.0 - c0) * diffuse);
-//    finalColor = vec4(material.diffuse, 1.0);
+    finalColor = texture(diffuseMap, fragTexCoords) * vec4(
+        material.diffuse, 1.0
+    );
 //    finalColor = vec4(fragNormal, 1.0);
-    finalColor = vec4(1.0, 0.0, 1.0, 1.0);
+//    finalColor = vec4(1.0, 0.0, 1.0, 1.0);
 }
