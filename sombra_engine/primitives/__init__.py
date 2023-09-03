@@ -24,10 +24,10 @@ class Material:
         self,
         material_id: int,
         name: str = "default",
-        ambient: Vec3 = Vec3(1.0),
-        diffuse: Vec3 = Vec3(1.0),
-        specular: Vec3 = Vec3(1.0),
-        specular_exponent: int = 0,
+        ambient: Vec3 = Vec3(1.0, 1.0, 1.0),
+        diffuse: Vec3 = Vec3(1.0, 1.0, 1.0),
+        specular: Vec3 = Vec3(1.0, 1.0, 1.0),
+        specular_exponent: float = 0.0,
         ior: float = 1.0,
         ambient_map: str = "",
         diffuse_map: str = "",
@@ -43,6 +43,21 @@ class Material:
         self.ambient_map = ambient_map
         self.diffuse_map = diffuse_map
         self.specular_map = specular_map
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, Material) and
+            self.material_id == other.material_id and
+            self.name == other.name and
+            self.ambient == other.ambient and
+            self.diffuse == other.diffuse and
+            self.specular == other.specular and
+            self.specular_exponent == other.specular_exponent and
+            self.ior == other.ior and
+            self.ambient_map == other.ambient_map and
+            self.diffuse_map == other.diffuse_map and
+            self.specular_map == other.specular_map
+        )
 
 
 class Triangle:

@@ -4,6 +4,7 @@ import unittest
 
 
 from sombra_engine.models.obj import MTLLoader, OBJLoader
+from sombra_engine.primitives import Material
 
 
 class MTLTestCase(unittest.TestCase):
@@ -12,22 +13,39 @@ class MTLTestCase(unittest.TestCase):
         self.materials = MTLLoader.load(self.filename)
 
     def test_mtl_loader(self):
+        # Test first material
         name = 'Material.001'
         self.assertIn(name, self.materials)
-        # TODO finish material test
+        mtl = self.materials[name]
+        mtl_copy = Material(
+            material_id=1,
+            name=name,
+            diffuse=Vec3(0.279282, 0.015609, 0.800000),
+            specular=Vec3(0.5, 0.5, 0.5),
+            specular_exponent=250,
+            ior=1.45
+        )
+        self.assertEqual(mtl, mtl_copy)
+        mtl_copy.diffuse = Vec3(1.0, 0.5, 1.0)
+        self.assertNotEqual(mtl, mtl_copy)
 
-
-"""
-newmtl Material.001
-Ns 250.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.279282 0.015609 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-"""
+        # Test second material
+        name = 'Material.002'
+        self.assertIn(name, self.materials)
+        mtl = self.materials[name]
+        mtl_copy = Material(
+            material_id=2,
+            name=name,
+            ambient=Vec3(0.100000, 0.100000, 0.100000),
+            diffuse=Vec3(0.938000, 0.837642, 0.527156),
+            specular=Vec3(0.500000, 0.500000, 0.500000),
+            specular_exponent=39.999996,
+            ior=1.5
+        )
+        self.assertEqual(self.materials[name], mtl_copy)
+        self.assertEqual(mtl, mtl_copy)
+        mtl_copy.diffuse = Vec3(1.0, 0.5, 1.0)
+        self.assertNotEqual(mtl, mtl_copy)
 
 
 class OBJTestCase(unittest.TestCase):
@@ -68,21 +86,3 @@ class OBJTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-"""
-mtllib plane.mtl
-o Plane
-v -1.000000 0.000000 1.000000
-v 1.000000 0.000000 1.000000
-v -1.000000 0.000000 -1.000000
-v 1.000000 0.000000 -1.000000
-vn -0.0000 1.0000 -0.0000
-vt 0.000000 0.000000
-vt 1.000000 0.000000
-vt 0.000000 1.000000
-vt 1.000000 1.000000
-s 0
-usemtl Material.001
-f 2/2/1 3/3/1 1/1/1
-f 2/2/1 4/4/1 3/3/1
-"""
