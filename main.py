@@ -20,6 +20,7 @@ model = None
 def on_draw():
     window.clear()
     batch.draw()
+    # model.draw()
 
 
 def main():
@@ -38,6 +39,7 @@ def main():
     #     light.color[:] = tuple(scene.lights[0].color)
     model = OBJLoader.load(
         "tests/data/shoe_box2.obj", "House", program, batch=batch
+        # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
     )
     pyglet.app.run()
 

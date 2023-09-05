@@ -11,3 +11,7 @@ class Model:
         self.meshes = meshes
         self.transform = transform
         self.parent = parent
+
+    def draw(self):
+        for mesh in self.meshes:
+            mesh.draw()

@@ -13,8 +13,8 @@ class OBJParser:
     This class implements the parse method that reads an OBJ file and stores the
     information into dictionaries that are useful for another OBJLoader class.
     The OBJLoader class is the one responsible for creating a 3D model from an
-    OBJ file, on the other hand this class only deals with transforming the text
-    into dictionaries, and loading the materials.
+    OBJ file, on the other hand this class (OBJParser) only deals with
+    transforming the text into dictionaries, and loading the materials.
 
     Attributes:
         meshes_data: This dictionary has the name of a mesh as key and then
@@ -28,9 +28,9 @@ class OBJParser:
     """
 
     def __init__(self):
-        self.meshes_data = {}
-        self.current_mesh_name = None
-        self.current_vertex_group_name = None
+        self.meshes_data: dict = {}
+        self.current_mesh_name: str = "unnamed mesh"
+        self.current_vertex_group_name: str = "unnamed vertex group"
         self.materials: dict[str, Material] = {}
 
     def parse(self, filename: str):
@@ -50,6 +50,9 @@ class OBJParser:
             if len(line) > 1 and line[-1] == '\n':
                 line = line[:-1]
             args = line.split(' ')
+            # Remove empty strings
+            args = list(filter(lambda l: l != '', args))
+
             if args[0] == 'o':
                 self.set_name(args[1])
             elif args[0] == 'v':
@@ -69,17 +72,16 @@ class OBJParser:
         file.close()
 
     def get_current_mesh_data(self):
-        if self.current_mesh_name in self.meshes_data:
-            return self.meshes_data[self.current_mesh_name]
-        else:
-            raise Exception("Error: no current mesh data")
+        if self.current_mesh_name not in self.meshes_data:
+            # In this case the OBJ file doesn't define an 'o <modelName>'
+            self.set_name(self.current_mesh_name)
+        return self.meshes_data[self.current_mesh_name]
 
     def get_current_vertex_group(self):
         data = self.get_current_mesh_data()
-        if self.current_vertex_group_name in data['vertex_groups']:
-            return data['vertex_groups'][self.current_vertex_group_name]
-        else:
-            return None
+        if self.current_vertex_group_name not in data['vertex_groups']:
+            self.set_vertex_group(self.current_vertex_group_name)
+        return data['vertex_groups'][self.current_vertex_group_name]
 
     def set_name(self, name: str):
         self.meshes_data[name] = {
@@ -133,7 +135,7 @@ class OBJParser:
     def set_tex_coords(self, args: list[str]):
         data = self.get_current_mesh_data()
         values = [float(x) for x in args]
-        new_tex_coords = Vec2(*values)
+        new_tex_coords = Vec2(*values[0:2])
         data['tex_coords'].append(new_tex_coords)
 
     def set_normal(self, args: list[str]):
@@ -154,6 +156,12 @@ class OBJParser:
     def set_material(self, name: str):
         vg_data = self.get_current_vertex_group()
         if vg_data:
+            if 'material' in vg_data:
+                # In case of a vertex group that already has a material, create
+                # a new vertex group
+                self.current_vertex_group_name += "+"
+                self.set_vertex_group(self.current_vertex_group_name)
+                vg_data = self.get_current_vertex_group()
             vg_data['material'] = self.materials[name]
 
     def load_materials(self, filename: str):

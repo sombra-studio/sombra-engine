@@ -44,6 +44,9 @@ class Material:
         self.diffuse_map = diffuse_map
         self.specular_map = specular_map
 
+    def __hash__(self):
+        return hash((self.material_id, self.name))
+
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Material) and

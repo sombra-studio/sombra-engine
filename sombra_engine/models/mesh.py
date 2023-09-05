@@ -59,10 +59,11 @@ class Mesh:
                 normal=('f', self.get_normals_array())
             )
             vlists.append(vl)
-            # DEBUGGING!!
-            # if len(vlists) == 1:
-            #     break
         return vlists
+
+    def draw(self):
+        for vl in self.vertex_lists:
+            vl.draw(self.mode)
 
     def get_vertex_attr_array(self, attrib_name):
         answer = []

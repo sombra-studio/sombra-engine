@@ -47,3 +47,17 @@ class MaterialGroup(Group):
     def unset_state(self):
         self.program.stop()
         glDisable(GL_DEPTH_TEST)
+
+    def __hash__(self):
+        return hash(
+            (self.material, self.program, self.order, self.parent)
+        )
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, MaterialGroup) and
+            self.material == other.material and
+            self.program == other.program and
+            self.order == other.order and
+            self.parent == other.parent
+        )
