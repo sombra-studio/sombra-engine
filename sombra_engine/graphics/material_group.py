@@ -32,8 +32,6 @@ class MaterialGroup(Group):
         else:
             self.specular_map = utils.create_black_tex()
 
-        self.program.uniforms['material.diffuse'].set(self.material.diffuse)
-
     def set_state(self):
         self.program.use()
         glEnable(GL_DEPTH_TEST)
@@ -43,6 +41,7 @@ class MaterialGroup(Group):
         glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
+        self.program.uniforms['material.diffuse'].set(self.material.diffuse)
 
     def unset_state(self):
         self.program.stop()
