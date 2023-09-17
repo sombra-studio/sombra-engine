@@ -49,14 +49,20 @@ class Mesh:
 
     def create_vertex_lists(self) -> list[VertexDomain]:
         vlists = []
+        # Create a list for position
+        position_list = self.get_positions_array()
+        # Create a list for texCoords
+        texcoords_list = self.get_tex_coords_array()
+        # Create a list for normal
+        normal_list = self.get_normals_array()
         for vg in self.vertex_groups.values():
             material_group = self.material_groups[vg.material.name]
             vl = self.program.vertex_list_indexed(
                 len(vg.indices), self.mode, vg.indices,
                 batch=self.batch, group=material_group,
-                position=('f', self.get_positions_array()),
-                texCoords=('f', self.get_tex_coords_array()),
-                normal=('f', self.get_normals_array())
+                position=('f', position_list),
+                texCoords=('f', texcoords_list),
+                normal=('f', normal_list)
             )
             vlists.append(vl)
         return vlists

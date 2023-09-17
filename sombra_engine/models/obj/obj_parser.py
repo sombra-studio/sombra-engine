@@ -63,7 +63,7 @@ class OBJParser:
                 self.set_normal(args[1:])
             elif args[0] == 'f':
                 self.set_face(args[1:])
-            elif args[0] == 's' or args[0] == 'g':
+            elif args[0] == 'g':
                 self.set_vertex_group(args[1])
             elif args[0] == 'mtllib':
                 self.load_materials(os.path.join(path, args[1]))
