@@ -26,14 +26,15 @@ def main():
     global model
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    with open('sombra_engine/shaders/lambert.frag') as f:
+    # with open('sombra_engine/shaders/lambert.frag') as f:
+    with open('sombra_engine/shaders/normals.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
 
     scene = Scene()
     scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0))
-    program.uniforms['light.position'].set(scene.lights[0].position)
-    program.uniforms['light.color'].set(scene.lights[0].color)
+    # program.uniforms['light.position'].set(scene.lights[0].position)
+    # program.uniforms['light.color'].set(scene.lights[0].color)
 
     model = OBJLoader.load(
         "tests/data/shoe_box2.obj", "House", program, batch=batch

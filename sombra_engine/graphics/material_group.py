@@ -41,7 +41,7 @@ class MaterialGroup(Group):
         glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
-        self.program.uniforms['material.diffuse'].set(self.material.diffuse)
+        # self.program.uniforms['material.diffuse'].set(self.material.diffuse)
 
     def unset_state(self):
         self.program.stop()
