@@ -109,6 +109,7 @@ class OBJParser:
         Args:
             args: the arguments of the set face command as a list,
                 for ex. ['6/5/1', '7/3/2', '8/6/3']
+                and this format f v1[/vt1][/vn1] v2[/vt2][/vn2] v3[/vt3][/vn3]
         """
         data = self.get_current_mesh_data()
         vertices = data['vertices']

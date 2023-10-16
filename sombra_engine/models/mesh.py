@@ -3,7 +3,6 @@ from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 from pyglet.graphics.vertexdomain import VertexDomain
 
-
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import *
 
@@ -48,6 +47,14 @@ class Mesh:
         return groups
 
     def create_vertex_lists(self) -> list[VertexDomain]:
+        """
+        This method creates a vertex list for each vertex group using the
+        Shader Program that this Mesh currently has, and returns all
+        of them in a list.
+
+        Returns:
+            list[VertexDomain]: The list with the newly created vertex lists.
+        """
         vlists = []
         # Create a list for position
         position_list = self.get_positions_array()
@@ -55,6 +62,7 @@ class Mesh:
         texcoords_list = self.get_tex_coords_array()
         # Create a list for normal
         normal_list = self.get_normals_array()
+
         for vg in self.vertex_groups.values():
             material_group = self.material_groups[vg.material.name]
             vl = self.program.vertex_list_indexed(

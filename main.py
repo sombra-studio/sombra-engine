@@ -1,9 +1,11 @@
+from pyglet.graphics import Group
 from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.math import Vec3
 import pyglet
 
 
 from sombra_engine.camera import FPSCamera
+from sombra_engine.models import Wireframe
 from sombra_engine.models.obj import OBJLoader
 from sombra_engine.scene import Scene
 
@@ -14,16 +16,18 @@ camera = FPSCamera(
 )
 batch = pyglet.graphics.Batch()
 model = None
+wf = None
 
 
 @window.event
 def on_draw():
     window.clear()
+    pyglet.gl.glEnable(pyglet.gl.GL_DEPTH_TEST)
     batch.draw()
 
 
 def main():
-    global model
+    global model, wf
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
     # with open('sombra_engine/shaders/lambert.frag') as f:
@@ -31,15 +35,19 @@ def main():
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
 
-    scene = Scene()
-    scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0))
+    # scene = Scene()
+    # scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0))
     # program.uniforms['light.position'].set(scene.lights[0].position)
     # program.uniforms['light.color'].set(scene.lights[0].color)
 
+    # model_group = Group()
+    # model_group.visible = False
     model = OBJLoader.load(
-        "tests/data/shoe_box2.obj", "House", program, batch=batch
+        "tests/data/shoe_box2.obj", "House", program, batch=batch,
+        # group=model_group
         # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
     )
+    # wf = Wireframe(model.meshes[0], vert_shader, batch)
     pyglet.app.run()
 
 
