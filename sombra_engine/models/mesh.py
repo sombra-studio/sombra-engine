@@ -2,9 +2,13 @@ from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 from pyglet.graphics.vertexdomain import VertexDomain
+from pyglet.math import Vec2, Vec3
 
 from sombra_engine.graphics import MaterialGroup
-from sombra_engine.primitives import *
+from sombra_engine.primitives import (
+    Material, SceneObject, Transform, Vertex,
+    VertexGroup
+)
 
 
 class Mesh:

@@ -8,7 +8,7 @@ from sombra_engine.models import Mesh
 
 
 class WireframeGroup(Group):
-    def __init__(self, program: ShaderProgram, order: int = 30, parent = None):
+    def __init__(self, program: ShaderProgram, order: int = 30, parent=None):
         super().__init__(order=order, parent=parent)
         self.program = program
 

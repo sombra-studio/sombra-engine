@@ -10,3 +10,6 @@ def create_black_tex() -> pyglet.image.Texture:
 
 def create_white_tex() -> pyglet.image.Texture:
     return create_color_tex((255, 255, 255, 255))
+
+def create_gray_tex() -> pyglet.image.Texture:
+    return create_color_tex((123, 123, 123, 255))
