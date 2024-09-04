@@ -1,7 +1,7 @@
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
-from pyglet.graphics.vertexdomain import VertexDomain
+from pyglet.graphics.vertexdomain import IndexedVertexList
 from pyglet.math import Vec2, Vec3
 
 from sombra_engine.graphics import MaterialGroup
@@ -50,14 +50,15 @@ class Mesh:
             groups[name] = new_group
         return groups
 
-    def create_vertex_lists(self) -> list[VertexDomain]:
+    def create_vertex_lists(self) -> list[IndexedVertexList]:
         """
         This method creates a vertex list for each vertex group using the
         Shader Program that this Mesh currently has, and returns all
         of them in a list.
 
         Returns:
-            list[VertexDomain]: The list with the newly created vertex lists.
+            list[IndexedVertexList]: The list with the newly created vertex
+                lists.
         """
         vlists = []
         # Create a list for position
@@ -70,7 +71,7 @@ class Mesh:
         for vg in self.vertex_groups.values():
             material_group = self.material_groups[vg.material.name]
             vl = self.program.vertex_list_indexed(
-                len(vg.indices), self.mode, vg.indices,
+                len(self.vertices), self.mode, vg.indices,
                 batch=self.batch, group=material_group,
                 position=('f', position_list),
                 texCoords=('f', texcoords_list),

@@ -49,8 +49,10 @@ def main():
 
     scene = Scene()
     scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0, 1.0, 1.0))
-    program.uniforms['light.position'].set(scene.lights[0].position)
-    program.uniforms['light.color'].set(scene.lights[0].color)
+    # program.uniforms['light.position'].set(scene.lights[0].position)
+    # program.uniforms['light.color'].set(scene.lights[0].color)
+    program.uniforms['light.position'] = scene.lights[0].position
+    program.uniforms['light.color'] = scene.lights[0].color
 
     # model_group = Group()
     # model_group.visible = False
