@@ -29,7 +29,8 @@ def main():
         fs = Shader(f.read(), 'fragment')
     shader_program = ShaderProgram(vs, fs)
     model = OBJLoader.load(
-        "tests/data/shoe_box2.obj", "house", shader_program, batch
+        #"tests/data/shoe_box2.obj", "house", shader_program, batch
+        "tests/data/cube.obj", "house", shader_program, batch
     )
     pyglet.app.run()
 
