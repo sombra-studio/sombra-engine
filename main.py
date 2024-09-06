@@ -19,7 +19,7 @@ camera = FPSCamera(
 batch = pyglet.graphics.Batch()
 model = None
 wf = None
-gizmo = Gizmo(camera)
+# gizmo = Gizmo(camera)
 
 
 # @window.event
@@ -33,6 +33,7 @@ gizmo = Gizmo(camera)
 @window.event
 def on_draw():
     window.clear()
+    pyglet.gl.glEnable(pyglet.gl.GL_CULL_FACE)
     pyglet.gl.glEnable(pyglet.gl.GL_DEPTH_TEST)
     batch.draw()
 
@@ -49,19 +50,18 @@ def main():
 
     scene = Scene()
     scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0, 1.0, 1.0))
-    # program.uniforms['light.position'].set(scene.lights[0].position)
-    # program.uniforms['light.color'].set(scene.lights[0].color)
-    program.uniforms['light.position'] = scene.lights[0].position
-    program.uniforms['light.color'] = scene.lights[0].color
+    program['light.position'] = scene.lights[0].position
+    program['light.color'] = scene.lights[0].color
 
     # model_group = Group()
     # model_group.visible = False
     model = OBJLoader.load(
-        "tests/data/shoe_box2.obj", "House", program, batch=batch,
+       "tests/data/cube.obj", "House", program, batch=batch,
+#         "tests/data/cube.obj", "cube", program, batch=batch,
         # group=model_group
         # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
     )
-    # wf = Wireframe(model.meshes[0], vert_shader, batch)
+    wf = Wireframe(model.meshes[0], vert_shader, batch)
     pyglet.app.run()
 
 

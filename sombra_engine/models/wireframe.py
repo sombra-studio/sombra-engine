@@ -1,7 +1,7 @@
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import VertexDomain
+from pyglet.graphics.vertexdomain import IndexedVertexList
 from pyglet.math import Vec3
 
 from sombra_engine.models import Mesh
@@ -37,16 +37,17 @@ class Wireframe:
         with open('sombra_engine/shaders/solid.frag') as f:
             fragment_shader = Shader(f.read(), 'fragment')
         self.program = ShaderProgram(vertex_shader, fragment_shader)
-        self.program.uniforms['material.diffuse'].set(color)
+        self.program.uniforms['material.diffuse'] = color
         self.vertex_lists = self.create_vertex_lists()
 
-    def create_vertex_lists(self) -> list[VertexDomain]:
+    def create_vertex_lists(self) -> list[IndexedVertexList]:
         """
         This method creates a vertex list for each vertex group and returns all
         of them in a list.
 
         Returns:
-            list[VertexDomain]: The list with the newly created vertex lists.
+            list[IndexedVertexList]: The list with the newly created vertex
+                lists.
         """
         vlists = []
         # Create a list for position
@@ -54,7 +55,7 @@ class Wireframe:
         group = WireframeGroup(self.program, parent=self.group)
         for vg in self.mesh.vertex_groups.values():
             vl = self.program.vertex_list_indexed(
-                len(vg.indices), GL_TRIANGLES, vg.indices,
+                len(self.mesh.vertices), GL_TRIANGLES, vg.indices,
                 batch=self.batch, group=group,
                 position=('f', position_list)
             )
