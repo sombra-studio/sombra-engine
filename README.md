@@ -10,4 +10,4 @@ Game Engine made in Python on top of the pyglet framework (work in progress).
 - Rigid body physics
 - Particle systems
 - Terrain rendering
-- UI with shaders support
+- UI library with shaders support (through pudu-ui)
