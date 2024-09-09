@@ -42,8 +42,8 @@ class MaterialGroup(Group):
         glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
-        self.program['material.ambient'] = self.material.ambient
-        self.program['material.diffuse'] = self.material.diffuse
+        # self.program['material.ambient'] = self.material.ambient
+        # self.program['material.diffuse'] = self.material.diffuse
         # self.program.uniforms['material.specular'].set(self.material.specular)
         # self.program.uniforms['material.specular_exponent'].set(
         #     self.material.specular_exponent
