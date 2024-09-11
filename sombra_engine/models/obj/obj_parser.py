@@ -143,7 +143,7 @@ class OBJParser:
         data = self.get_current_mesh_data()
         values = [float(x) for x in args]
         new_normal = Vec3(*values)
-        new_normal = Vec3(-new_normal.x, new_normal.y, -new_normal.z)
+        new_normal = Vec3(new_normal.x, new_normal.y, new_normal.z)
         data['normals'].append(new_normal)
 
     def set_vertex_group(self, name: str):
