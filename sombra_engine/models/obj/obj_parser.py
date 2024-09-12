@@ -3,7 +3,7 @@ from pyglet.math import Vec2, Vec3
 
 
 from .mtl_loader import MTLLoader
-from sombra_engine.primitives import Material, Vertex
+from sombra_engine.primitives import Material, Triangle, Vertex
 
 
 class OBJParser:
@@ -51,7 +51,7 @@ class OBJParser:
                 line = line[:-1]
             args = line.split(' ')
             # Remove empty strings
-            args = list(filter(lambda l: l != '', args))
+            args = list(filter(lambda c: c != '', args))
 
             if args[0] == 'o':
                 self.set_name(args[1])
@@ -87,7 +87,7 @@ class OBJParser:
         self.meshes_data[name] = {
             'name': name,
             'indices': [],
-            'vertices': [],
+            'positions': [],
             'tex_coords': [],
             'normals': [],
             'vertex_groups': {}
@@ -96,9 +96,9 @@ class OBJParser:
 
     def set_vertex(self, args: list[str]):
         data = self.get_current_mesh_data()
-        positions = map(float, args)
-        new_vert = Vertex(len(data['vertices']) + 1, position=Vec3(*positions))
-        data['vertices'].append(new_vert)
+        positions = [float(x) for x in args]
+        new_position = Vec3(*positions)
+        data['positions'].append(new_position)
 
     def set_face(self, args: list[str]):
         """
@@ -112,26 +112,28 @@ class OBJParser:
                 and this format f v1[/vt1][/vn1] v2[/vt2][/vn2] v3[/vt3][/vn3]
         """
         data = self.get_current_mesh_data()
-        vertices = data['vertices']
+        positions = data['positions']
         normals = data['normals']
         tex_coords = data['tex_coords']
         vg_data = self.get_current_vertex_group()
+        new_vertices = []
 
-        for indices_str in args:
+        for vertex_str in args:
             # Split by '/' and transform the values to int
-            values_str = indices_str.split('/')
+            indices_str = vertex_str.split('/')
 
-            idx = int(values_str[0]) - 1  # indices start from 0
-            data['indices'].append(idx)
-            if vg_data:
-                vg_data['indices'].append(idx)
-            vertex = vertices[idx]
-            if values_str[1]:
-                tex_coords_idx = int(values_str[1]) - 1
+            position_idx = int(indices_str[0]) - 1
+            position = positions[position_idx]
+            vertex = Vertex(position)
+            if indices_str[1]:
+                tex_coords_idx = int(indices_str[1]) - 1
                 vertex.tex_coords = tex_coords[tex_coords_idx]
-            if values_str[2]:
-                normal_idx = int(values_str[2]) - 1
+            if indices_str[2]:
+                normal_idx = int(indices_str[2]) - 1
                 vertex.normal = normals[normal_idx]
+            new_vertices.append(vertex)
+        new_triangle = Triangle(new_vertices)
+        vg_data['triangles'].append(new_triangle)
 
     def set_tex_coords(self, args: list[str]):
         data = self.get_current_mesh_data()
@@ -143,7 +145,6 @@ class OBJParser:
         data = self.get_current_mesh_data()
         values = [float(x) for x in args]
         new_normal = Vec3(*values)
-        new_normal = Vec3(new_normal.x, new_normal.y, new_normal.z)
         data['normals'].append(new_normal)
 
     def set_vertex_group(self, name: str):
@@ -151,7 +152,7 @@ class OBJParser:
         self.current_vertex_group_name = name
         new_vg_data = {
             'name': name,
-            'indices': []
+            'triangles': []
         }
         data['vertex_groups'][name] = new_vg_data
 

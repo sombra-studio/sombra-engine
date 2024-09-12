@@ -24,13 +24,11 @@ class OBJLoader:
             vertex_groups: dict[str, VertexGroup] = {}
             for vg_data in mesh_data['vertex_groups'].values():
                 vertex_groups[vg_data['name']] = VertexGroup(
-                    vg_data['name'], vg_data['indices'], vg_data['material']
+                    vg_data['name'], vg_data['triangles'], vg_data['material']
                 )
             # Create Mesh
             new_mesh = Mesh(
                 mesh_data['name'],
-                mesh_data['vertices'],
-                mesh_data['indices'],
                 vertex_groups=vertex_groups,
                 materials=obj_parser.materials,
                 batch=batch,

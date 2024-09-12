@@ -1,7 +1,7 @@
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import IndexedVertexList
+from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Vec3
 
 from sombra_engine.models import Mesh
@@ -37,25 +37,27 @@ class Wireframe:
         with open('sombra_engine/shaders/solid.frag') as f:
             fragment_shader = Shader(f.read(), 'fragment')
         self.program = ShaderProgram(vertex_shader, fragment_shader)
-        self.program.uniforms['material.diffuse'] = color
+        self.program['material.diffuse'] = color
         self.vertex_lists = self.create_vertex_lists()
 
-    def create_vertex_lists(self) -> list[IndexedVertexList]:
+    def create_vertex_lists(self) -> list[VertexList]:
         """
         This method creates a vertex list for each vertex group and returns all
         of them in a list.
 
         Returns:
-            list[IndexedVertexList]: The list with the newly created vertex
-                lists.
+            list[VertexList]: The list with the newly created vertex lists.
         """
         vlists = []
         # Create a list for position
-        position_list = self.mesh.get_positions_array()
         group = WireframeGroup(self.program, parent=self.group)
         for vg in self.mesh.vertex_groups.values():
-            vl = self.program.vertex_list_indexed(
-                len(self.mesh.vertices), GL_TRIANGLES, vg.indices,
+            position_list = []
+            for triangle in vg.triangles:
+                for v in triangle.vertices:
+                    position_list += [v.position.x, v.position.y, v.position.z]
+            vl = self.program.vertex_list(
+                len(vg.triangles) * 3, GL_TRIANGLES,
                 batch=self.batch, group=group,
                 position=('f', position_list)
             )

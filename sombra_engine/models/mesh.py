@@ -1,12 +1,12 @@
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
-from pyglet.graphics.vertexdomain import IndexedVertexList
+from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Vec2, Vec3
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
-    Material, SceneObject, Transform, Vertex,
+    Material, SceneObject, Transform, Triangle,
     VertexGroup
 )
 
@@ -15,8 +15,6 @@ class Mesh:
     def __init__(
         self,
         name: str,
-        vertices: list[Vertex],
-        indices: list[int],
         vertex_groups: dict[str, VertexGroup] = None,
         materials: dict[str, Material] = None,
         mode: int = GL_TRIANGLES,
@@ -27,8 +25,6 @@ class Mesh:
         parent: SceneObject = None
     ):
         self.name = name
-        self.vertices = vertices
-        self.indices = indices
         self.vertex_groups = vertex_groups
         self.materials = materials
         self.mode = mode
@@ -50,7 +46,7 @@ class Mesh:
             groups[name] = new_group
         return groups
 
-    def create_vertex_lists(self) -> list[IndexedVertexList]:
+    def create_vertex_lists(self) -> list[VertexList]:
         """
         This method creates a vertex list for each vertex group using the
         Shader Program that this Mesh currently has, and returns all
@@ -61,20 +57,17 @@ class Mesh:
                 lists.
         """
         vlists = []
-        # Create a list for position
-        position_list = self.get_positions_array()
-        # Create a list for texCoords
-        texcoords_list = self.get_tex_coords_array()
-        # Create a list for normal
-        normal_list = self.get_normals_array()
 
         for vg in self.vertex_groups.values():
+            (
+                position_list, tex_coords_list, normal_list
+            ) = self.get_lists_for_triangles(vg.triangles)
             material_group = self.material_groups[vg.material.name]
-            vl = self.program.vertex_list_indexed(
-                len(self.vertices), self.mode, vg.indices,
+            vl = self.program.vertex_list(
+                len(vg.triangles) * 3, self.mode,
                 batch=self.batch, group=material_group,
                 position=('f', position_list),
-                texCoords=('f', texcoords_list),
+                texCoords=('f', tex_coords_list),
                 normal=('f', normal_list)
             )
             vlists.append(vl)
@@ -84,29 +77,13 @@ class Mesh:
         for vl in self.vertex_lists:
             vl.draw(self.mode)
 
-    def get_vertex_attr_array(self, attrib_name):
-        answer = []
-        for v in self.vertices:
-            attrib = getattr(v, attrib_name)
-            if isinstance(attrib, Vec3):
-                answer += [attrib.x, attrib.y, attrib.z]
-            elif isinstance(attrib, Vec2):
-                answer += [attrib.x, attrib.y]
-            else:
-                raise Exception(
-                    f"invalid type {type(attrib)} for vertex attribute "
-                    f"{attrib_name}"
-                )
-        return answer
-
-    def get_positions_array(self):
-        answer = self.get_vertex_attr_array('position')
-        return answer
-
-    def get_normals_array(self):
-        answer = self.get_vertex_attr_array('normal')
-        return answer
-
-    def get_tex_coords_array(self):
-        answer = self.get_vertex_attr_array('tex_coords')
-        return answer
+    def get_lists_for_triangles(self, triangles: list[Triangle]):
+        position_list = []
+        tex_coords_list = []
+        normal_list = []
+        for triangle in triangles:
+            for v in triangle.vertices:
+                position_list += [v.position.x, v.position.y, v.position.z]
+                tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
+                normal_list += [v.normal.x, v.normal.y, v.normal.z]
+        return position_list, tex_coords_list, normal_list

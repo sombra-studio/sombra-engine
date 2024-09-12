@@ -22,12 +22,11 @@ wf = None
 # gizmo = Gizmo(camera)
 
 
-# @window.event
-# def on_key_press(symbol, mod):
-#     if symbol == key.P:
-#         pyglet.image.get_buffer_manager().get_color_buffer().save(
-#             'screenshot.png'
-#         )
+def on_key_press(symbol, mod):
+    if symbol == key.P:
+        pyglet.image.get_buffer_manager().get_color_buffer().save(
+            'docs/screenshot.png'
+        )
 
 
 @window.event
@@ -42,16 +41,16 @@ def main():
     global model, wf
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    # with open('sombra_engine/shaders/lambert.frag') as f:
+    with open('sombra_engine/shaders/lambert.frag') as f:
     # with open('sombra_engine/shaders/solid.frag') as f:
-    with open('sombra_engine/shaders/normals.frag') as f:
+    # with open('sombra_engine/shaders/normals.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
 
-    # scene = Scene()
-    # scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0, 1.0, 1.0))
-    # program['light.position'] = scene.lights[0].position
-    # program['light.color'] = scene.lights[0].color
+    scene = Scene()
+    scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0, 1.0, 1.0))
+    program['light.position'] = scene.lights[0].position
+    program['light.color'] = scene.lights[0].color
 
     # model_group = Group()
     # model_group.visible = False
@@ -62,6 +61,7 @@ def main():
         # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
     )
     wf = Wireframe(model.meshes[0], vert_shader, batch)
+    window.push_handlers(on_key_press)
     pyglet.app.run()
 
 
