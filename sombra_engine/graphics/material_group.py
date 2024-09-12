@@ -19,13 +19,14 @@ class MaterialGroup(Group):
         if material.diffuse_map:
             self.diffuse_map = pyglet.resource.image(material.diffuse_map)
         else:
-            self.diffuse_map = utils.create_gray_tex()
+            self.diffuse_map = utils.create_white_tex()
 
         # Set ambient map
         if material.ambient_map:
             self.ambient_map = pyglet.resource.image(material.ambient_map)
         else:
-            self.ambient_map = self.diffuse_map
+            # TODO maybe would be better to copy the texture instead
+            self.ambient_map = utils.create_white_tex()
 
         # Set specular map
         if material.specular_map:
@@ -43,7 +44,7 @@ class MaterialGroup(Group):
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
         self.program['material.ambient'] = self.material.ambient
-        self.program['material.diffuse'] = self.material.diffuse
+        # self.program['material.diffuse'] = self.material.diffuse
         # self.program.uniforms['material.specular'].set(self.material.specular)
         # self.program.uniforms['material.specular_exponent'].set(
         #     self.material.specular_exponent
