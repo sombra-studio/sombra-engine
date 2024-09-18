@@ -4,21 +4,9 @@ from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Vec3
 
+
+from sombra_engine.graphics import WireframeGroup
 from sombra_engine.models import Mesh
-
-
-class WireframeGroup(Group):
-    def __init__(self, program: ShaderProgram, order: int = 30, parent=None):
-        super().__init__(order=order, parent=parent)
-        self.program = program
-
-    def set_state(self):
-        self.program.use()
-        pyglet.gl.glPolygonMode(pyglet.gl.GL_FRONT_AND_BACK, pyglet.gl.GL_LINE)
-
-    def unset_state(self):
-        self.program.stop()
-        pyglet.gl.glPolygonMode(pyglet.gl.GL_FRONT_AND_BACK, pyglet.gl.GL_FILL)
 
 
 class Wireframe:
@@ -54,6 +42,7 @@ class Wireframe:
         for vg in self.mesh.vertex_groups.values():
             position_list = []
             for triangle in vg.triangles:
+                # Only render
                 for v in triangle.vertices:
                     position_list += [v.position.x, v.position.y, v.position.z]
             vl = self.program.vertex_list(

@@ -1,5 +1,6 @@
 from pyglet.gl import *
 from pyglet.graphics import Group
+from pyglet.graphics.shader import ShaderProgram
 import pyglet.resource
 
 from sombra_engine.primitives import Material
@@ -8,7 +9,7 @@ from sombra_engine import utils
 
 class MaterialGroup(Group):
     def __init__(
-        self, material: Material, program: pyglet.graphics.shader.ShaderProgram,
+        self, material: Material, program: ShaderProgram,
         order: int = 0, parent: Group = None
     ):
         super().__init__(order, parent)
@@ -25,7 +26,6 @@ class MaterialGroup(Group):
         if material.ambient_map:
             self.ambient_map = pyglet.resource.image(material.ambient_map)
         else:
-            # TODO maybe would be better to copy the texture instead
             self.ambient_map = utils.create_white_tex()
 
         # Set specular map
@@ -36,7 +36,6 @@ class MaterialGroup(Group):
 
     def set_state(self):
         self.program.use()
-        glEnable(GL_DEPTH_TEST)
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(self.ambient_map.target, self.ambient_map.id)
         glActiveTexture(GL_TEXTURE1)
@@ -44,7 +43,7 @@ class MaterialGroup(Group):
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
         self.program['material.ambient'] = self.material.ambient
-        # self.program['material.diffuse'] = self.material.diffuse
+        self.program['material.diffuse'] = self.material.diffuse
         # self.program.uniforms['material.specular'].set(self.material.specular)
         # self.program.uniforms['material.specular_exponent'].set(
         #     self.material.specular_exponent
@@ -52,7 +51,6 @@ class MaterialGroup(Group):
 
     def unset_state(self):
         self.program.stop()
-        glDisable(GL_DEPTH_TEST)
 
     def __hash__(self):
         return hash(
