@@ -1,7 +1,8 @@
 from pyglet.math import Vec3
 
 
-from sombra_engine.constants import *
+from sombra_engine.constants import DEFAULT_MATERIAL_NAME
+
 
 class MTLParser:
     def __init__(self):
@@ -87,4 +88,3 @@ class MTLParser:
 
     def set_bump_map(self, filename: str):
         self.set_map_by_key('bump_map', filename)
-
