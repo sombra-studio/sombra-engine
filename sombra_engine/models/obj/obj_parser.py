@@ -150,11 +150,12 @@ class OBJParser:
     def set_vertex_group(self, name: str):
         data = self.get_current_mesh_data()
         self.current_vertex_group_name = name
-        new_vg_data = {
-            'name': name,
-            'triangles': []
-        }
-        data['vertex_groups'][name] = new_vg_data
+        if name not in data['vertex_groups']:
+            new_vg_data = {
+                'name': name,
+                'triangles': []
+            }
+            data['vertex_groups'][name] = new_vg_data
 
     def set_material(self, name: str):
         vg_data = self.get_current_vertex_group()

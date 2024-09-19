@@ -26,16 +26,12 @@ in vec3 fragNormal;
 out vec4 finalColor;
 
 void main() {
-    vec3 ambient = light.color * (
-        material.ambient * texture(ambientMap, fragTexCoords).rgb
-    );
-//    vec3 l = normalize(light.position - fragPos);
-//    vec3 norm = normalize(fragNormal);
-//    float diff = max(dot(l, fragNormal), 0.0);
-//    vec3 diffuse = light.color * diff * (
-//        material.diffuse * texture(diffuseMap, fragTexCoords).rgb
-//    );
-//    vec3 result = ambient + diffuse;
-//    finalColor = vec4(result, 1.0);
-    finalColor = vec4(ambient, 1.0);
+    vec3 ambient = material.ambient * texture(ambientMap, fragTexCoords).rgb;
+    vec3 l = normalize(light.position - fragPos);
+    vec3 norm = normalize(fragNormal);
+    float lambert = max(dot(fragNormal, l), 0.0);
+    vec3 intensity = light.color * (ambient * 2.0 + lambert);
+    vec3 diffuse = material.diffuse * texture(diffuseMap, fragTexCoords).rgb;
+    vec3 result = clamp(diffuse * intensity, 0.0, 1.0);
+    finalColor = vec4(result, 1.0);
 }

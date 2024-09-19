@@ -13,7 +13,8 @@ class Material:
         ior: float = 1.0,
         ambient_map: str = "",
         diffuse_map: str = "",
-        specular_map: str = ""
+        specular_map: str = "",
+        bump_map: str = ""
     ):
         self.material_id = material_id
         self.name = name

@@ -1,3 +1,4 @@
+import os
 from pyglet.math import Vec3
 
 
@@ -21,6 +22,7 @@ class MTLParser:
             'map_bump': self.set_bump_map,
             'bump': self.set_bump_map
         }
+        self.current_path = None
 
     def parse(self, filename: str):
         """
@@ -29,6 +31,7 @@ class MTLParser:
         Args:
             filename: Path of an MTL file
         """
+        self.current_path = os.path.dirname(filename)
         with open(filename) as file:
             for line in file:
                 if not line or line[0] == '#':
@@ -37,6 +40,12 @@ class MTLParser:
                 if len(line) > 1 and line[-1] == '\n':
                     line = line[:-1]
                 args = line.split(' ')
+                # Remove empty strings
+                args = [
+                    arg.replace('\t', '')
+                    for arg in args if arg != ''
+                ]
+
                 command = args[0]
                 if command in self.commands_map:
                     self.commands_map[command](*args[1:])
@@ -60,7 +69,8 @@ class MTLParser:
     def set_map_by_key(self, key: str, filename: str):
         if self.current_name is None:
             self.current_name = DEFAULT_MATERIAL_NAME
-            self.materials[self.current_name][key] = filename
+        path = f"{self.current_path}/{filename}"
+        self.materials[self.current_name][key] = path
 
     def set_ambient(self, r: str, g: str, b: str):
         self.set_color_by_key('ambient', r, g, b)

@@ -2,13 +2,24 @@ from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
-from pyglet.math import Vec2, Vec3
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, Triangle,
     VertexGroup
 )
+
+
+def get_lists_for_triangles(triangles: list[Triangle]):
+    position_list = []
+    tex_coords_list = []
+    normal_list = []
+    for triangle in triangles:
+        for v in triangle.vertices:
+            position_list += [v.position.x, v.position.y, v.position.z]
+            tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
+            normal_list += [v.normal.x, v.normal.y, v.normal.z]
+    return position_list, tex_coords_list, normal_list
 
 
 class Mesh:
@@ -61,7 +72,7 @@ class Mesh:
         for vg in self.vertex_groups.values():
             (
                 position_list, tex_coords_list, normal_list
-            ) = self.get_lists_for_triangles(vg.triangles)
+            ) = get_lists_for_triangles(vg.triangles)
             material_group = self.material_groups[vg.material.name]
             vl = self.program.vertex_list(
                 len(vg.triangles) * 3, self.mode,
@@ -76,14 +87,3 @@ class Mesh:
     def draw(self):
         for vl in self.vertex_lists:
             vl.draw(self.mode)
-
-    def get_lists_for_triangles(self, triangles: list[Triangle]):
-        position_list = []
-        tex_coords_list = []
-        normal_list = []
-        for triangle in triangles:
-            for v in triangle.vertices:
-                position_list += [v.position.x, v.position.y, v.position.z]
-                tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
-                normal_list += [v.normal.x, v.normal.y, v.normal.z]
-        return position_list, tex_coords_list, normal_list

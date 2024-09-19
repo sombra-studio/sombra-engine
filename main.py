@@ -1,4 +1,4 @@
-from pyglet.graphics import Group
+from pyglet.gl import *
 from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.math import Vec3
 from pyglet.window import key
@@ -32,8 +32,9 @@ def on_key_press(symbol, mod):
 @window.event
 def on_draw():
     window.clear()
-    pyglet.gl.glEnable(pyglet.gl.GL_CULL_FACE)
-    pyglet.gl.glEnable(pyglet.gl.GL_DEPTH_TEST)
+    glEnable(GL_CULL_FACE)
+    glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LESS)
     batch.draw()
 
 
@@ -48,19 +49,19 @@ def main():
     program = ShaderProgram(vert_shader, frag_shader)
 
     scene = Scene()
-    scene.create_light(Vec3(100.0, 150.0, 7.0), Vec3(1.0, 1.0, 1.0))
-    # program['light.position'] = scene.lights[0].position
+    scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
+    program['light.position'] = scene.lights[0].position
     program['light.color'] = scene.lights[0].color
 
     # model_group = Group()
     # model_group.visible = False
     model = OBJLoader.load(
        "tests/data/ancient_house.obj", "House", program, batch=batch,
-         # "tests/data/cube.obj", "cube", program, batch=batch,
+       #   "tests/data/cube.obj", "cube", program, batch=batch,
         # group=model_group
         # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
     )
-    wf = Wireframe(model.meshes[0], vert_shader, batch)
+    # wf = Wireframe(model.meshes[0], vert_shader, batch)
     window.push_handlers(on_key_press)
     pyglet.app.run()
 
