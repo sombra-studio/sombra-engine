@@ -5,8 +5,7 @@ from pyglet.graphics.vertexdomain import VertexList
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
-    Material, SceneObject, Transform, Triangle,
-    VertexGroup
+    Material, SceneObject, Transform, VertexGroup
 )
 
 
@@ -60,13 +59,13 @@ class Mesh:
         for vg_name, vg in self.vertex_groups.items():
             (
                 position_list, tex_coords_list, normal_list
-            ) = self.get_lists_for_triangles(vg_name)
+            ) = self.get_lists_for_vertex_group(vg_name)
             material_group = self.material_groups[vg.material.name]
             vl = self.program.vertex_list(
                 len(vg.triangles) * 3, self.mode,
                 batch=self.batch, group=material_group,
                 position=('f', position_list),
-                texCoords=('f', tex_coords_list),
+                tex_coords=('f', tex_coords_list),
                 normal=('f', normal_list)
             )
             vlists.append(vl)
@@ -76,8 +75,10 @@ class Mesh:
         for vl in self.vertex_lists:
             vl.draw(self.mode)
 
-    def get_lists_for_triangles(self, vertex_group_name: str):
-        if not vertex_group_name in self.vertex_groups:
+    def get_lists_for_vertex_group(self, vertex_group_name: str) -> tuple[
+        list[float], list[float], list[float]
+    ]:
+        if vertex_group_name not in self.vertex_groups:
             raise KeyError(
                 f"Couldn't find key {vertex_group_name} for vertex group in "
                 f"mesh {self.name}"

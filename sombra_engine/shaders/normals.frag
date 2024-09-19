@@ -1,8 +1,8 @@
 #version 330
 
-in vec3 fragNormal;
+in vec3 frag_normal;
 
 void main() {
-    vec3 colorNormal = (normalize(fragNormal) + 1) / 2;
-    gl_FragColor = vec4(colorNormal, 1.0);
+    vec3 color_normal = (normalize(frag_normal) + 1) / 2;
+    gl_FragColor = vec4(color_normal, 1.0);
 }

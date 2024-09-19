@@ -1,8 +1,8 @@
 #version 330
 
-uniform sampler2D ambientMap;
-uniform sampler2D diffuseMap;
-uniform sampler2D specularMap;
+uniform sampler2D ambient_map;
+uniform sampler2D diffuse_map;
+uniform sampler2D specular_map;
 
 struct Material {
     vec3 ambient;
@@ -18,20 +18,20 @@ struct Light {
 
 uniform Light light;
 
-in vec3 fragPos;
-in vec2 fragTexCoords;
-in vec3 fragNormal;
+in vec3 frag_pos;
+in vec2 frag_tex_coords;
+in vec3 frag_normal;
 
 
-out vec4 finalColor;
+out vec4 final_color;
 
 void main() {
-    vec3 ambient = material.ambient * texture(ambientMap, fragTexCoords).rgb;
-    vec3 l = normalize(light.position - fragPos);
-    vec3 norm = normalize(fragNormal);
-    float lambert = max(dot(fragNormal, l), 0.0);
-    vec3 intensity = light.color * (ambient * 2.0 + lambert);
-    vec3 diffuse = material.diffuse * texture(diffuseMap, fragTexCoords).rgb;
+    vec3 ambient = material.ambient * texture(ambient_map, frag_tex_coords).rgb;
+    vec3 l = normalize(light.position - frag_pos);
+    vec3 norm = normalize(frag_normal);
+    float lambert = max(dot(frag_normal, l), 0.0);
+    vec3 intensity = light.color * (ambient + lambert);
+    vec3 diffuse = material.diffuse * texture(diffuse_map, frag_tex_coords).rgb;
     vec3 result = clamp(diffuse * intensity, 0.0, 1.0);
-    finalColor = vec4(result, 1.0);
+    final_color = vec4(result, 1.0);
 }

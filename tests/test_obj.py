@@ -77,7 +77,7 @@ class OBJTestCase(unittest.TestCase):
         self.assertEqual(model.name, name)
         plane_mesh = model.meshes[0]
         position_list, tex_coords_list, normal_list = (
-            plane_mesh.get_lists_for_triangles('unnamed vertex group')
+            plane_mesh.get_lists_for_vertex_group('unnamed vertex group')
         )
         self.assertEqual(position_list, vertices)
         self.assertEqual(tex_coords_list, tex_coords)

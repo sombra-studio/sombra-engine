@@ -7,17 +7,17 @@ uniform WindowBlock
 } window;
 
 in vec3 position;
-in vec2 texCoords;
+in vec2 tex_coords;
 in vec3 normal;
 
-out vec3 fragPos;
-out vec2 fragTexCoords;
-out vec3 fragNormal;
+out vec3 frag_pos;
+out vec2 frag_tex_coords;
+out vec3 frag_normal;
 
 void main()
 {
-    fragPos = position;
-    fragTexCoords = texCoords;
-    fragNormal = normal;
+    frag_pos = position;
+    frag_tex_coords = tex_coords;
+    frag_normal = normal;
     gl_Position = window.projection * window.view * vec4(position, 1.0);
 }
