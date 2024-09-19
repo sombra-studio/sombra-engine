@@ -62,26 +62,26 @@ class OBJTestCase(unittest.TestCase):
     def test_model(self):
         name = 'test'
         vertices = [
-            Vec3(-1, 0, 1), Vec3(1, 0, 1), Vec3(-1, 0, -1), Vec3(1, 0, -1)
+            1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+            1.0, 0.0, -1.0, -1.0, 0.0, -1.0
         ]
-        normal = Vec3(0, 1, 0)
-        tex_coords = [Vec2(0, 0), Vec2(1, 0), Vec2(0, 1), Vec2(1, 1)]
-        indices = [1, 2, 0, 1, 3, 2]
+        tex_coords = [
+            1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
+        ]
+        normal = [
+            -0.0, 1.0, -0.0, -0.0, 1.0, -0.0, -0.0, 1.0, -0.0, -0.0, 1.0, -0.0,
+            -0.0, 1.0, -0.0, -0.0, 1.0, -0.0
+        ]
 
         model = OBJLoader.load(self.filename, 'test', self.program)
         self.assertEqual(model.name, name)
-        plane = model.meshes[0]
-        self.assertEqual(plane.name, 'Plane')
-        for i, vertex in enumerate(plane.vertices):
-            self.assertEqual(vertex.position, vertices[i])
-            self.assertEqual(vertex.normal, normal)
-
-        self.assertEqual(plane.indices, indices)
-
-        for idx in indices:
-            self.assertEqual(
-                plane.vertices[idx - 1].tex_coords, tex_coords[idx - 1]
-            )
+        plane_mesh = model.meshes[0]
+        position_list, tex_coords_list, normal_list = (
+            plane_mesh.get_lists_for_triangles('unnamed vertex group')
+        )
+        self.assertEqual(position_list, vertices)
+        self.assertEqual(tex_coords_list, tex_coords)
+        self.assertEqual(normal_list, normal)
 
 
 if __name__ == '__main__':
