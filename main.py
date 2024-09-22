@@ -62,8 +62,8 @@ def main():
     # model_group = Group()
     # model_group.visible = False
     model = OBJLoader.load(
-       "tests/data/ancient_house.obj", "House", program, batch=batch,
-       #   "tests/data/cube.obj", "cube", program, batch=batch,
+       # "tests/data/ancient_house.obj", "House", program, batch=batch,
+         "tests/data/cube.obj", "cube", program, batch=batch,
         # group=model_group
         # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
     )
