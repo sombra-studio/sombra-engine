@@ -1,6 +1,7 @@
 from pyglet.gl import *
 from pyglet.graphics import Group
 from pyglet.graphics.shader import ShaderProgram
+from pyglet.math import Mat4
 import pyglet.resource
 
 from sombra_engine.primitives import Material
@@ -9,12 +10,13 @@ from sombra_engine import utils
 
 class MaterialGroup(Group):
     def __init__(
-        self, material: Material, program: ShaderProgram,
+        self, material: Material, program: ShaderProgram, matrix: Mat4,
         order: int = 0, parent: Group = None
     ):
         super().__init__(order, parent)
         self.program = program
         self.material = material
+        self.matrix = matrix
 
         # Set diffuse map
         if material.diffuse_map:
@@ -44,6 +46,7 @@ class MaterialGroup(Group):
         glBindTexture(self.specular_map.target, self.specular_map.id)
         self.program['material.ambient'] = self.material.ambient
         self.program['material.diffuse'] = self.material.diffuse
+        self.program['model'] = self.matrix
         # self.program.uniforms['material.specular'].set(self.material.specular)
         # self.program.uniforms['material.specular_exponent'].set(
         #     self.material.specular_exponent

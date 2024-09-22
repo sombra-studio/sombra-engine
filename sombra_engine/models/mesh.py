@@ -2,6 +2,7 @@ from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
+from pyglet.math import Vec3
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
@@ -9,7 +10,7 @@ from sombra_engine.primitives import (
 )
 
 
-class Mesh:
+class Mesh(SceneObject):
     def __init__(
         self,
         name: str,
@@ -22,6 +23,7 @@ class Mesh:
         transform: Transform = Transform(),
         parent: SceneObject = None
     ):
+        super().__init__(transform)
         self.name = name
         self.vertex_groups = vertex_groups
         self.materials = materials
@@ -29,17 +31,19 @@ class Mesh:
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
         self.program = program or pyglet.graphics.get_default_shader()
-        self.transform = transform
         self.parent = parent
 
         self.material_groups = self.create_material_groups()
         self.vertex_lists = self.create_vertex_lists()
 
+    # Create methods
+    # -------------------------------------------------------------------------
     def create_material_groups(self) -> dict[str, MaterialGroup]:
         groups = {}
         for name, material in self.materials.items():
             new_group = MaterialGroup(
-                material, self.program, order=0, parent=self.group
+                material, self.program, self.get_matrix(),
+                order=0, parent=self.group
             )
             groups[name] = new_group
         return groups
@@ -51,7 +55,7 @@ class Mesh:
         of them in a list.
 
         Returns:
-            list[IndexedVertexList]: The list with the newly created vertex
+            list[VertexList]: The list with the newly created vertex
                 lists.
         """
         vlists = []
@@ -70,6 +74,36 @@ class Mesh:
             )
             vlists.append(vl)
         return vlists
+
+    # Transform methods
+    # -------------------------------------------------------------------------
+    def update_matrix(self):
+        matrix = self.get_matrix()
+        for material_group in self.material_groups.values():
+            material_group.matrix = matrix
+
+    def rotate_x(self, angle: float):
+        rot = self.transform.rotation
+        self.transform.rotation = Vec3(angle, rot.y, rot.z)
+        self.update_matrix()
+
+    def rotate_y(self, angle: float):
+        self.transform.rotation.y = angle
+        self.update_matrix()
+
+    def rotate_z(self, angle: float):
+        self.transform.rotation.z = angle
+        self.update_matrix()
+
+    def translate(self, vec: Vec3):
+        self.transform.translation = vec
+        self.update_matrix()
+
+    def scale(self, vec: Vec3):
+        self.transform.scale = vec
+        self.update_matrix()
+
+    # -------------------------------------------------------------------------
 
     def draw(self):
         for vl in self.vertex_lists:

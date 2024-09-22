@@ -38,6 +38,12 @@ def on_draw():
     batch.draw()
 
 
+def update(dt: float):
+    mesh = model.meshes[0]
+    rx = mesh.transform.rotation.x
+    mesh.rotate_x(rx + dt / 3)
+
+
 def main():
     global model, wf
     with open('sombra_engine/shaders/default.vert') as f:
@@ -63,6 +69,8 @@ def main():
     )
     # wf = Wireframe(model.meshes[0], vert_shader, batch)
     window.push_handlers(on_key_press)
+
+    pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()
 
 
