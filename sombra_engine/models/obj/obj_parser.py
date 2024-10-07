@@ -2,7 +2,7 @@ import os
 from pyglet.math import Vec2, Vec3
 
 
-from .mtl_loader import MTLLoader
+from sombra_engine.models.obj.mtl_loader import MTLLoader
 from sombra_engine.primitives import Material, Triangle, Vertex
 
 
