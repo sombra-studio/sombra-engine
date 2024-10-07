@@ -10,12 +10,13 @@ from sombra_engine.primitives import VertexGroup
 class OBJLoader:
     @staticmethod
     def load(
-        filename: str, name: str, program: ShaderProgram = None,
+        filename: str, name: str, scale: float = 1.0,
+        program: ShaderProgram = None,
         batch: Batch = None, group: Group = None
     ) -> Model:
         obj_parser = OBJParser()
         # Parse the file
-        obj_parser.parse(filename)
+        obj_parser.parse(filename, scale=scale)
 
         # Now create the Model
         meshes = []

@@ -33,7 +33,7 @@ class OBJParser:
         self.current_vertex_group_name: str = "unnamed vertex group"
         self.materials: dict[str, Material] = {}
 
-    def parse(self, filename: str):
+    def parse(self, filename: str, scale: float = 1.0):
         """
         Parse a given OBJ file reading line by line and stores the model
         information into data structures that are attributes of this class.
@@ -56,7 +56,7 @@ class OBJParser:
             if args[0] == 'o':
                 self.set_name(args[1])
             elif args[0] == 'v':
-                self.set_vertex(args[1:])
+                self.set_vertex(args[1:], scale=scale)
             elif args[0] == 'vt':
                 self.set_tex_coords(args[1:])
             elif args[0] == 'vn':
@@ -94,10 +94,10 @@ class OBJParser:
         }
         self.current_mesh_name = name
 
-    def set_vertex(self, args: list[str]):
+    def set_vertex(self, args: list[str], scale: float = 1.0):
         data = self.get_current_mesh_data()
         positions = [float(x) for x in args]
-        new_position = Vec3(*positions)
+        new_position = Vec3(*positions) * scale
         data['positions'].append(new_position)
 
     def set_face(self, args: list[str]):
