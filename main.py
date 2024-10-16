@@ -6,8 +6,8 @@ import pyglet
 
 
 from sombra_engine.camera import FPSCamera
-from sombra_engine.debug import Gizmo
-from sombra_engine.models import Wireframe
+# from sombra_engine.debug import Gizmo
+from sombra_engine.models import Model, Wireframe
 from sombra_engine.models.obj import OBJLoader
 from sombra_engine.scene import Scene
 
@@ -17,8 +17,8 @@ camera = FPSCamera(
     window, position=Vec3(0.0, 0.0, -15.0), pitch=90, yaw=90
 )
 batch = pyglet.graphics.Batch()
-model = None
-wf = None
+model:Model|None = None
+wf:Wireframe|None = None
 # gizmo = Gizmo(camera)
 
 
@@ -62,13 +62,13 @@ def main():
     # model_group = Group()
     # model_group.visible = False
     model = OBJLoader.load(
-       # "tests/data/ancient_house.obj", "House", program, batch=batch,
-         "tests/data/cube.obj", "cube", program, batch=batch,
+        "tests/data/ancient_house.obj", "House",
         # group=model_group
-        # "tests/data/yoda/yoda.obj", "Yoda", program, batch=batch
+        # "tests/data/yoda/yoda.obj", "Yoda", scale=0.001,
+        program=program, batch=batch
     )
     # wf = Wireframe(model.meshes[0], vert_shader, batch)
-    window.push_handlers(on_key_press)
+    # window.push_handlers(on_key_press)
 
     pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()

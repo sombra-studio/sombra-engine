@@ -2,7 +2,6 @@
 
 uniform sampler2D ambient_map;
 uniform sampler2D diffuse_map;
-uniform sampler2D specular_map;
 
 struct Material {
     vec3 ambient;
