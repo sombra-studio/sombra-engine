@@ -1,8 +1,8 @@
-#version 330
+#version 420
 
-uniform sampler2D ambient_map;
-uniform sampler2D diffuse_map;
-uniform sampler2D specular_map;
+layout(binding = 0) uniform sampler2D ambient_map;
+layout(binding = 1) uniform sampler2D diffuse_map;
+layout(binding = 2) uniform sampler2D specular_map;
 
 struct Material {
     vec3 ambient;
@@ -44,7 +44,6 @@ void main() {
     vec3 Ks = max(
         material.specular, texture(specular_map, frag_tex_coords).rgb
     );
-//    vec3 Ks = vec3(0.0, 0.0, 0.0);
 
     vec3 intensity = light.color * (
         diffuse * lambert + Ks * pow(spec_factor, material.specular_exponent)
