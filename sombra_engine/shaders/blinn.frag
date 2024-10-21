@@ -34,16 +34,17 @@ void main() {
     // Calculate diffuse
     vec3 l = normalize(light.position - frag_pos);
     vec3 norm = normalize(frag_normal);
-    float lambert = max(dot(norm, l), 0.0);
+    float lambert = clamp(dot(norm, l), 0.0, 1.0);
     vec3 diffuse = material.diffuse * texture(diffuse_map, frag_tex_coords).rgb;
 
     // Calculate specular
     vec3 v = normalize(eye - frag_pos);
     vec3 h = normalize(l + v);
-    float spec_factor = clamp(dot(h, frag_normal), 0.0, 1.0);
+    float spec_factor = clamp(dot(h, norm), 0.0, 1.0);
     vec3 Ks = max(
         material.specular, texture(specular_map, frag_tex_coords).rgb
     );
+//    vec3 Ks = vec3(0.0, 0.0, 0.0);
 
     vec3 intensity = light.color * (
         diffuse * lambert + Ks * pow(spec_factor, material.specular_exponent)
