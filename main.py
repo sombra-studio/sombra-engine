@@ -48,11 +48,11 @@ def main():
     global model, wf
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    # with open('sombra_engine/shaders/blinn.frag') as f:
+    with open('sombra_engine/shaders/blinn.frag') as f:
     # with open('sombra_engine/shaders/lambert.frag') as f:
     # with open('sombra_engine/shaders/solid.frag') as f:
     # with open('sombra_engine/shaders/normals.frag') as f:
-    with open('sombra_engine/shaders/specular.frag') as f:
+    # with open('sombra_engine/shaders/specular.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
 
@@ -74,7 +74,7 @@ def main():
     # wf = Wireframe(model.meshes[0], vert_shader, batch)
     window.push_handlers(on_key_press)
 
-    pyglet.clock.schedule_interval(update, 1 / 60)
+    # pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()
 
 
