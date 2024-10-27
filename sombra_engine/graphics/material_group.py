@@ -49,9 +49,9 @@ class MaterialGroup(Group):
         glBindTexture(self.specular_map.target, self.specular_map.id)
         # self.program['material.ambient'] = self.material.ambient
         # self.program['material.diffuse'] = self.material.diffuse
-        # self.program['material.specular'] = self.material.specular
-        # self.program['material.specular_exponent'] = \
-        #     self.material.specular_exponent
+        self.program['material.specular'] = self.material.specular
+        self.program['material.specular_exponent'] = \
+            self.material.specular_exponent
         self.program['model'] = self.matrix
 
     def unset_state(self):

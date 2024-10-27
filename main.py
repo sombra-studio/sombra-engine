@@ -58,9 +58,9 @@ def main():
 
     scene = Scene()
     scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
-    # program['light.position'] = scene.lights[0].position
-    # program['light.color'] = scene.lights[0].color
-    # program['eye'] = camera.position
+    program['light.position'] = scene.lights[0].position
+    program['light.color'] = scene.lights[0].color
+    program['eye'] = camera.position
 
     # model_group = Group()
     # model_group.visible = False
@@ -74,7 +74,7 @@ def main():
     # wf = Wireframe(model.meshes[0], vert_shader, batch)
     window.push_handlers(on_key_press)
 
-    # pyglet.clock.schedule_interval(update, 1 / 60)
+    pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()
 
 
