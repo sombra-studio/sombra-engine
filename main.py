@@ -67,13 +67,14 @@ def main():
     model = OBJLoader.load(
         # "tests/data/ancient_house.obj", "House",
         # group=model_group
-        "tests/data/yoda/yoda.obj", "Yoda", scale=0.001,
+        "tests/data/yoda/yoda.obj", "Yoda",
         program=program, batch=batch
     )
+    print(f"object {model.name} loaded")
     # wf = Wireframe(model.meshes[0], vert_shader, batch)
-    # window.push_handlers(on_key_press)
+    window.push_handlers(on_key_press)
 
-    pyglet.clock.schedule_interval(update, 1 / 60)
+    # pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()
 
 

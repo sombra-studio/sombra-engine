@@ -20,19 +20,22 @@ class MaterialGroup(Group):
 
         # Set diffuse map
         if material.diffuse_map:
-            self.diffuse_map = pyglet.resource.image(material.diffuse_map)
+            img = pyglet.image.load(material.diffuse_map)
+            self.diffuse_map = img.get_texture()
         else:
             self.diffuse_map = utils.create_white_tex()
 
         # Set ambient map
         if material.ambient_map:
-            self.ambient_map = pyglet.resource.image(material.ambient_map)
+            img = pyglet.image.load(material.ambient_map)
+            self.ambient_map = img.get_texture()
         else:
             self.ambient_map = utils.create_white_tex()
 
         # Set specular map
         if material.specular_map:
-            self.specular_map = pyglet.resource.image(material.specular_map)
+            img = pyglet.image.load(material.specular_map)
+            self.specular_map = img.get_texture()
         else:
             self.specular_map = utils.create_black_tex()
 
