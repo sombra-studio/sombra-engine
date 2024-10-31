@@ -31,21 +31,21 @@ in vec3 frag_normal;
 out vec4 final_color;
 
 vec3 calculate_normal_from_bump() {
-    float lod_scale = textureQueryLod(bump_map).y;
+    float lod_scale = textureQueryLod(bump_map, frag_tex_coords).y;
     float u_dist_for_pixel = 1.0 / (textureSize(bump_map, 0).x * lod_scale);
     float v_dist_for_pixel = 1.0 / (textureSize(bump_map, 0).y * lod_scale);
     float height_left = texture(
         bump_map, frag_tex_coords + vec2(-1.0 * u_dist_for_pixel, 0.0)
-    );
+    ).r;
     float height_right = texture(
         bump_map, frag_tex_coords + vec2(1.0 * u_dist_for_pixel, 0.0)
-    );
+    ).r;
     float height_down = texture(
         bump_map, frag_tex_coords + vec2(0.0, -1.0 * v_dist_for_pixel)
-    );
+    ).r;
     float height_up = texture(
         bump_map, frag_tex_coords + vec2(0.0, 1.0 * v_dist_for_pixel)
-    );
+    ).r;
     float dx = (height_right - height_left) * material.bump_scale;
     float dy = (height_up - height_down) * material.bump_scale;
     vec3 normal = vec3(dx, dy, 1.0);
