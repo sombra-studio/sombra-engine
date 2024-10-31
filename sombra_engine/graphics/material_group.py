@@ -39,6 +39,13 @@ class MaterialGroup(Group):
         else:
             self.specular_map = utils.create_black_tex()
 
+        # Set bump map
+        if material.bump_map:
+            img = pyglet.image.load(material.bump_map)
+            self.bump_map = img.get_texture()
+        else:
+            self.bump_map = utils.create_black_tex()
+
     def set_state(self):
         self.program.use()
         glActiveTexture(GL_TEXTURE0)
@@ -47,11 +54,14 @@ class MaterialGroup(Group):
         glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
+        glActiveTexture(GL_TEXTURE3)
+        glBindTexture(self.bump_map.target, self.bump_map.id)
         self.program['material.ambient'] = self.material.ambient
         self.program['material.diffuse'] = self.material.diffuse
         self.program['material.specular'] = self.material.specular
         self.program['material.specular_exponent'] = \
             self.material.specular_exponent
+        self.program['material.bump_scale'] = self.material.bump_scale
         self.program['model'] = self.matrix
 
     def unset_state(self):

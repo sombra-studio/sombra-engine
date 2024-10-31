@@ -11,6 +11,7 @@ class Material:
         specular: Vec3 = Vec3(1.0, 1.0, 1.0),
         specular_exponent: float = 0.0,
         ior: float = 1.0,
+        bump_scale = 0.1,
         ambient_map: str = "",
         diffuse_map: str = "",
         specular_map: str = "",
@@ -23,9 +24,11 @@ class Material:
         self.specular = specular
         self.specular_exponent = specular_exponent
         self.ior = ior
+        self.bump_scale = bump_scale
         self.ambient_map = ambient_map
         self.diffuse_map = diffuse_map
         self.specular_map = specular_map
+        self.bump_map = bump_map
 
     def __hash__(self):
         return hash((self.material_id, self.name))
@@ -42,5 +45,6 @@ class Material:
             self.ior == other.ior and
             self.ambient_map == other.ambient_map and
             self.diffuse_map == other.diffuse_map and
-            self.specular_map == other.specular_map
+            self.specular_map == other.specular_map and
+            self.bump_map == other.bump_map
         )

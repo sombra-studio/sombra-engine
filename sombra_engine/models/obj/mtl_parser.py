@@ -20,6 +20,7 @@ class MTLParser:
             'map_Kd': self.set_diffuse_map,
             'map_Ks': self.set_specular_map,
             'map_bump': self.set_bump_map,
+            'map_Bump': self.set_bump_map,
             'bump': self.set_bump_map
         }
         self.current_path = None
