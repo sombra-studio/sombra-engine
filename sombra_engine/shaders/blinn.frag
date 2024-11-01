@@ -11,6 +11,7 @@ struct Material {
     vec3 specular;
     float specular_exponent;
     float bump_scale;
+    bool has_bump_map;
 };
 
 uniform Material material;
@@ -26,7 +27,7 @@ uniform vec3 eye;
 in vec3 frag_pos;
 in vec2 frag_tex_coords;
 in vec3 frag_normal;
-
+in mat3 TBN;
 
 out vec4 final_color;
 
@@ -56,11 +57,14 @@ void main() {
     vec3 ambient = material.ambient * texture(ambient_map, frag_tex_coords).rgb;
 
     // Calculate normal
-
+    vec3 norm = normalize(frag_normal);
+    if (material.has_bump_map) {
+        norm = calculate_normal_from_bump();
+        norm = normalize(TBN * norm);
+    }
 
     // Calculate diffuse
     vec3 l = normalize(light.position - frag_pos);
-    vec3 norm = normalize(frag_normal);
     float lambert = clamp(dot(norm, l), 0.0, 1.0);
     vec3 diffuse = material.diffuse * texture(diffuse_map, frag_tex_coords).rgb;
 

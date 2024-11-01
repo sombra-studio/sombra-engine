@@ -62,6 +62,7 @@ class MaterialGroup(Group):
         self.program['material.specular_exponent'] = \
             self.material.specular_exponent
         self.program['material.bump_scale'] = self.material.bump_scale
+        self.program['material.has_bump_map'] = self.material.has_bump_map
         self.program['model'] = self.matrix
 
     def unset_state(self):
