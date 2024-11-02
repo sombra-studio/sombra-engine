@@ -2,7 +2,7 @@ from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
-from pyglet.math import Vec3
+from pyglet.math import Vec4
 
 
 from sombra_engine.graphics import WireframeGroup
@@ -16,16 +16,16 @@ class Wireframe:
         vertex_shader: Shader,
         batch: Batch = pyglet.graphics.get_default_batch(),
         group: Group = None,
-        color: Vec3 = Vec3(1.0, 1.0, 1.0)
+        color: Vec4 = Vec4(1.0, 1.0, 1.0, 1.0)
     ):
         self.mesh = mesh
         self.vertex_shader = vertex_shader
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
-        with open('sombra_engine/shaders/solid.frag') as f:
+        with open('sombra_engine/shaders/wireframe.frag') as f:
             fragment_shader = Shader(f.read(), 'fragment')
         self.program = ShaderProgram(vertex_shader, fragment_shader)
-        self.program['material.diffuse'] = color
+        self.program['color'] = color
         self.vertex_lists = self.create_vertex_lists()
 
     def create_vertex_lists(self) -> list[VertexList]:

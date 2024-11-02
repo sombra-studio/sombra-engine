@@ -6,7 +6,6 @@ import pyglet
 
 
 from sombra_engine.camera import FPSCamera
-# from sombra_engine.debug import Gizmo
 from sombra_engine.models import Model, Wireframe
 from sombra_engine.models.obj import OBJLoader
 from sombra_engine.scene import Scene
@@ -19,7 +18,6 @@ camera = FPSCamera(
 batch = pyglet.graphics.Batch()
 model:Model|None = None
 wf:Wireframe|None = None
-# gizmo = Gizmo(camera)
 
 
 def on_key_press(symbol, mod):
@@ -48,30 +46,31 @@ def main():
     global model, wf
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    with open('sombra_engine/shaders/blinn.frag') as f:
+    # with open('sombra_engine/shaders/blinn.frag') as f:
     # with open('sombra_engine/shaders/lambert.frag') as f:
     # with open('sombra_engine/shaders/solid.frag') as f:
     # with open('sombra_engine/shaders/normals.frag') as f:
+    with open('sombra_engine/shaders/normals_from_bump.frag') as f:
     # with open('sombra_engine/shaders/specular.frag') as f:
         frag_shader = Shader(f.read(), 'fragment')
     program = ShaderProgram(vert_shader, frag_shader)
 
-    scene = Scene()
-    scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
-    program['light.position'] = scene.lights[0].position
-    program['light.color'] = scene.lights[0].color
-    program['eye'] = camera.position
+    # scene = Scene()
+    # scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
+    # program['light.position'] = scene.lights[0].position
+    # program['light.color'] = scene.lights[0].color
+    # program['eye'] = camera.position
 
-    # model_group = Group()
-    # model_group.visible = False
+    model_group = pyglet.graphics.Group()
+    model_group.visible = False
     model = OBJLoader.load(
-        # "tests/data/ancient_house.obj", "House",
-        # group=model_group
-        "tests/data/yoda/yoda.obj", "Yoda",
+        "tests/data/ancient_house.obj", "House",
+        # "tests/data/yoda/yoda.obj", "Yoda",
+        group=model_group,
         program=program, batch=batch
     )
     print(f"object {model.name} loaded")
-    # wf = Wireframe(model.meshes[0], vert_shader, batch)
+    wf = Wireframe(model.meshes[0], vert_shader, batch)
     window.push_handlers(on_key_press)
 
     # pyglet.clock.schedule_interval(update, 1 / 60)
