@@ -2,7 +2,7 @@ from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
-from pyglet.math import Vec3
+from pyglet.math import Vec2, Vec3
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
@@ -36,6 +36,55 @@ class Mesh(SceneObject):
         self.material_groups = self.create_material_groups()
         self.vertex_lists = self.create_vertex_lists()
 
+    def calculate_normals(self):
+        """
+        Calculate the normals for every vertex and the tangent vector.
+        """
+        for vertex_group in self.vertex_groups.values():
+            for triangle in vertex_group.triangles:
+                a = triangle.vertices[0]
+                b = triangle.vertices[1]
+                c = triangle.vertices[2]
+                # Formulas from:
+                #   https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+                edge_1: Vec3 = b.position - a.position
+                edge_2: Vec3 = c.position - a.position
+                delta_uv1: Vec2 = b.tex_coords - a.tex_coords
+                delta_uv2: Vec2 = c.tex_coords - a.tex_coords
+                inverse_scalar = (
+                    delta_uv1.x * delta_uv2.y - delta_uv2.x * delta_uv1.y
+                )
+                if inverse_scalar == 0:
+                    continue
+                f: float = 1.0 / inverse_scalar
+
+                tangent_x: float = f * (
+                    delta_uv2.y * edge_1.x - delta_uv1.y * edge_2.x
+                )
+                tangent_y: float = f * (
+                    delta_uv2.y * edge_1.y - delta_uv1.y * edge_2.y
+                )
+                tangent_z: float = f * (
+                    delta_uv2.y * edge_1.z - delta_uv1.y * edge_2.z
+
+                )
+                tangent: Vec3 = Vec3(tangent_x, tangent_y, tangent_z)
+
+                # bitangent: Vec3 = Vec3()
+                # bitangent.x = f * (
+                #     -delta_uv2.x * edge_1.x + delta_uv1.x * edge_2.x
+                # )
+                # bitangent.y = f * (
+                #     -delta_uv2.x * edge_1.y + delta_uv1.x * edge_2.y
+                # )
+                # bitangent.z = f * (
+                #     -delta_uv2.x * edge_1.z + delta_uv1.x * edge_2.z
+                # )
+
+                a.tangent = tangent
+                b.tangent = tangent
+                c.tangent = tangent
+
     # Create methods
     # -------------------------------------------------------------------------
     def create_material_groups(self) -> dict[str, MaterialGroup]:
@@ -58,19 +107,24 @@ class Mesh(SceneObject):
             list[VertexList]: The list with the newly created vertex
                 lists.
         """
+        # first calculate normals
+        self.calculate_normals()
+
         vlists = []
 
         for vg_name, vg in self.vertex_groups.items():
             (
-                position_list, tex_coords_list, normal_list
+                position_list, normal_list, tangent_list, tex_coords_list
             ) = self.get_lists_for_vertex_group(vg_name)
             material_group = self.material_groups[vg.material.name]
             vl = self.program.vertex_list(
                 len(vg.triangles) * 3, self.mode,
                 batch=self.batch, group=material_group,
                 position=('f', position_list),
-                tex_coords=('f', tex_coords_list),
-                normal=('f', normal_list)
+                normal=('f', normal_list),
+                tangent=('f', tangent_list),
+                tex_coords=('f', tex_coords_list)
+
             )
             vlists.append(vl)
         return vlists
@@ -110,7 +164,7 @@ class Mesh(SceneObject):
             vl.draw(self.mode)
 
     def get_lists_for_vertex_group(self, vertex_group_name: str) -> tuple[
-        list[float], list[float], list[float]
+        list[float], list[float], list[float], list[float]
     ]:
         if vertex_group_name not in self.vertex_groups:
             raise KeyError(
@@ -118,11 +172,13 @@ class Mesh(SceneObject):
                 f"mesh {self.name}"
             )
         position_list = []
-        tex_coords_list = []
         normal_list = []
+        tangent_list = []
+        tex_coords_list = []
         for triangle in self.vertex_groups[vertex_group_name].triangles:
             for v in triangle.vertices:
                 position_list += [v.position.x, v.position.y, v.position.z]
-                tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
                 normal_list += [v.normal.x, v.normal.y, v.normal.z]
-        return position_list, tex_coords_list, normal_list
+                tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
+                tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
+        return position_list, normal_list, tangent_list, tex_coords_list

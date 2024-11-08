@@ -61,12 +61,12 @@ def main():
     # program['light.color'] = scene.lights[0].color
     # program['eye'] = camera.position
 
-    model_group = pyglet.graphics.Group()
-    model_group.visible = False
+    # model_group = pyglet.graphics.Group()
+    # model_group.visible = False
     model = OBJLoader.load(
-        "tests/data/ancient_house.obj", "House",
-        # "tests/data/yoda/yoda.obj", "Yoda",
-        group=model_group,
+        # "tests/data/ancient_house.obj", "House",
+        "tests/data/yoda/yoda.obj", "Yoda",
+        # group=model_group,
         program=program, batch=batch
     )
     print(f"object {model.name} loaded")
