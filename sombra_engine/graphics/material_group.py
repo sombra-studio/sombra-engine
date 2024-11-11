@@ -56,11 +56,11 @@ class MaterialGroup(Group):
         glBindTexture(self.specular_map.target, self.specular_map.id)
         glActiveTexture(GL_TEXTURE3)
         glBindTexture(self.bump_map.target, self.bump_map.id)
-        # self.program['material.ambient'] = self.material.ambient
-        # self.program['material.diffuse'] = self.material.diffuse
-        # self.program['material.specular'] = self.material.specular
-        # self.program['material.specular_exponent'] = \
-        #     self.material.specular_exponent
+        self.program['material.ambient'] = self.material.ambient
+        self.program['material.diffuse'] = self.material.diffuse
+        self.program['material.specular'] = self.material.specular
+        self.program['material.specular_exponent'] = \
+            self.material.specular_exponent
         self.program['material.bump_scale'] = self.material.bump_scale
         self.program['material.has_bump_map'] = self.material.has_bump_map
         self.program['model'] = self.matrix

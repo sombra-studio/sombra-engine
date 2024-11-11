@@ -6,7 +6,7 @@ from pyglet.math import Vec2, Vec3
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
-    Material, SceneObject, Transform, VertexGroup
+    Material, SceneObject, Transform, Vertex, VertexGroup
 )
 
 
@@ -36,15 +36,29 @@ class Mesh(SceneObject):
         self.material_groups = self.create_material_groups()
         self.vertex_lists = self.create_vertex_lists()
 
+    def check_tex_coords(self, a: Vertex, b: Vertex, c: Vertex):
+        empty: Vec2 = Vec2()
+        if (
+            a.tex_coords == empty and
+            b.tex_coords == empty and
+            c.tex_coords == empty
+        ):
+            # Assign arbitrary texture coordinates when not defined
+            a.tex_coords = Vec2(0.0, 1.0)
+            b.tex_coords = Vec2(0.0, 0.0)
+            c.tex_coords = Vec2(1.0, 0.0)
+
     def calculate_normals(self):
         """
-        Calculate the normals for every vertex and the tangent vector.
+        Calculate normal and tangent vectors for every vertex.
+        Also define texture coordinates if they are not defined.
         """
         for vertex_group in self.vertex_groups.values():
             for triangle in vertex_group.triangles:
                 a = triangle.vertices[0]
                 b = triangle.vertices[1]
                 c = triangle.vertices[2]
+                self.check_tex_coords(a, b, c)
                 # Formulas from:
                 #   https://learnopengl.com/Advanced-Lighting/Normal-Mapping
                 edge_1: Vec3 = b.position - a.position
@@ -66,7 +80,6 @@ class Mesh(SceneObject):
                 )
                 tangent_z: float = f * (
                     delta_uv2.y * edge_1.z - delta_uv1.y * edge_2.z
-
                 )
                 tangent: Vec3 = Vec3(tangent_x, tangent_y, tangent_z)
 
