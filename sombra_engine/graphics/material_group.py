@@ -24,6 +24,8 @@ class MaterialGroup(Group):
             self.diffuse_map = img.get_texture()
         else:
             self.diffuse_map = utils.create_white_tex()
+        glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
+        glGenerateMipmap(self.diffuse_map.target)
 
         # Set ambient map
         if material.ambient_map:
@@ -31,6 +33,8 @@ class MaterialGroup(Group):
             self.ambient_map = img.get_texture()
         else:
             self.ambient_map = utils.create_white_tex()
+        glBindTexture(self.ambient_map.target, self.ambient_map.id)
+        glGenerateMipmap(self.ambient_map.target)
 
         # Set specular map
         if material.specular_map:
@@ -38,6 +42,8 @@ class MaterialGroup(Group):
             self.specular_map = img.get_texture()
         else:
             self.specular_map = utils.create_black_tex()
+        glBindTexture(self.specular_map.target, self.specular_map.id)
+        glGenerateMipmap(self.specular_map.target)
 
         # Set bump map
         if material.bump_map:

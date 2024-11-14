@@ -32,9 +32,8 @@ in mat3 TBN;
 out vec4 final_color;
 
 vec3 calculate_normal_from_bump() {
-    float lod_scale = textureQueryLod(bump_map, frag_tex_coords).y;
-    float u_dist_for_pixel = 1.0 / (textureSize(bump_map, 0).x * lod_scale);
-    float v_dist_for_pixel = 1.0 / (textureSize(bump_map, 0).y * lod_scale);
+    float u_dist_for_pixel = 1.0 / textureSize(bump_map, 0).x;
+    float v_dist_for_pixel = 1.0 / textureSize(bump_map, 0).y;
     float height_left = texture(
         bump_map, frag_tex_coords + vec2(-1.0 * u_dist_for_pixel, 0.0)
     ).r;
