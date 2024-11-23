@@ -81,7 +81,9 @@ void main() {
     vec3 specular_intensity = Ks * pow(spec_factor, material.specular_exponent);
 
     vec3 color = light.color * (
-        ambient * diffuse + lambert * diffuse + specular_intensity
+        ambient * diffuse + lambert * diffuse * (
+            vec3(1.0, 1.0, 1.0) - material.ambient
+        ) + specular_intensity
     );
     vec3 result = clamp(color, 0.0, 1.0);
     final_color = vec4(result, 1.0);

@@ -46,7 +46,8 @@ def main():
     global model, wf
     with open('sombra_engine/shaders/default.vert') as f:
         vert_shader = Shader(f.read(), 'vertex')
-    with open('sombra_engine/shaders/blinn.frag') as f:
+    with open('sombra_engine/shaders/blinn_barycentric.frag') as f:
+    # with open('sombra_engine/shaders/blinn.frag') as f:
     # with open('sombra_engine/shaders/lambert.frag') as f:
     # with open('sombra_engine/shaders/solid.frag') as f:
     # with open('sombra_engine/shaders/normals.frag') as f:
@@ -59,13 +60,14 @@ def main():
     scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
     program['light.position'] = scene.lights[0].position
     program['light.color'] = scene.lights[0].color
+
     program['eye'] = camera.position
 
     # model_group = pyglet.graphics.Group()
     # model_group.visible = False
     model = OBJLoader.load(
-        "tests/data/ancient_house.obj", "House",
-        # "tests/data/yoda/yoda.obj", "Yoda",
+        # "tests/data/ancient_house.obj", "House",
+        "tests/data/yoda/yoda.obj", "Yoda",
         # group=model_group,
         program=program, batch=batch
     )
@@ -73,7 +75,7 @@ def main():
     wf = Wireframe(model.meshes[0], vert_shader, batch)
     # window.push_handlers(on_key_press)
 
-    # pyglet.clock.schedule_interval(update, 1 / 60)
+    pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()
 
 
