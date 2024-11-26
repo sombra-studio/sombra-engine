@@ -16,8 +16,8 @@ camera = FPSCamera(
     window, position=Vec3(0.0, 0.0, -15.0), pitch=90, yaw=90
 )
 batch = pyglet.graphics.Batch()
-model:Model|None = None
-wf:Wireframe|None = None
+model: Model | None = None
+wf: Wireframe | None = None
 
 
 # def on_key_press(symbol, mod):
@@ -73,6 +73,7 @@ def main():
     )
     print(f"object {model.name} loaded")
     wf = Wireframe(model.meshes[0], vert_shader, batch)
+
     # window.push_handlers(on_key_press)
 
     # pyglet.clock.schedule_interval(update, 1 / 60)
