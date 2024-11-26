@@ -6,7 +6,6 @@ layout(binding = 2) uniform sampler2D specular_map;
 layout(binding = 3) uniform sampler2D bump_map;
 
 struct Material {
-    vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     float specular_exponent;
@@ -16,6 +15,9 @@ struct Material {
 };
 
 uniform Material material;
+/* For barycentric shading we will have 20% of the color intensity given by the
+   ambient */
+const float ambient_alpha = 0.2;
 
 struct Light {
     vec3 position;
@@ -54,7 +56,7 @@ vec3 calculate_normal_from_bump() {
 }
 
 void main() {
-    vec3 ambient = material.ambient * texture(ambient_map, frag_tex_coords).rgb;
+    vec3 ambient = ambient_alpha * texture(ambient_map, frag_tex_coords).rgb;
 
     // Calculate normal
     vec3 norm = normalize(frag_normal);
@@ -81,9 +83,8 @@ void main() {
     vec3 specular_intensity = Ks * pow(spec_factor, material.specular_exponent);
 
     vec3 color = light.color * (
-        ambient * diffuse + lambert * diffuse * (
-            vec3(1.0, 1.0, 1.0) - material.ambient
-        ) + specular_intensity
+        ambient * diffuse + (1.0 - ambient_alpha) * lambert * diffuse +
+        specular_intensity
     );
     vec3 result = clamp(color, 0.0, 1.0);
     final_color = vec4(result, 1.0);
