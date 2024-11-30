@@ -1,3 +1,4 @@
+import pyglet
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram

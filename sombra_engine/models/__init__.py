@@ -1,6 +1,6 @@
-from .mesh import Mesh
-from .model import Model
-from .wireframe import Wireframe
+from sombra_engine.models.mesh import Mesh
+from sombra_engine.models.model import Model
+from sombra_engine.models.wireframe import Wireframe
 # IMPORTANT DON'T MOVE THE IMPORT OF OBJ, IT NEEDS THIS ORDER BECAUSE IT USES
 # MESH AND MODEL
-from . import obj
+from sombra_engine.models import obj
