@@ -6,6 +6,7 @@ import pyglet
 
 
 from sombra_engine.camera import FPSCamera
+from sombra_engine.debug.gizmo import Gizmo
 from sombra_engine.models import Model, Wireframe
 from sombra_engine.models.obj import OBJLoader
 from sombra_engine.scene import Scene
@@ -18,6 +19,7 @@ camera = FPSCamera(
 batch = pyglet.graphics.Batch()
 model: Model | None = None
 wf: Wireframe | None = None
+gizmo = Gizmo()
 
 
 # def on_key_press(symbol, mod):
@@ -33,6 +35,7 @@ def on_draw():
     glEnable(GL_CULL_FACE)
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LESS)
+    gizmo.draw()
     batch.draw()
 
 

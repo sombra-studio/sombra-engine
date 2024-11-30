@@ -36,7 +36,8 @@ class Mesh(SceneObject):
         self.material_groups = self.create_material_groups()
         self.vertex_lists = self.create_vertex_lists()
 
-    def check_tex_coords(self, a: Vertex, b: Vertex, c: Vertex):
+    @staticmethod
+    def check_tex_coords(a: Vertex, b: Vertex, c: Vertex):
         empty: Vec2 = Vec2()
         if (
             a.tex_coords == empty and
@@ -82,7 +83,8 @@ class Mesh(SceneObject):
                     delta_uv2.y * edge_1.z - delta_uv1.y * edge_2.z
                 )
                 tangent: Vec3 = Vec3(tangent_x, tangent_y, tangent_z)
-
+                # tangent.normalize()
+                #
                 # bitangent: Vec3 = Vec3()
                 # bitangent.x = f * (
                 #     -delta_uv2.x * edge_1.x + delta_uv1.x * edge_2.x
@@ -93,6 +95,7 @@ class Mesh(SceneObject):
                 # bitangent.z = f * (
                 #     -delta_uv2.x * edge_1.z + delta_uv1.x * edge_2.z
                 # )
+                # bitangent.normalize()
 
                 a.tangent = tangent
                 b.tangent = tangent

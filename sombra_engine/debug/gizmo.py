@@ -2,12 +2,14 @@ import pyglet
 from pyglet.graphics.shader import Shader, ShaderProgram
 
 class Gizmo:
-    def __init__(self, size:float = 1.0):
-        vs = Shader("shaders/gizmo.vert", 'vertex')
-        fs = Shader("shaders/gizmo.frag", 'fragment')
-        program = ShaderProgram(vs, fs)
+    def __init__(self, size:float = 100.0):
+        with open("sombra_engine/shaders/gizmo.vert") as f:
+            vs = Shader(f.read(), 'vertex')
+        with open("sombra_engine/shaders/gizmo.frag") as f:
+            fs = Shader(f.read(), 'fragment')
+        self.program = ShaderProgram(vs, fs)
         self.mode = pyglet.gl.GL_LINES
-        self.vertex_list = program.vertex_list(
+        self.vertex_list = self.program.vertex_list(
             6, self.mode,
             position=(
                 'f', (

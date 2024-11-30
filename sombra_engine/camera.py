@@ -11,8 +11,8 @@ SENSITIVITY = 0.3
 class FPSCamera:
     def __init__(
         self, window,
-        position=Vec3(0, 0, 0),
-        target=Vec3(0, 0, -1),
+        position=Vec3(0, 0, -2),
+        target=Vec3(0, 0, 0),
         up=Vec3(0, 1, 0),
         pitch=130,
         yaw=-137
