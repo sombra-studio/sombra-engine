@@ -88,20 +88,7 @@ class Mesh(SceneObject):
                 tangent_z: float = f * (
                     delta_uv2.y * edge_1.z - delta_uv1.y * edge_2.z
                 )
-                tangent: Vec3 = Vec3(tangent_x, tangent_y, tangent_z)
-                # tangent.normalize()
-                #
-                # bitangent: Vec3 = Vec3()
-                # bitangent.x = f * (
-                #     -delta_uv2.x * edge_1.x + delta_uv1.x * edge_2.x
-                # )
-                # bitangent.y = f * (
-                #     -delta_uv2.x * edge_1.y + delta_uv1.x * edge_2.y
-                # )
-                # bitangent.z = f * (
-                #     -delta_uv2.x * edge_1.z + delta_uv1.x * edge_2.z
-                # )
-                # bitangent.normalize()
+                tangent = Vec3(tangent_x, tangent_y, tangent_z).normalize()
 
                 a.tangent = tangent
                 b.tangent = tangent
