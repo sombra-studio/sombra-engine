@@ -1,7 +1,7 @@
 import pyglet
 
 def create_color_tex(color: tuple[int, int, int, int]) -> pyglet.image.Texture:
-    color_pattern = pyglet.image.SolidColorImagePattern((color))
+    color_pattern = pyglet.image.SolidColorImagePattern(color)
     img = color_pattern.create_image(16, 16)
     return img.get_texture()
 
