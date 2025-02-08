@@ -1,5 +1,5 @@
 from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.math import Mat4, Vec2, Vec3
+from pyglet.math import Mat4, Vec3
 import unittest
 
 
@@ -9,7 +9,7 @@ from sombra_engine.primitives import Material
 
 class MTLTestCase(unittest.TestCase):
     def setUp(self):
-        self.filename = 'data/plane.mtl'
+        self.filename = 'tests/data/plane.mtl'
         self.materials = MTLLoader.load(self.filename)
 
     def test_mtl_loader(self):
@@ -50,10 +50,10 @@ class MTLTestCase(unittest.TestCase):
 
 class OBJTestCase(unittest.TestCase):
     def setUp(self):
-        self.filename = 'data/plane.obj'
-        with open('data/test.vert') as f:
+        self.filename = 'tests/data/plane.obj'
+        with open('tests/data/test.vert') as f:
             self.vert_shader = Shader(f.read(), 'vertex')
-        with open('data/test.frag') as f:
+        with open('tests/data/test.frag') as f:
             self.frag_shader = Shader(f.read(), 'fragment')
         self.program = ShaderProgram(self.vert_shader, self.frag_shader)
         self.program['mv'] = Mat4()
@@ -65,23 +65,30 @@ class OBJTestCase(unittest.TestCase):
             1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
             1.0, 0.0, -1.0, -1.0, 0.0, -1.0
         ]
-        tex_coords = [
-            1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
-        ]
         normal = [
             -0.0, 1.0, -0.0, -0.0, 1.0, -0.0, -0.0, 1.0, -0.0, -0.0, 1.0, -0.0,
             -0.0, 1.0, -0.0, -0.0, 1.0, -0.0
         ]
+        tangent = [
+            2.0, 0.0, -0.0, 2.0, 0.0, -0.0, 2.0, 0.0, -0.0, 2.0, 0.0, 0.0, 2.0,
+            0.0, 0.0, 2.0, 0.0, 0.0
+        ]
+        tex_coords = [
+            1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0
+        ]
 
-        model = OBJLoader.load(self.filename, 'test', self.program)
+        model = OBJLoader.load(
+            self.filename, 'test', program=self.program
+        )
         self.assertEqual(model.name, name)
         plane_mesh = model.meshes[0]
-        position_list, tex_coords_list, normal_list = (
+        position_list, normal_list, tangent_list, tex_coords_list  = (
             plane_mesh.get_lists_for_vertex_group('unnamed vertex group')
         )
         self.assertEqual(position_list, vertices)
-        self.assertEqual(tex_coords_list, tex_coords)
         self.assertEqual(normal_list, normal)
+        self.assertEqual(tangent_list, tangent)
+        self.assertEqual(tex_coords_list, tex_coords)
 
 
 if __name__ == '__main__':

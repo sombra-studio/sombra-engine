@@ -19,7 +19,7 @@ camera = FPSCamera(
 batch = pyglet.graphics.Batch()
 model: Model | None = None
 wf: Wireframe | None = None
-gizmo = Gizmo()
+gizmo = Gizmo(batch=batch)
 
 
 # def on_key_press(symbol, mod):
@@ -35,7 +35,6 @@ def on_draw():
     glEnable(GL_CULL_FACE)
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LESS)
-    gizmo.draw()
     batch.draw()
 
 
@@ -75,7 +74,7 @@ def main():
         program=program, batch=batch
     )
     print(f"object {model.name} loaded")
-    wf = Wireframe(model.meshes[0], vert_shader, batch)
+    wf = Wireframe(model.meshes[0], vert_shader, batch=batch)
 
     # window.push_handlers(on_key_press)
 
