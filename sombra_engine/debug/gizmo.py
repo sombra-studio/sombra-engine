@@ -1,6 +1,7 @@
 import pyglet
 from pyglet.graphics.shader import Shader, ShaderProgram
 
+
 class Gizmo:
     def __init__(
         self,
