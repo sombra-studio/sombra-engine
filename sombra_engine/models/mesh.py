@@ -1,6 +1,6 @@
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Vec2, Vec3
 
@@ -30,7 +30,13 @@ class Mesh(SceneObject):
         self.mode = mode
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
-        self.program = program or pyglet.graphics.get_default_shader()
+        if not program:
+            with open('sombra_engine/shaders/default.vert') as f:
+                vert_shader = Shader(f.read(), 'vertex')
+            with open('sombra_engine/shaders/blinn.frag') as f:
+                frag_shader = Shader(f.read(), 'fragment')
+            program = ShaderProgram(vert_shader, frag_shader)
+        self.program = program
         self.parent = parent
 
         self.material_groups = self.create_material_groups()

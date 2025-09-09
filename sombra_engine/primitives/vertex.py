@@ -9,7 +9,7 @@ class Vertex:
         tangent: Vec3 = Vec3(),
         tex_coords: Vec2 = Vec2(),
         bones_ids: tuple[int, int, int, int] = (0, 0, 0, 0),
-        weights: Vec4 = Vec4(0.0)
+        weights: Vec4 = Vec4(1.0)
     ):
         self.position = position
         self.normal = normal
