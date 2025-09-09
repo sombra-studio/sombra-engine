@@ -1,7 +1,9 @@
 from pyglet.gl import GL_TRIANGLES
-from pyglet.graphics import Batch, Group, ShaderProgram, VertexList
+from pyglet.graphics import Batch, Group
+from pyglet.graphics.shader import Shader, ShaderProgram
+from pyglet.graphics.vertexdomain import VertexList
 
-
+from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, VertexGroup
@@ -31,6 +33,13 @@ class SkeletalMesh(Mesh):
         transform: Transform = Transform(),
         parent: SceneObject = None
     ):
+        if not program:
+            with open('sombra_engine/shaders/skeletal.vert') as f:
+                vert_shader = Shader(f.read(), 'vertex')
+            with open('sombra_engine/shaders/blinn.frag') as f:
+            # with open('sombra_engine/shaders/solid.frag') as f:
+                frag_shader = Shader(f.read(), 'fragment')
+            program = ShaderProgram(vert_shader, frag_shader)
         super().__init__(
             name=name,
             vertex_groups=vertex_groups,
@@ -43,6 +52,16 @@ class SkeletalMesh(Mesh):
             parent=parent
         )
         self.root_bone = root_bone
+
+    def create_material_groups(self) -> dict[str, SkeletalMaterialGroup]:
+        groups = {}
+        for name, material in self.materials.items():
+            new_group = SkeletalMaterialGroup(
+                material, self.program, self.get_matrix(),
+                order=0, parent=self.group
+            )
+            groups[name] = new_group
+        return groups
 
     def create_vertex_lists(self) -> list[VertexList]:
         vlists = []
@@ -60,7 +79,7 @@ class SkeletalMesh(Mesh):
                 normal=('f', normal_list),
                 tangent=('f', tangent_list),
                 tex_coords=('f', tex_coords_list),
-                bones_isds=('i', bones_ids_list),
+                bones_ids=('i', bones_ids_list),
                 weights=('f', weights_list)
             )
             vlists.append(vl)

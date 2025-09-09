@@ -31,8 +31,8 @@ class OBJLoader:
                     vg_data['name'], vg_data['triangles'], vg_data['material']
                 )
             # Create Mesh
-            new_mesh = Mesh(
-            # new_mesh = SkeletalMesh(
+            # new_mesh = Mesh(
+            new_mesh = SkeletalMesh(
                 mesh_data['name'],
                 vertex_groups=vertex_groups,
                 materials=obj_parser.materials,

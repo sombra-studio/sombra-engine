@@ -1,2 +1,3 @@
 from .material_group import MaterialGroup
+from .skeletal_material_group import SkeletalMaterialGroup
 from .wireframe_group import WireframeGroup

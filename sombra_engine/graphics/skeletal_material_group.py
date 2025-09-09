@@ -1,4 +1,5 @@
-from pyglet.graphics import Group, ShaderProgram
+from pyglet.graphics import Group
+from pyglet.graphics.shader import ShaderProgram
 from pyglet.math import Mat4
 
 
@@ -21,6 +22,13 @@ class SkeletalMaterialGroup(MaterialGroup):
 
     def set_state(self):
         super().set_state()
-        self.program['bones_transforms'] = [
-            Mat4() for _ in range(100)
-        ]
+        transforms_list = []
+        for i in range(100):
+            # transforms_list += (
+            #     1, 0, 0, 0,
+            #     0, 1, 0, 0,
+            #     0, 0, 1, 0,
+            #     0, 0, 0, 1
+            # )
+            transforms_list.append(Mat4())
+        self.program['bones_transforms'] = transforms_list
