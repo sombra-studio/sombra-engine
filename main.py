@@ -64,9 +64,9 @@ def main():
     # model_group = pyglet.graphics.Group()
     # model_group.visible = False
     model = OBJLoader.load(
-        # "tests/data/ancient_house.obj", "House",
-        "tests/data/yoda/yoda.obj", "Yoda",
-        scale=0.001,
+        "tests/data/ancient_house.obj", "House",
+        # "tests/data/yoda/yoda.obj", "Yoda",
+        # scale=0.001,
         # group=model_group,
         # program=program,
         batch=batch
