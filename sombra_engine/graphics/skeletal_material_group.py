@@ -7,6 +7,9 @@ from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import Material
 
 
+MAX_BONES = 100
+
+
 class SkeletalMaterialGroup(MaterialGroup):
     def __init__(
         self, material: Material, program: ShaderProgram, matrix: Mat4,
@@ -23,12 +26,6 @@ class SkeletalMaterialGroup(MaterialGroup):
     def set_state(self):
         super().set_state()
         transforms_list = []
-        for i in range(100):
-            # transforms_list += (
-            #     1, 0, 0, 0,
-            #     0, 1, 0, 0,
-            #     0, 0, 1, 0,
-            #     0, 0, 0, 1
-            # )
+        for i in range(MAX_BONES):
             transforms_list.append(Mat4())
         self.program['bones_transforms'] = transforms_list
