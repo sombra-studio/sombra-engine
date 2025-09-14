@@ -14,12 +14,12 @@ from sombra_engine.scene import Scene
 
 window = pyglet.window.Window(caption="Sombra Engine")
 camera = FPSCamera(
-    window, position=Vec3(0.0, 0.0, -15.0), pitch=90, yaw=90
+    window, position=Vec3(0.0, 0.0, 15.0), pitch=90, yaw=-90
 )
 batch = pyglet.graphics.Batch()
 model: Model | None = None
 wf: Wireframe | None = None
-gizmo = Gizmo(batch=batch)
+gizmo = Gizmo(size=10.0, batch=batch)
 
 
 # def on_key_press(symbol, mod):
@@ -46,8 +46,8 @@ def update(dt: float):
 
 def main():
     global model, wf
-    # with open('sombra_engine/shaders/default.vert') as f:
-    #     vert_shader = Shader(f.read(), 'vertex')
+    with open('sombra_engine/shaders/default.vert') as f:
+       vert_shader = Shader(f.read(), 'vertex')
     # with open('sombra_engine/shaders/blinn_barycentric.frag') as f:
     # with open('sombra_engine/shaders/blinn.frag') as f:
     # with open('sombra_engine/shaders/lambert.frag') as f:
@@ -64,8 +64,8 @@ def main():
     # model_group = pyglet.graphics.Group()
     # model_group.visible = False
     model = OBJLoader.load(
-        "tests/data/ancient_house.obj", "House",
-        # "tests/data/yoda/yoda.obj", "Yoda",
+        # "tests/data/ancient_house.obj", "House",
+        "tests/data/yoda/yoda.obj", "Yoda",
         # scale=0.001,
         # group=model_group,
         # program=program,
@@ -77,7 +77,7 @@ def main():
 
     program['eye'] = camera.position
     print(f"object {model.name} loaded")
-    # wf = Wireframe(model.meshes[0], vert_shader, batch=batch)
+    wf = Wireframe(model.meshes[0], vert_shader, batch=batch)
 
     # window.push_handlers(on_key_press)
 

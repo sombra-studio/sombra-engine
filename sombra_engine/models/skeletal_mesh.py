@@ -3,11 +3,13 @@ from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
 
+
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, VertexGroup
 )
+from sombra_engine.animations import Pose
 
 
 class Bone:
@@ -115,3 +117,13 @@ class SkeletalMesh(Mesh):
             position_list, normal_list, tangent_list, tex_coords_list,
             bones_ids_list, weights_list
         )
+
+    def set_pose(self, pose: Pose):
+        bones_transforms = []
+        for transform in pose.bones_transforms:
+            bones_transforms.append(transform.get_matrix())
+
+        # This is not convenient because it has a copy of all the transforms
+        # for all material groups
+        for mg in self.material_groups.values():
+            mg.bones_transforms = bones_transforms

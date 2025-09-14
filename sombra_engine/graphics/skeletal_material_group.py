@@ -22,10 +22,11 @@ class SkeletalMaterialGroup(MaterialGroup):
             order=order,
             parent=parent
         )
+        self.bones_transforms = []
+        for i in range(MAX_BONES):
+            self.bones_transforms.append(Mat4())
+
 
     def set_state(self):
         super().set_state()
-        transforms_list = []
-        for i in range(MAX_BONES):
-            transforms_list.append(Mat4())
-        self.program['bones_transforms'] = transforms_list
+        self.program['bones_transforms'] = self.bones_transforms

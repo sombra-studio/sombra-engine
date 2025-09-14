@@ -14,12 +14,15 @@ class Wireframe:
     def __init__(
         self,
         mesh: Mesh,
-        vertex_shader: Shader,
-        batch: Batch = pyglet.graphics.get_default_batch(),
+        vertex_shader: Shader = None,
+        batch: Batch = None,
         group: Group = None,
         color: Vec4 = Vec4(1.0, 1.0, 1.0, 1.0)
     ):
         self.mesh = mesh
+        if not vertex_shader:
+            with open('sombra_engine/shaders/default.vert') as f:
+                vertex_shader = Shader(f.read(), 'vertex')
         self.vertex_shader = vertex_shader
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
