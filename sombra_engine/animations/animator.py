@@ -1,5 +1,6 @@
 from sombra_engine.animations import Animation, Pose
 from sombra_engine.models import SkeletalMesh
+from sombra_engine.primitives import Transform
 
 
 class Animator:
@@ -46,10 +47,10 @@ class Animator:
         bones_transforms = []
         n = len(prev_pose.bones_transforms)
         for i in range(n):
-            # TODO: Correctly interpolate between two mat4
-            transform = (
-                prev_pose.bones_transforms[i].get_matrix() +
-                next_pose.bones_transforms[i].get_matrix()
+            transform = Transform.interpolate(
+                prev_pose.bones_transforms[i],
+                next_pose.bones_transforms[i],
+                t
             )
             bones_transforms.append(transform)
         new_pose = Pose(bones_transforms)
