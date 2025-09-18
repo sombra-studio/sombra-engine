@@ -1,4 +1,7 @@
-from pyglet.math import Mat4, Vec3, Quaternion
+from pyglet.math import Mat4, Vec3
+
+
+from sombra_engine.utils import Quaternion
 
 
 class Transform:
@@ -27,13 +30,18 @@ class Transform:
         return final
 
     @staticmethod
-    def interpolate(a: 'Transform', b: 'Transform', t: float) -> 'Transform':
+    def interpolate(a: 'Transform', b: 'Transform', t: float) -> Mat4:
         new_translation = a.translation.lerp(b.translation, t)
 
         # Rotation
-        # TODO Define interpolated rotation
-        new_rotation = Vec3()
+        q_a = Quaternion.from_mat4(a.get_rotation_as_mat4())
+        q_b = Quaternion.from_mat4(b.get_rotation_as_mat4())
+        q_interpolated = q_a @ q_b
+        rotation = q_interpolated.to_mat4()
 
         new_scale = a.scale.lerp(b.scale, t)
 
-        return Transform(new_translation, new_rotation, new_scale)
+        scale = Mat4.from_scale(new_scale)
+        translation = Mat4.from_translation(new_translation)
+        final = scale @ translation @ rotation
+        return final

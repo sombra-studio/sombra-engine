@@ -1,4 +1,7 @@
-from sombra_engine.animations import Animation, Pose
+from pyglet.math import Mat4
+
+
+from sombra_engine.animations import Animation
 from sombra_engine.models import SkeletalMesh
 from sombra_engine.primitives import Transform
 
@@ -28,8 +31,8 @@ class Animator:
 
         # Get the poses in between
         t = self.time % self.keyframe_duration
-        interpolated_pose = self.interpolate(t)
-        self.mesh.set_pose(interpolated_pose)
+        bones_transforms = self.interpolate(t)
+        self.mesh.set_bones_transforms(bones_transforms)
 
     def pause(self):
         self.is_paused = True
@@ -37,7 +40,7 @@ class Animator:
     def play(self):
         self.is_paused = False
 
-    def interpolate(self, t: float) -> Pose:
+    def interpolate(self, t: float) -> list[Mat4]:
         idx = int(self.time // self.keyframe_duration)
         prev_pose = self.animation.keyframes[idx].pose
         next_idx = idx + 1 if idx < self.keyframes_count else 0
@@ -53,5 +56,4 @@ class Animator:
                 t
             )
             bones_transforms.append(transform)
-        new_pose = Pose(bones_transforms)
-        return new_pose
+        return bones_transforms

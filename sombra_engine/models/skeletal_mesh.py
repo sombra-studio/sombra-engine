@@ -2,14 +2,14 @@ from pyglet.gl import GL_TRIANGLES
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
+from pyglet.math import Mat4
 
-
+from sombra_engine.animations import Animator
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, VertexGroup
 )
-from sombra_engine.animations import Pose
 
 
 class Bone:
@@ -54,6 +54,7 @@ class SkeletalMesh(Mesh):
             parent=parent
         )
         self.root_bone = root_bone
+        self.animator = Animator(self)
 
     def create_material_groups(self) -> dict[str, SkeletalMaterialGroup]:
         groups = {}
@@ -118,12 +119,11 @@ class SkeletalMesh(Mesh):
             bones_ids_list, weights_list
         )
 
-    def set_pose(self, pose: Pose):
-        bones_transforms = []
-        for transform in pose.bones_transforms:
-            bones_transforms.append(transform.get_matrix())
-
+    def set_bones_transforms(self, bones_transforms: list[Mat4]):
         # This is not convenient because it has a copy of all the transforms
         # for all material groups
         for mg in self.material_groups.values():
             mg.bones_transforms = bones_transforms
+
+    def update(self, dt: float):
+        self.animator.update(dt)
