@@ -159,24 +159,23 @@ class Mesh(SceneObject):
             material_group.matrix = matrix
 
     def rotate_x(self, angle: float):
-        rot = self.transform.rotation
-        self.transform.rotation = Vec3(angle, rot.y, rot.z)
+        self.transform.rotation += Vec3(angle, 0.0, 0.0)
         self.update_matrix()
 
     def rotate_y(self, angle: float):
-        self.transform.rotation.y = angle
+        self.transform.rotation += Vec3(0.0, angle, 0.0)
         self.update_matrix()
 
     def rotate_z(self, angle: float):
-        self.transform.rotation.z = angle
+        self.transform.rotation += Vec3(0.0, 0.0, angle)
         self.update_matrix()
 
     def translate(self, vec: Vec3):
-        self.transform.translation = vec
+        self.transform.translation += vec
         self.update_matrix()
 
     def scale(self, vec: Vec3):
-        self.transform.scale = vec
+        self.transform.scale *= vec
         self.update_matrix()
 
     # -------------------------------------------------------------------------
