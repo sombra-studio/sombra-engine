@@ -4,7 +4,8 @@ from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Mat4
 
-from sombra_engine.animations import Animator
+
+from sombra_engine.animations import Animation
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
@@ -21,7 +22,6 @@ class Bone:
 
 
 class SkeletalMesh(Mesh):
-
     def __init__(
         self,
         name: str,
@@ -54,7 +54,11 @@ class SkeletalMesh(Mesh):
             parent=parent
         )
         self.root_bone = root_bone
-        self.animator = Animator(self)
+        self.time = 0.0
+        self.animation: Animation | None = None
+        self.is_paused = False
+        self.keyframes_count = 0
+        self.keyframe_duration = 0.0
 
     def create_material_groups(self) -> dict[str, SkeletalMaterialGroup]:
         groups = {}
@@ -125,5 +129,45 @@ class SkeletalMesh(Mesh):
         for mg in self.material_groups.values():
             mg.bones_transforms = bones_transforms
 
+    def load_animation(self, animation: Animation):
+        self.time = 0.0
+        self.animation = animation
+        self.keyframes_count = len(self.animation.keyframes)
+        self.keyframe_duration = self.animation.length / self.keyframes_count
+
     def update(self, dt: float):
-        self.animator.update(dt)
+        if not self.animation or self.is_paused:
+            return
+
+        self.time += dt
+        if self.time > self.animation.length:
+            self.time = self.time % self.animation.length
+
+        # Get the poses in between
+        t = self.time % self.keyframe_duration
+        bones_transforms = self.interpolate(t)
+        self.set_bones_transforms(bones_transforms)
+
+    def pause(self):
+        self.is_paused = True
+
+    def play(self):
+        self.is_paused = False
+
+    def interpolate(self, t: float) -> list[Mat4]:
+        idx = int(self.time // self.keyframe_duration)
+        prev_pose = self.animation.keyframes[idx].pose
+        next_idx = idx + 1 if idx + 1 < self.keyframes_count else 0
+        next_pose = self.animation.keyframes[next_idx].pose
+
+        # interpolate between the two poses
+        bones_transforms = []
+        n = len(prev_pose.bones_transforms)
+        for i in range(n):
+            transform = Transform.interpolate(
+                prev_pose.bones_transforms[i],
+                next_pose.bones_transforms[i],
+                t
+            )
+            bones_transforms.append(transform)
+        return bones_transforms
