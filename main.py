@@ -40,8 +40,8 @@ def on_draw():
 
 def update(dt: float):
     mesh = model.meshes[0]
-    rx = mesh.transform.rotation.x
-    mesh.rotate_x(rx + dt / 3)
+    mesh.rotate_y(dt / 3)
+    mesh.update(dt)
 
 
 def main():
@@ -81,7 +81,7 @@ def main():
 
     # window.push_handlers(on_key_press)
 
-    # pyglet.clock.schedule_interval(update, 1 / 60)
+    pyglet.clock.schedule_interval(update, 1 / 60)
     pyglet.app.run()
 
 

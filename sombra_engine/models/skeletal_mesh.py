@@ -14,10 +14,11 @@ from sombra_engine.primitives import (
 
 
 class Bone:
-    def __init__(self, idx: int, name: str, transform: Transform):
+    def __init__(self, idx: int, name: str, local_bind_transform: Mat4):
         self.idx = idx
         self.name = name
-        self.transform = transform
+        self.local_bind_transform = local_bind_transform
+        self.inverse_bind_transform = None
         self.children: list[Bone] = []
 
 
@@ -133,6 +134,7 @@ class SkeletalMesh(Mesh):
         self.time = 0.0
         self.animation = animation
         self.keyframes_count = len(self.animation.keyframes)
+        # Here we are using the same duration for every keyframe
         self.keyframe_duration = self.animation.length / self.keyframes_count
 
     def update(self, dt: float):
