@@ -1,37 +1,38 @@
 from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.math import Vec3
 import pyglet
+from pyglet.math import Vec3
 
-
-from sombra_engine.camera import FPSCamera
+from sombra_engine.app import App
 from sombra_engine.models.obj import OBJLoader
+from sombra_engine.scene import Scene
 
-
-window = pyglet.window.Window()
-camera = FPSCamera(
-    window, position=Vec3(0.0, 0.0, -15.0), pitch=90, yaw=90
-)
-batch = pyglet.graphics.Batch()
+app = App(is_debug=True)
 model = None
-
-
-@window.event
-def on_draw():
-    window.clear()
-    batch.draw()
 
 
 def main():
     global model
     with open('sombra_engine/shaders/default.vert') as f:
         vs = Shader(f.read(), 'vertex')
-    with open('sombra_engine/shaders/solid.frag') as f:
+    with open('sombra_engine/shaders/blinn.frag') as f:
         fs = Shader(f.read(), 'fragment')
     shader_program = ShaderProgram(vs, fs)
     model = OBJLoader.load(
         #"tests/data/shoe_box2.obj", "house", shader_program, batch
-        "tests/data/cube.obj", "house", shader_program, batch
+        filename="tests/data/cube.obj",
+        name="house",
+        program=shader_program,
+        batch=app.batch
     )
+    scene = Scene()
+    scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
+
+    program = model.meshes[0].program
+    program['light.position'] = scene.lights[0].position
+    program['light.color'] = scene.lights[0].color
+
+    program['eye'] = app.camera.position
+
     pyglet.app.run()
 
 
