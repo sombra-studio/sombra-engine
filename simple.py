@@ -19,7 +19,8 @@ def main():
     shader_program = ShaderProgram(vs, fs)
     model = OBJLoader.load(
         #"tests/data/shoe_box2.obj", "house", shader_program, batch
-        filename="tests/data/cube.obj",
+        #filename="tests/data/cube.obj",
+        filename="tests/data/yoda/yoda.obj",
         name="house",
         program=shader_program,
         batch=app.batch
@@ -33,7 +34,7 @@ def main():
 
     program['eye'] = app.camera.position
 
-    pyglet.app.run()
+    pyglet.app.run(1/120)
 
 
 if __name__ == '__main__':
