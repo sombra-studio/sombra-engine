@@ -20,7 +20,8 @@ def main():
     model = OBJLoader.load(
         #"tests/data/shoe_box2.obj", "house", shader_program, batch
         #filename="tests/data/cube.obj",
-        filename="tests/data/yoda/yoda.obj",
+        #filename="tests/data/yoda/yoda.obj",
+        filename="tests/data/shoe_box2.obj",
         name="house",
         program=shader_program,
         batch=app.batch
