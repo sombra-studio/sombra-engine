@@ -1,10 +1,12 @@
 from pyglet.event import EVENT_HANDLED
 from pyglet.gl import (
-    GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glDepthFunc, glDisable, glEnable
+    GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
+    glDisable, glEnable
 )
 from pyglet.graphics import Batch, Group
 from pyglet.math import Mat4, Vec3
-from pyglet.window import FPSDisplay, Window
+from pyglet.window import FPSDisplay, key, Window
+import pyglet
 
 
 from sombra_engine.camera import FPSCamera
@@ -17,7 +19,7 @@ class App(Window):
         self.is_debug = is_debug
         self.fps_display = FPSDisplay(self, color=(0, 127, 0, 127))
         self.camera = FPSCamera(
-            self, position=Vec3(0.0, 0.0, -15.0), pitch=90, yaw=90
+            self, position=Vec3(0.0, 0.0, 15.0), pitch=90, yaw=-90
         )
         self.batch = Batch()
         self.debug_group = Group()
@@ -42,6 +44,7 @@ class App(Window):
         self.view = temp_view
 
     def on_draw(self):
+        glClearColor(0.0, 0.0, 0.0, 1.0)
         self.clear()
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
@@ -52,3 +55,13 @@ class App(Window):
             # Use 2D UI here
             self.draw_2d_debug_ui()
         return EVENT_HANDLED
+
+    def on_key_press(self, symbol, mod):
+        handled = super().on_key_press(symbol, mod)
+        if not handled:
+            if mod & key.MOD_SHIFT and symbol == key.P:
+                pyglet.image.get_buffer_manager().get_color_buffer().save(
+                    'docs/screenshot.png'
+                )
+                handled = EVENT_HANDLED
+        return handled

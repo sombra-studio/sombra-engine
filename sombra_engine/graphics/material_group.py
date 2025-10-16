@@ -62,16 +62,31 @@ class MaterialGroup(Group):
         glBindTexture(self.specular_map.target, self.specular_map.id)
         glActiveTexture(GL_TEXTURE3)
         glBindTexture(self.bump_map.target, self.bump_map.id)
-        self.program['material.ambient'] = self.material.ambient
-        self.program['material.diffuse'] = self.material.diffuse
-        self.program['material.specular'] = self.material.specular
-        self.program['material.specular_exponent'] = \
-            self.material.specular_exponent
-        self.program['material.bump_scale'] = self.material.bump_scale
-        self.program['material.has_bump_map'] = self.material.has_bump_map
-        self.program['material.has_specular_map'] = \
-            self.material.has_specular_map
-        self.program['model'] = self.matrix
+        if 'material.ambient' in self.program._uniforms:
+            self.program['material.ambient'] = self.material.ambient
+
+        if 'material.diffuse' in self.program._uniforms:
+            self.program['material.diffuse'] = self.material.diffuse
+
+        if 'material.specular' in self.program._uniforms:
+            self.program['material.specular'] = self.material.specular
+
+        if 'material.specular_exponent' in self.program._uniforms:
+            self.program['material.specular_exponent'] = \
+                self.material.specular_exponent
+
+        if 'material.bump_scale' in self.program._uniforms:
+            self.program['material.bump_scale'] = self.material.bump_scale
+
+        if 'material.has_bump_map' in self.program._uniforms:
+            self.program['material.has_bump_map'] = self.material.has_bump_map
+
+        if 'material.has_specular_map' in self.program._uniforms:
+            self.program['material.has_specular_map'] = \
+                self.material.has_specular_map
+
+        if 'model' in self.program._uniforms:
+            self.program['model'] = self.matrix
 
     def unset_state(self):
         self.program.stop()

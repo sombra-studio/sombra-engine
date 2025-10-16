@@ -21,7 +21,7 @@ class FPSCamera:
         self.target = target
         self.up = up
 
-        self.speed = 30.0
+        self.speed = 10.0
 
         self.pitch = pitch
         self.yaw = yaw
