@@ -6,7 +6,7 @@ class Gizmo:
     def __init__(
         self,
         size:float = 1.0,
-        batch:pyglet.graphics.Batch = pyglet.graphics.get_default_batch(),
+        batch:pyglet.graphics.Batch = None,
         group:pyglet.graphics.Group = None
     ):
         with open("sombra_engine/shaders/gizmo.vert") as f:
@@ -32,3 +32,6 @@ class Gizmo:
                 )
             )
         )
+
+    def draw(self):
+        self.vertex_list.draw(self.mode)

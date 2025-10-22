@@ -1,9 +1,6 @@
-import numpy as np
+# import numpy as np
 from pyglet.math import Mat4, Vec3
-import quaternion
-
-
-from sombra_engine.utils import Quaternion
+# import quaternion
 
 
 class Transform:
@@ -31,28 +28,28 @@ class Transform:
         final = scale @ translation @ rotation
         return final
 
-    @staticmethod
-    def interpolate(a: 'Transform', b: 'Transform', t: float) -> Mat4:
-        new_translation = a.translation.lerp(b.translation, t)
-
-        # Rotation
-        q_a = Quaternion.from_mat4(a.get_rotation_as_mat4())
-        q_b = Quaternion.from_mat4(b.get_rotation_as_mat4())
-        q1 = np.quaternion(q_a.w, q_a.x, q_a.y, q_a.z)
-        q2 = np.quaternion(q_b.w, q_b.x, q_b.y, q_b.z)
-
-        q_interpolated = quaternion.slerp_evaluate(q1, q2, t)
-        final_q = Quaternion(
-            q_interpolated.w,
-            q_interpolated.x,
-            q_interpolated.y,
-            q_interpolated.z
-        )
-        rotation = final_q.to_mat4()
-
-        new_scale = a.scale.lerp(b.scale, t)
-
-        scale = Mat4.from_scale(new_scale)
-        translation = Mat4.from_translation(new_translation)
-        final = scale @ translation @ rotation
-        return final
+    # @staticmethod
+    # def interpolate(a: 'Transform', b: 'Transform', t: float) -> Mat4:
+    #     new_translation = a.translation.lerp(b.translation, t)
+    #
+    #     # Rotation
+    #     q_a = Quaternion.from_mat4(a.get_rotation_as_mat4())
+    #     q_b = Quaternion.from_mat4(b.get_rotation_as_mat4())
+    #     q1 = np.quaternion(q_a.w, q_a.x, q_a.y, q_a.z)
+    #     q2 = np.quaternion(q_b.w, q_b.x, q_b.y, q_b.z)
+    #
+    #     q_interpolated = quaternion.slerp_evaluate(q1, q2, t)
+    #     final_q = Quaternion(
+    #         q_interpolated.w,
+    #         q_interpolated.x,
+    #         q_interpolated.y,
+    #         q_interpolated.z
+    #     )
+    #     rotation = final_q.to_mat4()
+    #
+    #     new_scale = a.scale.lerp(b.scale, t)
+    #
+    #     scale = Mat4.from_scale(new_scale)
+    #     translation = Mat4.from_translation(new_translation)
+    #     final = scale @ translation @ rotation
+    #     return final

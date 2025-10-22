@@ -1,3 +1,8 @@
+import os
+import psutil
+from pudu_ui.styles.fonts import FontStyle
+from pudu_ui import Label, LabelParams
+import pudu_ui
 from pyglet.event import EVENT_HANDLED
 from pyglet.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
@@ -13,22 +18,47 @@ from sombra_engine.camera import FPSCamera
 from sombra_engine.debug import Gizmo
 
 
+DEBUG_FONT_SIZE = 14
+TIME_TO_UPDATE_DEBUG = 0.5
+
+
 class App(Window):
     def __init__(self, is_debug: bool = False):
         super().__init__(caption="Sombra Engine", vsync=False)
         self.is_debug = is_debug
         self.fps_display = FPSDisplay(self, color=(0, 127, 0, 127))
+        self.fps_display.label.font_size = DEBUG_FONT_SIZE
         self.camera = FPSCamera(
             self, position=Vec3(0.0, 0.0, 15.0), pitch=90, yaw=-90
         )
         self.batch = Batch()
         self.debug_group = Group()
+
         self.gizmo = Gizmo(size=10.0, batch=self.batch)
         self.debug_group.visible = is_debug
         self.ui_projection = Mat4.orthogonal_projection(
             0.0, self.width, 0.0, self.height,
             0.0, 1000.0
         )
+        debug_label_style = FontStyle(
+            font_size=DEBUG_FONT_SIZE,
+            weight=pudu_ui.styles.fonts.Weight.BOLD,
+            color=pudu_ui.colors.Color(0, 127, 0),
+            opacity=127
+        )
+        y = 30
+        memory_label_params = LabelParams(
+            x=self.fps_display.label.x,
+            y=y,
+            style=debug_label_style
+        )
+        self.memory_label = Label(
+            params=memory_label_params,
+            group=self.debug_group
+        )
+        self.memory_label.set_debug_mode()
+        self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
+        self.process = psutil.Process(os.getpid())
 
     def draw_2d_debug_ui(self):
         temp_proj = self.projection
@@ -39,6 +69,7 @@ class App(Window):
         # Needs to disable DEPTH TEST for 2D UI
         glDisable(GL_DEPTH_TEST)
         self.fps_display.draw()
+        self.memory_label.impl.draw()
 
         self.projection = temp_proj
         self.view = temp_view
@@ -65,3 +96,13 @@ class App(Window):
                 )
                 handled = EVENT_HANDLED
         return handled
+
+    def update(self, dt):
+        self.time_to_update_debug -= dt
+        if self.time_to_update_debug <= 0:
+            self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
+            ram_used = self.process.memory_info().rss / (1024 * 1024)  # in MB
+            self.memory_label.text = f"{round(ram_used, 2)} MB"
+            self.memory_label.invalidate()
+
+        self.memory_label.update(dt)

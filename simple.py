@@ -15,6 +15,7 @@ def update(dt):
     global shader_program
     if 'eye' in shader_program._uniforms:
         shader_program['eye'] = app.camera.position
+    app.update(dt)
 
 
 def main():
