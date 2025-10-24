@@ -23,8 +23,12 @@ TIME_TO_UPDATE_DEBUG = 0.5
 
 
 class App(Window):
-    def __init__(self, is_debug: bool = False):
-        super().__init__(caption="Sombra Engine", vsync=False)
+    def __init__(
+        self,
+        caption: str = "Sombra Engine",
+        is_debug: bool = False
+    ):
+        super().__init__(caption=caption, vsync=False)
         self.is_debug = is_debug
         self.fps_display = FPSDisplay(self, color=(0, 127, 0, 127))
         self.fps_display.label.font_size = DEBUG_FONT_SIZE
@@ -33,9 +37,10 @@ class App(Window):
         )
         self.batch = Batch()
         self.debug_group = Group()
-
-        self.gizmo = Gizmo(size=10.0, batch=self.batch)
         self.debug_group.visible = is_debug
+
+        self.gizmo = Gizmo(size=10.0, batch=self.batch, group=self.debug_group)
+        self.debug_ui_batch = Batch()
         self.ui_projection = Mat4.orthogonal_projection(
             0.0, self.width, 0.0, self.height,
             0.0, 1000.0
@@ -54,9 +59,9 @@ class App(Window):
         )
         self.memory_label = Label(
             params=memory_label_params,
+            batch=self.debug_ui_batch,
             group=self.debug_group
         )
-        self.memory_label.set_debug_mode()
         self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
         self.process = psutil.Process(os.getpid())
 
@@ -69,7 +74,7 @@ class App(Window):
         # Needs to disable DEPTH TEST for 2D UI
         glDisable(GL_DEPTH_TEST)
         self.fps_display.draw()
-        self.memory_label.impl.draw()
+        self.debug_ui_batch.draw()
 
         self.projection = temp_proj
         self.view = temp_view
@@ -97,7 +102,7 @@ class App(Window):
                 handled = EVENT_HANDLED
         return handled
 
-    def update(self, dt):
+    def update(self, dt: float):
         self.time_to_update_debug -= dt
         if self.time_to_update_debug <= 0:
             self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
@@ -106,3 +111,10 @@ class App(Window):
             self.memory_label.invalidate()
 
         self.memory_label.update(dt)
+
+    def run(self, interval: float = 1.0 / 60.0):
+        if not interval:
+            pyglet.clock.schedule(self.update)
+        else:
+            pyglet.clock.schedule_interval(self.update, interval)
+        pyglet.app.run(interval)
