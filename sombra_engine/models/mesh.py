@@ -3,6 +3,7 @@ from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Vec2, Vec3
+import pyglet
 
 from sombra_engine.graphics import MaterialGroup
 from sombra_engine.primitives import (
