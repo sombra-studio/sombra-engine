@@ -39,7 +39,7 @@ class App(Window):
         self.debug_group = Group()
         self.debug_group.visible = is_debug
 
-        self.gizmo = Gizmo(size=10.0, batch=self.batch, group=self.debug_group)
+        self.gizmo = Gizmo(size=10.0)
         self.debug_ui_batch = Batch()
         self.ui_projection = Mat4.orthogonal_projection(
             0.0, self.width, 0.0, self.height,
@@ -82,6 +82,11 @@ class App(Window):
     def on_draw(self):
         glClearColor(0.0, 0.0, 0.0, 1.0)
         self.clear()
+
+        # Draw gizmo first
+        glDisable(GL_DEPTH_TEST)
+        self.gizmo.draw()
+
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LESS)
