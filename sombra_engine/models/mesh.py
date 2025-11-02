@@ -42,6 +42,8 @@ class Mesh(SceneObject):
 
         self.material_groups = self.create_material_groups()
         self.vertex_lists = self.create_vertex_lists()
+        self.tri_count: int = 0
+        self.calculate_tri_count(vertex_groups)
 
     @staticmethod
     def check_tex_coords(a: Vertex, b: Vertex, c: Vertex):
@@ -94,6 +96,11 @@ class Mesh(SceneObject):
                 a.tangent = tangent
                 b.tangent = tangent
                 c.tangent = tangent
+
+    def calculate_tri_count(self, vertex_groups: dict[str, VertexGroup]):
+        self.tri_count: int = 0
+        for vg_name, vg in vertex_groups.items():
+            self.tri_count += len(vg.triangles)
 
     # Create methods
     # -------------------------------------------------------------------------
@@ -191,3 +198,6 @@ class Mesh(SceneObject):
                 tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
                 tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
         return position_list, normal_list, tangent_list, tex_coords_list
+
+    def update(self, dt):
+        pass

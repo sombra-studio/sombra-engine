@@ -1,8 +1,3 @@
-import os
-import psutil
-from pudu_ui.styles.fonts import FontStyle
-from pudu_ui import Label, LabelParams
-import pudu_ui
 from pyglet.event import EVENT_HANDLED
 from pyglet.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
@@ -10,16 +5,13 @@ from pyglet.gl import (
 )
 from pyglet.graphics import Batch, Group
 from pyglet.math import Mat4, Vec3
-from pyglet.window import FPSDisplay, key, Window
+from pyglet.window import key, Window
 import pyglet
 
 
 from sombra_engine.camera import FPSCamera
-from sombra_engine.debug import Gizmo
-
-
-DEBUG_FONT_SIZE = 14
-TIME_TO_UPDATE_DEBUG = 0.5
+from sombra_engine.debug import Gizmo, Stats
+from sombra_engine.models import Model
 
 
 class App(Window):
@@ -30,8 +22,6 @@ class App(Window):
     ):
         super().__init__(caption=caption, vsync=False)
         self.is_debug = is_debug
-        self.fps_display = FPSDisplay(self, color=(0, 127, 0, 127))
-        self.fps_display.label.font_size = DEBUG_FONT_SIZE
         self.camera = FPSCamera(
             self, position=Vec3(0.0, 0.0, 15.0), pitch=90, yaw=-90
         )
@@ -45,25 +35,14 @@ class App(Window):
             0.0, self.width, 0.0, self.height,
             0.0, 1000.0
         )
-        debug_label_style = FontStyle(
-            font_size=DEBUG_FONT_SIZE,
-            weight=pudu_ui.styles.fonts.Weight.BOLD,
-            color=pudu_ui.colors.Color(0, 127, 0),
-            opacity=127
-        )
-        y = 30
-        memory_label_params = LabelParams(
-            x=self.fps_display.label.x,
-            y=y,
-            style=debug_label_style
-        )
-        self.memory_label = Label(
-            params=memory_label_params,
-            batch=self.debug_ui_batch,
-            group=self.debug_group
-        )
-        self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
-        self.process = psutil.Process(os.getpid())
+        self.stats = Stats(self, self.debug_ui_batch, self.debug_group)
+
+        self.models: list[Model] = []
+        self.tri_count = 0
+
+    def add_model(self, model: Model):
+        self.models.append(model)
+        self.tri_count += model.tri_count
 
     def draw_2d_debug_ui(self):
         temp_proj = self.projection
@@ -73,8 +52,7 @@ class App(Window):
 
         # Needs to disable DEPTH TEST for 2D UI
         glDisable(GL_DEPTH_TEST)
-        self.fps_display.draw()
-        self.debug_ui_batch.draw()
+        self.stats.draw()
 
         self.projection = temp_proj
         self.view = temp_view
@@ -108,14 +86,11 @@ class App(Window):
         return handled
 
     def update(self, dt: float):
-        self.time_to_update_debug -= dt
-        if self.time_to_update_debug <= 0:
-            self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
-            ram_used = self.process.memory_info().rss / (1024 * 1024)  # in MB
-            self.memory_label.text = f"{round(ram_used, 2)} MB"
-            self.memory_label.invalidate()
+        self.stats.update(dt)
 
-        self.memory_label.update(dt)
+        # Update models
+        for model in self.models:
+            model.update(dt)
 
     def run(self, interval: float = 1.0 / 60.0):
         if not interval:

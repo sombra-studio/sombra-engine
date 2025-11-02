@@ -1,4 +1,5 @@
 from pyglet.graphics.shader import Shader, ShaderProgram
+from pyglet.graphics import Group
 import pyglet
 from pyglet.math import Vec3
 
@@ -25,12 +26,14 @@ def main():
     with open('sombra_engine/shaders/blinn_barycentric.frag') as f:
         fs = Shader(f.read(), 'fragment')
     shader_program = ShaderProgram(vs, fs)
+    model_group = Group()
     model = OBJLoader.load(
-        #filename="tests/data/cube.obj",
+        # filename="tests/data/cube.obj",
         filename="tests/data/yoda/yoda.obj",
         # filename="tests/data/shoe_box2.obj",
-        name="house",
+        name="model",
         program=shader_program,
+        group=model_group,
         batch=app.batch
     )
     scene = Scene()
@@ -44,6 +47,9 @@ def main():
         program['light.color'] = scene.lights[0].color
     if 'eye' in program._uniforms:
         program['eye'] = app.camera.position
+
+    app.add_model(model)
+
     pyglet.clock.schedule(update)
     pyglet.app.run(0)
 
