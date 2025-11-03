@@ -1,3 +1,4 @@
+from pudu_ui import Params
 from pyglet.event import EVENT_HANDLED
 from pyglet.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
@@ -35,7 +36,10 @@ class App(Window):
             0.0, self.width, 0.0, self.height,
             0.0, 1000.0
         )
-        self.stats = Stats(self, self.debug_ui_batch, self.debug_group)
+        stats_params = Params(x=10.0, y=10.0)
+        self.stats = Stats(
+            self, stats_params, self.debug_ui_batch, self.debug_group
+        )
 
         self.models: list[Model] = []
         self.tri_count = 0
@@ -43,6 +47,7 @@ class App(Window):
     def add_model(self, model: Model):
         self.models.append(model)
         self.tri_count += model.tri_count
+        self.stats.set_tri_counts(self.tri_count)
 
     def draw_2d_debug_ui(self):
         temp_proj = self.projection
