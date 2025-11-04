@@ -1,3 +1,4 @@
+from importlib.resources import files
 from pyglet.gl import GL_TRIANGLES
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
@@ -37,11 +38,16 @@ class SkeletalMesh(Mesh):
         parent: SceneObject = None
     ):
         if not program:
-            with open('sombra_engine/shaders/skeletal.vert') as f:
-                vert_shader = Shader(f.read(), 'vertex')
-            with open('sombra_engine/shaders/blinn.frag') as f:
-            # with open('sombra_engine/shaders/solid.frag') as f:
-                frag_shader = Shader(f.read(), 'fragment')
+            vs_src = files('sombra_engine.shaders').joinpath(
+                'skeletal.vert'
+            ).read_text()
+            vert_shader = Shader(vs_src, 'vertex')
+
+            fs_src = files('sombra_engine.shaders').joinpath(
+                'blinn.frag'
+            ).read_text()
+            frag_shader = Shader(fs_src, 'fragment')
+
             program = ShaderProgram(vert_shader, frag_shader)
         super().__init__(
             name=name,

@@ -1,3 +1,4 @@
+from importlib.resources import files
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import Shader, ShaderProgram
@@ -32,10 +33,16 @@ class Mesh(SceneObject):
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
         if not program:
-            with open('sombra_engine/shaders/default.vert') as f:
-                vert_shader = Shader(f.read(), 'vertex')
-            with open('sombra_engine/shaders/blinn.frag') as f:
-                frag_shader = Shader(f.read(), 'fragment')
+            vs_src = files('sombra_engine.shaders').joinpath(
+                'default.vert'
+            ).read_text()
+            vert_shader = Shader(vs_src, 'vertex')
+
+            fs_src = files('sombra_engine.shaders').joinpath(
+                'blinn_barycentric.frag'
+            ).read_text()
+            frag_shader = Shader(fs_src, 'fragment')
+
             program = ShaderProgram(vert_shader, frag_shader)
         self.program = program
         self.parent = parent

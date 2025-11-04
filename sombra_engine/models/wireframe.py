@@ -1,3 +1,4 @@
+from importlib.resources import files
 import pyglet
 from pyglet.gl import *
 from pyglet.graphics import Batch, Group
@@ -21,13 +22,17 @@ class Wireframe:
     ):
         self.mesh = mesh
         if not vertex_shader:
-            with open('sombra_engine/shaders/default.vert') as f:
-                vertex_shader = Shader(f.read(), 'vertex')
+            vs_src = files('sombra_engine.shaders').joinpath(
+                'default.vert'
+            ).read_text()
+            vertex_shader = Shader(vs_src, 'vertex')
         self.vertex_shader = vertex_shader
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
-        with open('sombra_engine/shaders/wireframe.frag') as f:
-            fragment_shader = Shader(f.read(), 'fragment')
+        fs_src = files('sombra_engine.shaders').joinpath(
+            'wireframe.frag'
+        ).read_text()
+        fragment_shader = Shader(fs_src, 'fragment')
         self.program = ShaderProgram(vertex_shader, fragment_shader)
         self.program['color'] = color
         self.vertex_lists = self.create_vertex_lists()
