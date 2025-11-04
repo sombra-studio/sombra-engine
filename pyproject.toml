@@ -1,0 +1,36 @@
+[build-system]
+requires = ["uv_build>=0.9.6,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "sombra-engine"
+version = "0.1.0"
+authors = [
+  { name="Jesus Henriquez" },
+]
+description = "Small 3D game engine used at Sombra Studio"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "psutil==7.1.3",
+    "pudu-ui==0.1.2",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering"
+]
+license = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/sombra-studio/sombra-engine"
+Issues = "https://github.com/sombra-studio/sombra-engine/issues"
+
+[tool.uv.build-backend]
+module-name = "sombra_engine"
+module-root = ""
+#source-include = ["sombra_engine/shaders/**"]
+#source-exclude = ["tests/**", ]
+
+
