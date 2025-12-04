@@ -62,7 +62,8 @@ class SkeletalMesh(Mesh):
         )
         self.root_bone = root_bone
         self.time = 0.0
-        self.animation: Animation | None = None
+        self.animations: dict[str, Animation] = {}
+        self.current_animation: Animation | None = None
         self.is_paused = False
         self.keyframes_count = 0
         self.keyframe_duration = 0.0
@@ -136,20 +137,23 @@ class SkeletalMesh(Mesh):
         for mg in self.material_groups.values():
             mg.bones_transforms = bones_transforms
 
-    def load_animation(self, animation: Animation):
-        self.time = 0.0
-        self.animation = animation
-        self.keyframes_count = len(self.animation.keyframes)
-        # Here we are using the same duration for every keyframe
-        self.keyframe_duration = self.animation.length / self.keyframes_count
+    def set_animation(self, name: str):
+        if name in self.animations:
+            self.time = 0.0
+            self.current_animation = self.animations[name]
+            self.keyframes_count = len(self.current_animation.keyframes)
+            # Here we are using the same duration for every keyframe
+            self.keyframe_duration = (
+                self.current_animation.length / self.keyframes_count
+            )
 
     def update(self, dt: float):
-        if not self.animation or self.is_paused:
+        if not self.current_animation or self.is_paused:
             return
 
         self.time += dt
-        if self.time > self.animation.length:
-            self.time = self.time % self.animation.length
+        if self.time > self.current_animation.length:
+            self.time = self.time % self.current_animation.length
 
         # Get the poses in between
         t = self.time % self.keyframe_duration
@@ -164,9 +168,9 @@ class SkeletalMesh(Mesh):
 
     def interpolate(self, t: float) -> list[Mat4]:
         idx = int(self.time // self.keyframe_duration)
-        prev_pose = self.animation.keyframes[idx].pose
+        prev_pose = self.current_animation.keyframes[idx].pose
         next_idx = idx + 1 if idx + 1 < self.keyframes_count else 0
-        next_pose = self.animation.keyframes[next_idx].pose
+        next_pose = self.current_animation.keyframes[next_idx].pose
 
         # interpolate between the two poses
         bones_transforms = []
