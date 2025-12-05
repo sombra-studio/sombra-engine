@@ -21,18 +21,12 @@ def update(dt):
 
 def main():
     global model, shader_program
-    with open('sombra_engine/shaders/default.vert') as f:
-        vs = Shader(f.read(), 'vertex')
-    with open('sombra_engine/shaders/blinn_barycentric.frag') as f:
-        fs = Shader(f.read(), 'fragment')
-    shader_program = ShaderProgram(vs, fs)
     model_group = Group()
     model = OBJLoader.load(
-        # filename="tests/data/cube.obj",
-        filename="tests/data/yoda/yoda.obj",
+        filename="tests/data/cube.obj",
+        # filename="tests/data/yoda/yoda.obj",
         # filename="tests/data/shoe_box2.obj",
         name="model",
-        program=shader_program,
         group=model_group,
         batch=app.batch
     )
@@ -41,6 +35,7 @@ def main():
     scene.create_light(Vec3(10.0, 8.0, 0.0), Vec3(1.0, 1.0, 1.0))
 
     program = model.meshes[0].program
+    shader_program = program
     if 'light.position' in program._uniforms:
         program['light.position'] = scene.lights[0].position
     if 'light.color' in program._uniforms:
