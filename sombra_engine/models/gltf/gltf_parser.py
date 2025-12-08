@@ -42,17 +42,19 @@ GLTF_COMPONENT_UNPACK_FORMATS = {
 
 
 def get_dense_data(gltf: GLTF2, accessor: Accessor):
-    bufferView = gltf.bufferViews[accessor.bufferView]
-    buffer = gltf.buffers[bufferView.buffer]
+    buffer_view = gltf.bufferViews[accessor.bufferView]
+    buffer = gltf.buffers[buffer_view.buffer]
     buffer_data = gltf.get_data_from_buffer_uri(buffer.uri)
     result = []
     elem_stride = GLTF_ACCESSORTYPE_COUNTS[accessor.type] * \
-                  GLTF_COMPONENTTYPE_SIZES[int(accessor.componentType)]
+      GLTF_COMPONENTTYPE_SIZES[int(accessor.componentType)]
     for i in range(accessor.count):
-        index = bufferView.byteOffset + accessor.byteOffset + i * elem_stride
+        index = buffer_view.byteOffset + accessor.byteOffset + i * elem_stride
         base64_elem_data = buffer_data[index:index + elem_stride]
+        format_count = GLTF_ACCESSORTYPE_COUNTS[accessor.type]
+        format_type = GLTF_COMPONENT_UNPACK_FORMATS[accessor.componentType]
         elem_data = struct.unpack(
-            f"<{GLTF_COMPONENT_UNPACK_FORMATS[accessor.componentType] * GLTF_ACCESSORTYPE_COUNTS[accessor.type]}",
+            f"<{format_type * format_count}",
             base64_elem_data
         )
         if len(elem_data) == 1:
@@ -64,27 +66,46 @@ def get_dense_data(gltf: GLTF2, accessor: Accessor):
 
 
 class GLTFParser:
-    def parse(self, filename: str) -> dict:
+    @staticmethod
+    def parse(filename: str, scale: float = 1.0) -> dict:
         model_data = {
             "meshes_data": [],
             "materials_data": []
         }
         gltf = GLTF2().load(filename)
 
+        # Parse mesh data
         for mesh in gltf.meshes:
             mesh_data = {
                 "primitives": []
             }
             for primitive in mesh.primitives:
-                primitive_data = {}
-
-                # indices = get_dense_data(gltf, gltf.accessors[primitive.indices])
+                indices = get_dense_data(gltf, gltf.accessors[primitive.indices])
                 positions = get_dense_data(
                     gltf, gltf.accessors[primitive.attributes.POSITION]
                 )
 
-                primitive_data["positions"] = positions
+                if scale != 1.0:
+                    positions = [
+                        tuple(
+                            value * scale for value in pos
+                        ) for pos in positions
+                    ]
+
+                primitive_data = {
+                    "indices": indices,
+                    "positions": positions,
+                }
+
                 mesh_data["primitives"].append(primitive_data)
             model_data["meshes_data"].append(mesh_data)
+
+        # Parse materials data
+        for material in gltf.materials:
+            material_data = {
+                "name": material.name,
+                "diffuse_color": material.pbrMetallicRoughness.baseColorFactor
+            }
+            model_data["materials_data"].append(material_data)
 
         return model_data

@@ -1,9 +1,13 @@
+from pyglet.gl import GL_TRIANGLES
 from pyglet.graphics import Batch, Group, ShaderProgram
-import pyglet
 from pyglet.math import Mat4
 
 from sombra_engine.models import Bone, Model, SkeletalMesh
-from sombra_engine.primitives import Material, SceneObject, VertexGroup
+from sombra_engine.primitives import (
+    Material, SceneObject, Transform,
+    VertexGroup
+)
+from sombra_engine.models.gltf import GLTFParser
 
 
 class GLTFLoader:
@@ -11,19 +15,18 @@ class GLTFLoader:
     def load(
         filename: str,
         name: str | None = None,
-        program: ShaderProgram | None = None,
         scale: float = 1.0,
-        batch: Batch | None = None,
-        group: Group | None = None,
-        parent: SceneObject | None = None
+        mode: int = GL_TRIANGLES,
+        batch: Batch = None,
+        group: Group = None,
+        program: ShaderProgram = None,
+        transform: Transform = Transform(),
+        parent: SceneObject = None
     ) -> Model:
 
-        # Decode glTF file
-        decoder = pyglet.model.ModelDecoder()
-        gltf = decoder.decode(filename)
 
         # We need a dict with data
-        meshes_data = gltf.meshes_data
+        meshes_data = GLTFParser.parse(filename, scale=scale)
 
         if name is None:
             name = filename
@@ -40,7 +43,7 @@ class GLTFLoader:
 
             # Create skeleton
             root = Bone(idx=1, name="root", local_bind_transform=Mat4())
-            # iterate bones
+                # iterate bones hierarchy
 
             # Create materials
             materials = {}
@@ -57,8 +60,11 @@ class GLTFLoader:
                 vertex_groups=vertex_groups,
                 materials=materials,
                 root_bone=root,
+                mode=mode,
                 batch=batch,
                 group=group,
+                program=program,
+                transform=transform,
                 parent=parent
             )
             meshes.append(mesh)
