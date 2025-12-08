@@ -71,7 +71,5 @@ class Stats(Widget):
         super().update(dt)
 
     def set_tri_counts(self, tri_count: int):
-        self.tri_count_label.text = f"{tri_count:,} triangles".replace(
-            ",", "."
-        )
+        self.tri_count_label.text = f"{tri_count:,} triangles"
         self.invalidate()
