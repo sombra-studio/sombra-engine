@@ -104,7 +104,7 @@ class GLTFParser:
         for material in gltf.materials:
             material_data = {
                 "name": material.name,
-                "diffuse_color": material.pbrMetallicRoughness.baseColorFactor
+                "diffuse": material.pbrMetallicRoughness.baseColorFactor
             }
             model_data["materials_data"].append(material_data)
 
