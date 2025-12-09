@@ -44,7 +44,7 @@ class SkeletalMesh(Mesh):
             vert_shader = Shader(vs_src, 'vertex')
 
             fs_src = files('sombra_engine.shaders').joinpath(
-                'blinn.frag'
+                'blinn_barycentric.frag'
             ).read_text()
             frag_shader = Shader(fs_src, 'fragment')
 
@@ -79,6 +79,9 @@ class SkeletalMesh(Mesh):
         return groups
 
     def create_vertex_lists(self) -> list[VertexList]:
+        # first calculate normals
+        self.calculate_normals()
+
         vlists = []
 
         for vg_name, vg in self.vertex_groups.items():

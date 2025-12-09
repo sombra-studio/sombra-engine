@@ -77,13 +77,17 @@ class GLTFParser:
         # Parse mesh data
         for mesh in gltf.meshes:
             mesh_data = {
-                "primitives": []
+                "primitives": [],
+                "name": mesh.name or "unnamed"
             }
             for primitive in mesh.primitives:
                 indices = get_dense_data(gltf, gltf.accessors[primitive.indices])
                 positions = get_dense_data(
                     gltf, gltf.accessors[primitive.attributes.POSITION]
                 )
+                # tex_coords = get_dense_data(
+                #     gltf, gltf.accessors[primitive.attributes.TEXCOORD_0]
+                # )
 
                 if scale != 1.0:
                     positions = [
@@ -95,6 +99,8 @@ class GLTFParser:
                 primitive_data = {
                     "indices": indices,
                     "positions": positions,
+                    "material": primitive.material,
+                    # "tex_coords": tex_coords,
                 }
 
                 mesh_data["primitives"].append(primitive_data)
@@ -104,7 +110,7 @@ class GLTFParser:
         for material in gltf.materials:
             material_data = {
                 "name": material.name,
-                "diffuse": material.pbrMetallicRoughness.baseColorFactor
+                "diffuse": material.pbrMetallicRoughness.baseColorFactor[:3]
             }
             model_data["materials_data"].append(material_data)
 

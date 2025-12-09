@@ -1,11 +1,12 @@
-from pyglet.graphics.shader import Shader, ShaderProgram
 from pyglet.graphics import Group
 import pyglet
 from pyglet.math import Vec3
 
+
 from sombra_engine.app import App
 from sombra_engine.models.obj import OBJLoader
 from sombra_engine.scene import Scene
+
 
 app = App(is_debug=True)
 model = None
@@ -23,8 +24,8 @@ def main():
     global model, shader_program
     model_group = Group()
     model = OBJLoader.load(
-        filename="tests/data/cube.obj",
-        # filename="tests/data/yoda/yoda.obj",
+        # filename="tests/data/cube.obj",
+        filename="tests/data/yoda/yoda.obj",
         # filename="tests/data/shoe_box2.obj",
         name="model",
         group=model_group,

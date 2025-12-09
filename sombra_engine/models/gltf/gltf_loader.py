@@ -1,6 +1,7 @@
 from pyglet.gl import GL_TRIANGLES
-from pyglet.graphics import Batch, Group, ShaderProgram
-from pyglet.math import Mat4, Vec3
+from pyglet.graphics import Batch, Group
+from pyglet.graphics.shader import ShaderProgram
+from pyglet.math import Mat4, Vec2, Vec3
 
 from sombra_engine.models import Bone, Model, SkeletalMesh
 from sombra_engine.primitives import (
@@ -13,13 +14,15 @@ from sombra_engine.models.gltf import GLTFParser
 def get_triangles_from_data(data: dict) -> list[Triangle]:
     triangles = []
     num_vertices = len(data["indices"])
-    for num_tri in range(num_vertices // 3):
+    for tri_num in range(num_vertices // 3):
         new_vertices = []
         for i in range(3):
-            index = num_tri * 3 + i
-            position: Vec3 = Vec3(*data["position"][index])
+            index = data["indices"][tri_num * 3 + i]
+            position: Vec3 = Vec3(*data["positions"][index])
+            # tex_coords: Vec2 = Vec2(*data["tex_coords"][index])
             vertex = Vertex(
                 position=position,
+                # tex_coords=tex_coords,
             )
             new_vertices.append(vertex)
         new_triangle = Triangle(new_vertices)
@@ -76,14 +79,19 @@ class GLTFLoader:
         # Create vertex group data
         for data in parsed_data["meshes_data"]:
             name = data["name"]
-            triangles = get_triangles_from_data(data)
-            mesh_data = {
-                "name": data["name"],
-                "triangles": triangles,
-                "material": materials_list[data["material"]],
+            vertex_groups_data = {}
+            for i, primitive_data in enumerate(data["primitives"]):
+                triangles = get_triangles_from_data(primitive_data)
+                vg_name = str(i)
+                vg_data = {
+                    "name": vg_name,
+                    "triangles": triangles,
+                    "material": materials_list[primitive_data["material"]],
+                }
+                vertex_groups_data[vg_name] = vg_data
+            meshes_data[name] = {
+                'vertex_groups': vertex_groups_data
             }
-            meshes_data[name] = mesh_data
-
         meshes = []
 
         for mesh_name, mesh_data in meshes_data.items():
@@ -95,6 +103,7 @@ class GLTFLoader:
                 vertex_groups[vg_name] = VertexGroup(
                     vg_name, vg_data['triangles'], material
                 )
+                materials[material.name] = material
 
             # Create skeleton
             root = Bone(idx=1, name="root", local_bind_transform=Mat4())
