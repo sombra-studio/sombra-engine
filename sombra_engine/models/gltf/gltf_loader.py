@@ -19,10 +19,12 @@ def get_triangles_from_data(data: dict) -> list[Triangle]:
         for i in range(3):
             index = data["indices"][tri_num * 3 + i]
             position: Vec3 = Vec3(*data["positions"][index])
-            # tex_coords: Vec2 = Vec2(*data["tex_coords"][index])
+            normal: Vec3 = Vec3(*data["normals"][index])
+            tex_coords: Vec2 = Vec2(*data["tex_coords"][index])
             vertex = Vertex(
                 position=position,
-                # tex_coords=tex_coords,
+                normal=normal,
+                tex_coords=tex_coords,
             )
             new_vertices.append(vertex)
         new_triangle = Triangle(new_vertices)

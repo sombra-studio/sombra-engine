@@ -21,7 +21,11 @@ def update(dt: float):
 
 if __name__ == '__main__':
     batch = app.batch
-    model = GLTFLoader.load(filename='tests/data/shoe_box.glb', batch=batch)
+    model = GLTFLoader.load(
+        filename='tests/data/yoda/yoda.glb',
+        scale=0.001,
+        batch=batch
+    )
 
     scene = Scene()
     # scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))

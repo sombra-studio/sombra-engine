@@ -85,9 +85,12 @@ class GLTFParser:
                 positions = get_dense_data(
                     gltf, gltf.accessors[primitive.attributes.POSITION]
                 )
-                # tex_coords = get_dense_data(
-                #     gltf, gltf.accessors[primitive.attributes.TEXCOORD_0]
-                # )
+                normals = get_dense_data(
+                    gltf, gltf.accessors[primitive.attributes.NORMAL]
+                )
+                tex_coords = get_dense_data(
+                    gltf, gltf.accessors[primitive.attributes.TEXCOORD_0]
+                )
 
                 if scale != 1.0:
                     positions = [
@@ -99,8 +102,9 @@ class GLTFParser:
                 primitive_data = {
                     "indices": indices,
                     "positions": positions,
+                    "normals": normals,
+                    "tex_coords": tex_coords,
                     "material": primitive.material,
-                    # "tex_coords": tex_coords,
                 }
 
                 mesh_data["primitives"].append(primitive_data)

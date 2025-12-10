@@ -7,6 +7,7 @@ Game Engine made in Python on top of the pyglet framework (work in progress).
 - 3D models through glTF format (and limited support for OBJ)
 - OpenGL Renderer and GLSL shaders
 - Skeletal animations
+- Shadows
 - Pathfinding
 - Rigid body physics
 - Particle systems
