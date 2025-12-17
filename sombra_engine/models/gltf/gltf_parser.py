@@ -1,5 +1,7 @@
-from pygltflib import GLTF2, Accessor
 from enum import IntEnum
+import io
+from pygltflib import GLTF2, Accessor
+import pyglet
 import struct
 
 
@@ -112,9 +114,28 @@ class GLTFParser:
 
         # Parse materials data
         for material in gltf.materials:
+            if material.pbrMetallicRoughness.baseColorTexture:
+                diffuse_tex_gltf = gltf.textures[
+                    material.pbrMetallicRoughness.baseColorTexture.index
+                ]
+                diffuse_img_gltf = gltf.images[diffuse_tex_gltf.source]
+                fmt = diffuse_img_gltf.mimeType.split('/')[-1]
+                buffer_view = gltf.bufferViews[diffuse_img_gltf.bufferView]
+                offset = buffer_view.byteOffset
+                length = buffer_view.byteLength
+                buffer = gltf.buffers[buffer_view.buffer]
+                image_data_bytes = gltf.get_data_from_buffer_uri(
+                    buffer.uri
+                )[offset:offset + length]
+                image_stream = io.BytesIO(image_data_bytes)
+                diffuse_tex = pyglet.image.load(f"image.{fmt}",
+                    file=image_stream).get_texture()
+            else:
+                diffuse_tex = None
             material_data = {
                 "name": material.name,
-                "diffuse": material.pbrMetallicRoughness.baseColorFactor[:3]
+                "diffuse": material.pbrMetallicRoughness.baseColorFactor[:3],
+                "diffuse_map": diffuse_tex
             }
             model_data["materials_data"].append(material_data)
 
