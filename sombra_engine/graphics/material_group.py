@@ -2,10 +2,9 @@ from pyglet.gl import *
 from pyglet.graphics import Group
 from pyglet.graphics.shader import ShaderProgram
 from pyglet.math import Mat4
-import pyglet.resource
+
 
 from sombra_engine.primitives import Material
-from sombra_engine import utils
 
 
 class MaterialGroup(Group):
@@ -19,38 +18,24 @@ class MaterialGroup(Group):
         self.matrix = matrix
 
         # Set diffuse map
-        if material.diffuse_map:
-            img = pyglet.image.load(material.diffuse_map)
-            self.diffuse_map = img.get_texture()
-        else:
-            self.diffuse_map = utils.create_white_tex()
+        self.diffuse_map = material.diffuse_map
         glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
         glGenerateMipmap(self.diffuse_map.target)
 
         # Set ambient map
-        if material.ambient_map:
-            img = pyglet.image.load(material.ambient_map)
-            self.ambient_map = img.get_texture()
-        else:
-            self.ambient_map = utils.create_white_tex()
+        self.ambient_map = material.ambient_map
         glBindTexture(self.ambient_map.target, self.ambient_map.id)
         glGenerateMipmap(self.ambient_map.target)
 
         # Set specular map
-        if material.specular_map:
-            img = pyglet.image.load(material.specular_map)
-            self.specular_map = img.get_texture()
-        else:
-            self.specular_map = utils.create_black_tex()
+        self.specular_map = material.specular_map
         glBindTexture(self.specular_map.target, self.specular_map.id)
         glGenerateMipmap(self.specular_map.target)
 
         # Set bump map
-        if material.bump_map:
-            img = pyglet.image.load(material.bump_map)
-            self.bump_map = img.get_texture()
-        else:
-            self.bump_map = utils.create_black_tex()
+        self.bump_map = material.bump_map
+        glBindTexture(self.bump_map.target, self.bump_map.id)
+        glGenerateMipmap(self.bump_map.target)
 
     def set_state(self):
         self.program.use()
