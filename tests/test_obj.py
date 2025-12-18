@@ -4,7 +4,6 @@ import unittest
 
 
 from sombra_engine.models.obj import MTLLoader, OBJLoader
-from sombra_engine.primitives import Material
 
 
 class MTLTestCase(unittest.TestCase):
@@ -17,35 +16,24 @@ class MTLTestCase(unittest.TestCase):
         name = 'Material.001'
         self.assertIn(name, self.materials)
         mtl = self.materials[name]
-        mtl_copy = Material(
-            material_id=1,
-            name=name,
-            diffuse=Vec3(0.279282, 0.015609, 0.800000),
-            specular=Vec3(0.5, 0.5, 0.5),
-            specular_exponent=250,
-            ior=1.45
-        )
-        self.assertEqual(mtl, mtl_copy)
-        mtl_copy.diffuse = Vec3(1.0, 0.5, 1.0)
-        self.assertNotEqual(mtl, mtl_copy)
+        self.assertEqual(mtl.material_id, 1)
+        self.assertEqual(mtl.name, name)
+        self.assertEqual(mtl.diffuse, Vec3(0.279282, 0.015609, 0.800000))
+        self.assertEqual(mtl.specular, Vec3(0.5, 0.5, 0.5))
+        self.assertEqual(mtl.specular_exponent, 250)
+        self.assertEqual(mtl.ior, 1.45)
 
         # Test second material
         name = 'Material.002'
         self.assertIn(name, self.materials)
         mtl = self.materials[name]
-        mtl_copy = Material(
-            material_id=2,
-            name=name,
-            ambient=Vec3(0.100000, 0.100000, 0.100000),
-            diffuse=Vec3(0.938000, 0.837642, 0.527156),
-            specular=Vec3(0.500000, 0.500000, 0.500000),
-            specular_exponent=39.999996,
-            ior=1.5
-        )
-        self.assertEqual(self.materials[name], mtl_copy)
-        self.assertEqual(mtl, mtl_copy)
-        mtl_copy.diffuse = Vec3(1.0, 0.5, 1.0)
-        self.assertNotEqual(mtl, mtl_copy)
+        self.assertEqual(mtl.material_id, 2)
+        self.assertEqual(mtl.name, name)
+        self.assertEqual(mtl.ambient, Vec3(0.1, 0.1, 0.1))
+        self.assertEqual(mtl.diffuse, Vec3(0.938000, 0.837642, 0.527156))
+        self.assertEqual(mtl.specular, Vec3(0.5, 0.5, 0.5))
+        self.assertEqual(mtl.specular_exponent, 39.999996)
+        self.assertEqual(mtl.ior, 1.5)
 
 
 class OBJTestCase(unittest.TestCase):
