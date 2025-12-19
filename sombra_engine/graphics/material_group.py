@@ -33,9 +33,14 @@ class MaterialGroup(Group):
         glGenerateMipmap(self.specular_map.target)
 
         # Set bump map
-        self.bump_map = material.bump_map
-        glBindTexture(self.bump_map.target, self.bump_map.id)
-        glGenerateMipmap(self.bump_map.target)
+        if self.material.has_bump_map:
+            self.bump_map = material.bump_map
+            glBindTexture(self.bump_map.target, self.bump_map.id)
+            glGenerateMipmap(self.bump_map.target)
+        elif self.material.has_normal_map:
+            self.normal_map = material.normal_map
+            glBindTexture(self.normal_map.target, self.normal_map.id)
+            glGenerateMipmap(self.normal_map.target)
 
     def set_state(self):
         self.program.use()
@@ -46,7 +51,10 @@ class MaterialGroup(Group):
         glActiveTexture(GL_TEXTURE2)
         glBindTexture(self.specular_map.target, self.specular_map.id)
         glActiveTexture(GL_TEXTURE3)
-        glBindTexture(self.bump_map.target, self.bump_map.id)
+        if self.material.has_bump_map:
+            glBindTexture(self.bump_map.target, self.bump_map.id)
+        elif self.material.has_normal_map:
+            glBindTexture(self.normal_map.target, self.normal_map.id)
         if 'material.ambient' in self.program._uniforms:
             self.program['material.ambient'] = self.material.ambient
 
@@ -65,6 +73,10 @@ class MaterialGroup(Group):
 
         if 'material.has_bump_map' in self.program._uniforms:
             self.program['material.has_bump_map'] = self.material.has_bump_map
+
+        if 'material.has_normal_map' in self.program._uniforms:
+            self.program['material.has_normal_map'] = \
+                self.material.has_normal_map
 
         if 'material.has_specular_map' in self.program._uniforms:
             self.program['material.has_specular_map'] = \

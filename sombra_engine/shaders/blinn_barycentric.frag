@@ -11,6 +11,7 @@ struct Material {
     float specular_exponent;
     float bump_scale;
     bool has_bump_map;
+    bool has_normal_map;
     bool has_specular_map;
 };
 
@@ -62,6 +63,10 @@ void main() {
     vec3 norm = normalize(frag_normal);
     if (material.has_bump_map) {
         norm = calculate_normal_from_bump();
+        norm = normalize(TBN * norm);
+    } else if (material.has_normal_map) {
+        norm = texture(bump_map, frag_tex_coords).rgb;
+        norm = 2.0 * norm - 1.0;
         norm = normalize(TBN * norm);
     }
 

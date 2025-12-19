@@ -44,8 +44,8 @@ class SkeletalMesh(Mesh):
             vert_shader = Shader(vs_src, 'vertex')
 
             fs_src = files('sombra_engine.shaders').joinpath(
-                # 'blinn_barycentric.frag'
-                'normals.frag'
+                'blinn_barycentric.frag'
+                # 'normals.frag'
             ).read_text()
             frag_shader = Shader(fs_src, 'fragment')
 

@@ -1,6 +1,7 @@
 from enum import IntEnum
 import io
 from pygltflib import GLTF2, Accessor
+from pyglet.image import Texture
 import pyglet
 import struct
 
@@ -67,6 +68,22 @@ def get_dense_data(gltf: GLTF2, accessor: Accessor):
     return result
 
 
+def get_texture_from_gltf_image(img_gltf, gltf) -> Texture:
+    fmt = img_gltf.mimeType.split('/')[-1]
+    buffer_view = gltf.bufferViews[img_gltf.bufferView]
+    offset = buffer_view.byteOffset
+    length = buffer_view.byteLength
+    buffer = gltf.buffers[buffer_view.buffer]
+    image_data_bytes = gltf.get_data_from_buffer_uri(
+        buffer.uri
+    )[offset:offset + length]
+    image_stream = io.BytesIO(image_data_bytes)
+    tex = pyglet.image.load(
+        f"image.{fmt}", file=image_stream
+    ).get_texture()
+    return tex
+
+
 class GLTFParser:
     @staticmethod
     def parse(filename: str, scale: float = 1.0) -> dict:
@@ -119,23 +136,52 @@ class GLTFParser:
                     material.pbrMetallicRoughness.baseColorTexture.index
                 ]
                 diffuse_img_gltf = gltf.images[diffuse_tex_gltf.source]
-                fmt = diffuse_img_gltf.mimeType.split('/')[-1]
-                buffer_view = gltf.bufferViews[diffuse_img_gltf.bufferView]
-                offset = buffer_view.byteOffset
-                length = buffer_view.byteLength
-                buffer = gltf.buffers[buffer_view.buffer]
-                image_data_bytes = gltf.get_data_from_buffer_uri(
-                    buffer.uri
-                )[offset:offset + length]
-                image_stream = io.BytesIO(image_data_bytes)
-                diffuse_tex = pyglet.image.load(f"image.{fmt}",
-                    file=image_stream).get_texture()
+                diffuse_tex = get_texture_from_gltf_image(
+                    diffuse_img_gltf, gltf
+                )
             else:
                 diffuse_tex = None
+
+            if material.occlusionTexture:
+                ambient_tex_gltf = gltf.textures[
+                    material.occlusionTexture.index
+                ]
+                ambient_img_gltf = gltf.images[ambient_tex_gltf.source]
+                ambient_tex = get_texture_from_gltf_image(
+                    ambient_img_gltf, gltf
+                )
+            else:
+                ambient_tex = None
+
+            if material.normalTexture:
+                normal_tex_gltf = gltf.textures[material.normalTexture.index]
+                normal_img_gltf = gltf.images[normal_tex_gltf.source]
+                normal_tex = get_texture_from_gltf_image(
+                    normal_img_gltf, gltf
+                )
+            else:
+                normal_tex = None
+
+            if material.pbrMetallicRoughness.metallicRoughnessTexture:
+                specular_tex_gltf = gltf.textures[
+                    material.pbrMetallicRoughness.metallicRoughnessTexture.index
+                ]
+                specular_img_gltf = gltf.images[specular_tex_gltf.source]
+                specular_tex = get_texture_from_gltf_image(
+                    specular_img_gltf, gltf
+                )
+            else:
+                specular_tex = None
+
             material_data = {
                 "name": material.name,
+                "ambient_map": ambient_tex,
                 "diffuse": material.pbrMetallicRoughness.baseColorFactor[:3],
-                "diffuse_map": diffuse_tex
+                "diffuse_map": diffuse_tex,
+                "specular_map": specular_tex,
+                "specular_exponent": \
+                    material.pbrMetallicRoughness.roughnessFactor,
+                "normal_map": normal_tex,
             }
             model_data["materials_data"].append(material_data)
 

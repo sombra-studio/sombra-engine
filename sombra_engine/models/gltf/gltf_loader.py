@@ -1,6 +1,8 @@
+from collections.abc import Callable
 from pyglet.gl import GL_TRIANGLES
 from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
+from pyglet.image import Texture
 from pyglet.math import Mat4, Vec2, Vec3
 
 from sombra_engine.models import Bone, Model, SkeletalMesh
@@ -9,6 +11,7 @@ from sombra_engine.primitives import (
     Triangle, Vertex, VertexGroup
 )
 from sombra_engine.models.gltf import GLTFParser
+from sombra_engine import utils
 
 
 def get_triangles_from_data(data: dict) -> list[Triangle]:
@@ -20,7 +23,10 @@ def get_triangles_from_data(data: dict) -> list[Triangle]:
             index = data["indices"][tri_num * 3 + i]
             position: Vec3 = Vec3(*data["positions"][index])
             normal: Vec3 = Vec3(*data["normals"][index])
-            tex_coords: Vec2 = Vec2(*data["tex_coords"][index])
+            # Flip Vertical texture coordinates!
+            uvs = data["tex_coords"][index]
+            v_coord = int(uvs[1]) + (1 - (uvs[1] % 1))
+            tex_coords: Vec2 = Vec2(uvs[0], v_coord)
             vertex = Vertex(
                 position=position,
                 normal=normal,
@@ -31,6 +37,17 @@ def get_triangles_from_data(data: dict) -> list[Triangle]:
         triangles.append(new_triangle)
     return triangles
 
+
+def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
+    if map_name in data and data[map_name]:
+        if map_name == 'bump_map':
+            data["has_bump_map"] = True
+        elif map_name == 'specular_map':
+            data["has_specular_map"] = True
+        elif map_name == 'normal_map':
+            data["has_normal_map"] = True
+    else:
+        data[map_name] = default_tex_func()
 
 
 class GLTFLoader:
@@ -70,12 +87,28 @@ class GLTFLoader:
         # Create materials
         materials_list = []
         for idx, material_data in enumerate(parsed_data["materials_data"]):
-            name = material_data["name"]
-            material = Material(
-                material_id=idx,
-                name=name,
-                diffuse=material_data["diffuse"],
+            set_map(
+                material_data,
+                map_name='ambient_map',
+                default_tex_func=utils.create_white_tex
             )
+            set_map(
+                material_data,
+                map_name='diffuse_map',
+                default_tex_func=utils.create_white_tex
+            )
+            set_map(
+                material_data,
+                map_name='specular_map',
+                default_tex_func=utils.create_black_tex
+            )
+            set_map(
+                material_data,
+                map_name='normal_map',
+                default_tex_func=utils.create_blue_tex
+            )
+
+            material = Material(material_id=idx, **material_data)
             materials_list.append(material)
 
         # Create vertex group data

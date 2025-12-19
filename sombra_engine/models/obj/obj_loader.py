@@ -2,7 +2,7 @@ from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram
 
 
-from sombra_engine.models import Mesh, Model, SkeletalMesh
+from sombra_engine.models import Mesh, Model
 from .obj_parser import OBJParser
 from sombra_engine.primitives import VertexGroup
 
@@ -32,7 +32,6 @@ class OBJLoader:
                 )
             # Create Mesh
             new_mesh = Mesh(
-            # new_mesh = SkeletalMesh(
                 mesh_data['name'],
                 vertex_groups=vertex_groups,
                 materials=obj_parser.materials,
