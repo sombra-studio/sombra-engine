@@ -79,13 +79,16 @@ void main() {
     vec3 v = normalize(eye - frag_pos);
     vec3 h = normalize(l + v);
     float spec_factor = clamp(dot(h, norm), 0.0, 1.0);
-    vec3 Ks;
+    float Ks;
     if (material.has_specular_map) {
-        Ks = texture(specular_map, frag_tex_coords).rgb;
+        Ks = texture(specular_map, frag_tex_coords).g;
     } else {
-        Ks = material.specular;
+        Ks = material.specular.x;
     }
-    vec3 specular_intensity = Ks * pow(spec_factor, material.specular_exponent);
+    float specular_exponent = max(material.specular_exponent, 40);
+    vec3 specular_intensity = (
+        vec3(1.0, 1.0, 1.0) * Ks * pow(spec_factor, specular_exponent)
+    );
 
     vec3 color = light.color * (
         ambient * diffuse + (1.0 - ambient_alpha) * lambert * diffuse +
