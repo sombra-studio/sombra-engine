@@ -162,9 +162,17 @@ class GLTFParser:
             else:
                 normal_tex = None
 
-            if material.pbrMetallicRoughness.metallicRoughnessTexture:
+            if (
+                material.extensions and
+                'KHR_materials_specular' in material.extensions and
+                material.extensions['KHR_materials_specular'] and
+                'specularTexture' in material.extensions[
+                    'KHR_materials_specular'
+                ]
+            ):
+                specular_data = material.extensions['KHR_materials_specular']
                 specular_tex_gltf = gltf.textures[
-                    material.pbrMetallicRoughness.metallicRoughnessTexture.index
+                    specular_data['specularTexture']['index']
                 ]
                 specular_img_gltf = gltf.images[specular_tex_gltf.source]
                 specular_tex = get_texture_from_gltf_image(
