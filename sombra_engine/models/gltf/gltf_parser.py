@@ -68,8 +68,17 @@ def get_dense_data(gltf: GLTF2, accessor: Accessor):
     return result
 
 
-def get_texture_from_gltf_image(img_gltf, gltf) -> Texture:
-    fmt = img_gltf.mimeType.split('/')[-1]
+def get_texture_from_gltf_image(img_gltf, gltf, root_path='') -> Texture:
+    # if this has a uri just open that
+    if img_gltf.uri:
+        filename = root_path + img_gltf.uri
+        tex = pyglet.image.load(filename).get_texture()
+        return tex
+
+    if img_gltf.mimeType:
+        fmt = img_gltf.mimeType.split('/')[-1]
+    else:
+        fmt = 'png'
     buffer_view = gltf.bufferViews[img_gltf.bufferView]
     offset = buffer_view.byteOffset
     length = buffer_view.byteLength
@@ -87,6 +96,8 @@ def get_texture_from_gltf_image(img_gltf, gltf) -> Texture:
 class GLTFParser:
     @staticmethod
     def parse(filename: str, scale: float = 1.0) -> dict:
+        idx = filename[::-1].find('/')
+        root_path = filename[:-idx]
         model_data = {
             "meshes_data": [],
             "materials_data": []
@@ -137,7 +148,7 @@ class GLTFParser:
                 ]
                 diffuse_img_gltf = gltf.images[diffuse_tex_gltf.source]
                 diffuse_tex = get_texture_from_gltf_image(
-                    diffuse_img_gltf, gltf
+                    diffuse_img_gltf, gltf, root_path=root_path
                 )
             else:
                 diffuse_tex = None
@@ -148,7 +159,7 @@ class GLTFParser:
                 ]
                 ambient_img_gltf = gltf.images[ambient_tex_gltf.source]
                 ambient_tex = get_texture_from_gltf_image(
-                    ambient_img_gltf, gltf
+                    ambient_img_gltf, gltf, root_path=root_path
                 )
             else:
                 ambient_tex = None
@@ -157,7 +168,7 @@ class GLTFParser:
                 normal_tex_gltf = gltf.textures[material.normalTexture.index]
                 normal_img_gltf = gltf.images[normal_tex_gltf.source]
                 normal_tex = get_texture_from_gltf_image(
-                    normal_img_gltf, gltf
+                    normal_img_gltf, gltf, root_path=root_path
                 )
             else:
                 normal_tex = None
@@ -176,7 +187,7 @@ class GLTFParser:
                 ]
                 specular_img_gltf = gltf.images[specular_tex_gltf.source]
                 specular_tex = get_texture_from_gltf_image(
-                    specular_img_gltf, gltf
+                    specular_img_gltf, gltf, root_path=root_path
                 )
             else:
                 specular_tex = None
