@@ -66,10 +66,12 @@ class Stats(Widget):
             self.time_to_update_debug = TIME_TO_UPDATE_DEBUG
             ram_used = self.process.memory_info().rss / (1024 * 1024)  # in MB
             self.memory_label.text = f"{round(ram_used, 2)} MB"
+            self.memory_label.invalidate()
             self.invalidate()
 
         super().update(dt)
 
     def set_tri_counts(self, tri_count: int):
         self.tri_count_label.text = f"{tri_count:,} triangles"
+        self.tri_count_label.invalidate()
         self.invalidate()
