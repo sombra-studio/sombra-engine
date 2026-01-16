@@ -1,9 +1,7 @@
 from importlib.resources import files
 import pyglet
-from pyglet.gl import *
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import VertexList
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Vec4
 
 
@@ -37,7 +35,7 @@ class Wireframe:
         self.program['color'] = color
         self.vertex_lists = self.create_vertex_lists()
 
-    def create_vertex_lists(self) -> list[VertexList]:
+    def create_vertex_lists(self):
         """
         This method creates a vertex list for each vertex group and returns all
         of them in a list.
@@ -55,7 +53,7 @@ class Wireframe:
                 for v in triangle.vertices:
                     position_list += [v.position.x, v.position.y, v.position.z]
             vl = self.program.vertex_list(
-                len(vg.triangles) * 3, GL_TRIANGLES,
+                len(vg.triangles) * 3, GeometryMode.TRIANGLES,
                 batch=self.batch, group=group,
                 position=('f', position_list)
             )
@@ -64,4 +62,4 @@ class Wireframe:
 
     def draw(self):
         for vl in self.vertex_lists:
-            vl.draw(GL_TRIANGLES)
+            vl.draw(GeometryMode.TRIANGLES)

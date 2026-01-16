@@ -1,5 +1,4 @@
-from pyglet.graphics import Group
-from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics import Group, ShaderProgram
 from pyglet.math import Mat4
 
 

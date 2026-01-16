@@ -23,7 +23,7 @@ class Stats(Widget):
         self.fps_label.font_size = DEBUG_FONT_SIZE
         debug_label_style = FontStyle(
             font_size=DEBUG_FONT_SIZE,
-            weight=pudu_ui.styles.fonts.Weight.BOLD,
+            weight="bold",
             color=pudu_ui.colors.Color(0, 127, 0),
             opacity=127
         )

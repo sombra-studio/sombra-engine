@@ -1,8 +1,6 @@
 from importlib.resources import files
-from pyglet.gl import GL_TRIANGLES
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import VertexList
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Mat4
 
 
@@ -30,7 +28,7 @@ class SkeletalMesh(Mesh):
         vertex_groups: dict[str, VertexGroup] = None,
         materials: dict[str, Material] = None,
         root_bone: Bone = None,
-        mode: int = GL_TRIANGLES,
+        mode: int = GeometryMode.TRIANGLES,
         batch: Batch = None,
         group: Group = None,
         program: ShaderProgram = None,
@@ -79,7 +77,7 @@ class SkeletalMesh(Mesh):
             groups[name] = new_group
         return groups
 
-    def create_vertex_lists(self) -> list[VertexList]:
+    def create_vertex_lists(self):
         # first calculate normals
         self.calculate_normals()
 

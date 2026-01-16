@@ -1,5 +1,4 @@
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics import Batch, Group, ShaderProgram
 
 
 from sombra_engine.models import Mesh, Model

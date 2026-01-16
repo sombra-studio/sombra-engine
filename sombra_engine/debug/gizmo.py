@@ -1,6 +1,6 @@
 from importlib.resources import files
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import Shader, ShaderProgram
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 import pyglet
 
 
@@ -23,7 +23,7 @@ class Gizmo:
             batch = pyglet.graphics.get_default_batch()
         self.batch = batch
         self.program = ShaderProgram(vs, fs)
-        self.mode = pyglet.gl.GL_LINES
+        self.mode = GeometryMode.LINES
         self.vertex_list = self.program.vertex_list(
             6, self.mode, batch=self.batch, group=group,
             position=(

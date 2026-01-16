@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "sombra-engine"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="Jesus Henriquez" },
 ]
@@ -12,9 +12,8 @@ description = "Small 3D game engine used at Sombra Studio"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "psutil==7.1.3",
-    "pudu-ui==0.1.2",
-    "pygltflib>=1.16.5",
+    "psutil>=7.1.3",
+    "pudu-ui>=0.1.2",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

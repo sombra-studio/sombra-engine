@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pyglet.math import Vec3
-from pyglet.image import Texture
+from pyglet.graphics import Texture
 
 
 @dataclass

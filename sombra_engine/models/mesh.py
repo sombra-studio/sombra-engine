@@ -1,8 +1,6 @@
 from importlib.resources import files
-from pyglet.gl import *
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import VertexList
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Vec2, Vec3
 import pyglet
 
@@ -18,7 +16,7 @@ class Mesh(SceneObject):
         name: str,
         vertex_groups: dict[str, VertexGroup] = None,
         materials: dict[str, Material] = None,
-        mode: int = GL_TRIANGLES,
+        mode: int = GeometryMode.TRIANGLES,
         batch: Batch = None,
         group: Group = None,
         program: ShaderProgram = None,
@@ -121,7 +119,7 @@ class Mesh(SceneObject):
             groups[name] = new_group
         return groups
 
-    def create_vertex_lists(self) -> list[VertexList]:
+    def create_vertex_lists(self):
         """
         This method creates a vertex list for each vertex group using the
         Shader Program that this Mesh currently has, and returns all

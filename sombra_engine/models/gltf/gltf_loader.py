@@ -1,8 +1,7 @@
 from collections.abc import Callable
-from pyglet.gl import GL_TRIANGLES
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import ShaderProgram
-from pyglet.image import Texture
+
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3
 
 from sombra_engine.models import Bone, Model, SkeletalMesh
@@ -56,7 +55,7 @@ class GLTFLoader:
         filename: str,
         name: str | None = None,
         scale: float = 1.0,
-        mode: int = GL_TRIANGLES,
+        mode: int = GeometryMode.TRIANGLES,
         batch: Batch = None,
         group: Group = None,
         program: ShaderProgram = None,
@@ -121,7 +120,8 @@ class GLTFLoader:
                 vg_data = {
                     "name": vg_name,
                     "triangles": triangles,
-                    "material": materials_list[primitive_data["material"]],
+                    # "material": materials_list[primitive_data["material"]],
+                    "material": Material(i)
                 }
                 vertex_groups_data[vg_name] = vg_data
             meshes_data[name] = {

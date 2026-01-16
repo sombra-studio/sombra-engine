@@ -1,6 +1,6 @@
 from pudu_ui import Params
 from pyglet.event import EVENT_HANDLED
-from pyglet.gl import (
+from pyglet.graphics.api.gl.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
     glDisable, glEnable
 )
@@ -24,7 +24,7 @@ class App(Window):
         super().__init__(caption=caption, vsync=False)
         self.is_debug = is_debug
         self.camera = FPSCamera(
-            self, position=Vec3(0.0, 0.0, 15.0), pitch=90, yaw=-90
+            self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
         )
         self.batch = Batch()
         self.debug_group = Group()
