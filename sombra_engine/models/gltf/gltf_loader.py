@@ -73,19 +73,23 @@ class GLTFLoader:
         #           "positions": [(132.4, 427.2, 12.3), (...), ...]
         #       }
         #     ],
-        #     "materials_data": [
-        #       {
+        #     "materials_data": {
+        #       "Wood": {
         #           "name": "Wood",
         #           "diffuse_color": (1.0, 1.0, 1.0, 1.0)
+        #       },
+        #       "Stone": {
+        #           ....
         #       }
-        #     ]
+        #     }
         # }
         parsed_data = GLTFParser.parse(filename, scale=scale)
         meshes_data = {}
 
         # Create materials
-        materials_list = []
-        for idx, material_data in enumerate(parsed_data["materials_data"]):
+        materials_dict = {}
+        idx = 1
+        for name, material_data in parsed_data["materials_data"].items():
             set_map(
                 material_data,
                 map_name='ambient_map',
@@ -108,7 +112,8 @@ class GLTFLoader:
             )
 
             material = Material(material_id=idx, **material_data)
-            materials_list.append(material)
+            idx += 1
+            materials_dict[name] = material
 
         # Create vertex group data
         for data in parsed_data["meshes_data"]:
@@ -120,8 +125,7 @@ class GLTFLoader:
                 vg_data = {
                     "name": vg_name,
                     "triangles": triangles,
-                    # "material": materials_list[primitive_data["material"]],
-                    "material": Material(i)
+                    "material": materials_dict[primitive_data['material_name']]
                 }
                 vertex_groups_data[vg_name] = vg_data
             meshes_data[name] = {

@@ -19,7 +19,7 @@ class GLTFParser:
         root_path = filename[:-idx]
         model_data = {
             "meshes_data": [],
-            "materials_data": []
+            "materials_data": {}
         }
         scene = gltf.load_gltf(filename)
 
@@ -57,73 +57,69 @@ class GLTFParser:
                         ) for pos in positions
                     ]
 
-                primitive_data['material'] = primitive.material
+                primitive_data['material_name'] = primitive.material.name
 
                 mesh_data["primitives"].append(primitive_data)
             model_data["meshes_data"].append(mesh_data)
 
         # Parse materials data
-        # for material in gltf.materials:
-        #     if material.pbrMetallicRoughness.baseColorTexture:
-        #         diffuse_tex_gltf = gltf.textures[
-        #             material.pbrMetallicRoughness.baseColorTexture.index
-        #         ]
-        #         diffuse_img_gltf = gltf.images[diffuse_tex_gltf.source]
-        #         diffuse_tex = get_texture_from_gltf_image(
-        #             diffuse_img_gltf, gltf, root_path=root_path
-        #         )
-        #     else:
-        #         diffuse_tex = None
-        #
-        #     if material.occlusionTexture:
-        #         ambient_tex_gltf = gltf.textures[
-        #             material.occlusionTexture.index
-        #         ]
-        #         ambient_img_gltf = gltf.images[ambient_tex_gltf.source]
-        #         ambient_tex = get_texture_from_gltf_image(
-        #             ambient_img_gltf, gltf, root_path=root_path
-        #         )
-        #     else:
-        #         ambient_tex = None
-        #
-        #     if material.normalTexture:
-        #         normal_tex_gltf = gltf.textures[material.normalTexture.index]
-        #         normal_img_gltf = gltf.images[normal_tex_gltf.source]
-        #         normal_tex = get_texture_from_gltf_image(
-        #             normal_img_gltf, gltf, root_path=root_path
-        #         )
-        #     else:
-        #         normal_tex = None
-        #
-        #     if (
-        #         material.extensions and
-        #         'KHR_materials_specular' in material.extensions and
-        #         material.extensions['KHR_materials_specular'] and
-        #         'specularTexture' in material.extensions[
-        #             'KHR_materials_specular'
-        #         ]
-        #     ):
-        #         specular_data = material.extensions['KHR_materials_specular']
-        #         specular_tex_gltf = gltf.textures[
-        #             specular_data['specularTexture']['index']
-        #         ]
-        #         specular_img_gltf = gltf.images[specular_tex_gltf.source]
-        #         specular_tex = get_texture_from_gltf_image(
-        #             specular_img_gltf, gltf, root_path=root_path
-        #         )
-        #     else:
-        #         specular_tex = None
-        #
-        #     material_data = {
-        #         "name": material.name,
-        #         "ambient_map": ambient_tex,
-        #         "diffuse": material.pbrMetallicRoughness.baseColorFactor[:3],
-        #         "diffuse_map": diffuse_tex,
-        #         "specular_map": specular_tex,
-        #         "specular_exponent": \
-        #             material.pbrMetallicRoughness.roughnessFactor,
-        #         "normal_map": normal_tex,
-        #     }
-        #     model_data["materials_data"].append(material_data)
+        for material in scene.materials:
+            if material.base_color_texture:
+                diffuse_tex_gltf = scene.textures[
+                    material.base_color_texture['index']
+                ]
+                diffuse_tex = diffuse_tex_gltf.image.read().get_texture()
+            else:
+                diffuse_tex = None
+
+            if material.occlusion_texture:
+                ambient_tex_gltf = scene.textures[
+                    material.occlusion_texture['index']
+                ]
+                ambient_tex = ambient_tex_gltf.image.read().get_texture()
+            else:
+                ambient_tex = None
+
+            if material.normal_texture:
+                normal_tex_gltf = scene.textures[
+                    material.normal_texture['index']
+                ]
+                normal_tex = normal_tex_gltf.image.read().get_texture()
+            else:
+                normal_tex = None
+
+            if (
+                material.extensions and
+                'KHR_materials_specular' in material.extensions and
+                material.extensions['KHR_materials_specular'] and
+                'specularTexture' in material.extensions[
+                    'KHR_materials_specular'
+                ]
+            ):
+                specular_data = material.extensions['KHR_materials_specular']
+                specular_tex_gltf = scene.textures[
+                    specular_data['specularTexture']['index']
+                ]
+                specular_tex = specular_tex_gltf.image.read().get_texture()
+            else:
+                if material.metallic_roughness_texture:
+                    specular_tex_gltf = scene.textures[
+                        material.metallic_roughness_texture['index']
+                    ]
+                    specular_tex = specular_tex_gltf.image.read().get_texture()
+                else:
+                    specular_tex = None
+
+            specular_exponent = 120
+            material_data = {
+                "name": material.name,
+                "ambient_map": ambient_tex,
+                "diffuse": material.base_color_factor[:3],
+                "diffuse_map": diffuse_tex,
+                "specular_map": specular_tex,
+                "specular_exponent": specular_exponent,
+                "normal_map": normal_tex,
+            }
+            model_data["materials_data"][material.name] = material_data
 
         return model_data
