@@ -2,7 +2,10 @@ from pyglet.model.codecs import gltf
 
 
 def group_in_ms(l: list, m: int) -> list:
-    return [l[i: i + m] for i in range(len(l) // m)]
+    new_list = []
+    for i in range(0, len(l), m):
+        new_list.append(l[i:i + m])
+    return new_list
 
 def group_in_3s(l: list) -> list:
     return group_in_ms(l=l, m=3)
@@ -35,19 +38,16 @@ class GLTFParser:
                 for attribute in primitive.attributes:
                     match attribute.name:
                         case 'POSITION':
-                            n = attribute.count
                             primitive_data['positions'] = group_in_3s(
-                                attribute.array
+                                tuple(attribute.array)
                             )
                         case 'NORMAL':
-                            n = attribute.count
                             primitive_data['normals'] = group_in_3s(
-                                attribute.array
+                                tuple(attribute.array)
                             )
                         case 'TEXCOORD_0':
-                            n = attribute.count
                             primitive_data['tex_coords'] = group_in_2s(
-                                attribute.array
+                                tuple(attribute.array)
                             )
 
                 if scale != 1.0:
