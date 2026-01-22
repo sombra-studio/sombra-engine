@@ -16,7 +16,7 @@ class Mesh(SceneObject):
         name: str,
         vertex_groups: dict[str, VertexGroup] = None,
         materials: dict[str, Material] = None,
-        mode: int = GeometryMode.TRIANGLES,
+        mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch = None,
         group: Group = None,
         program: ShaderProgram = None,

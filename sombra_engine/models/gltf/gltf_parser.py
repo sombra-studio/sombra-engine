@@ -39,22 +39,22 @@ class GLTFParser:
                     match attribute.name:
                         case 'POSITION':
                             primitive_data['positions'] = group_in_3s(
-                                tuple(attribute.array)
+                                attribute.array
                             )
                         case 'NORMAL':
                             primitive_data['normals'] = group_in_3s(
-                                tuple(attribute.array)
+                                attribute.array
                             )
                         case 'TEXCOORD_0':
                             primitive_data['tex_coords'] = group_in_2s(
-                                tuple(attribute.array)
+                                attribute.array
                             )
 
                 if scale != 1.0:
-                    positions = [
+                    primitive_data['positions'] = [
                         tuple(
                             value * scale for value in pos
-                        ) for pos in positions
+                        ) for pos in primitive_data['positions']
                     ]
 
                 primitive_data['material_name'] = primitive.material.name

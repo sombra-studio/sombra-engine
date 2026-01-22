@@ -33,23 +33,17 @@ wheels = [
 [[package]]
 name = "pudu-ui"
 version = "0.1.3"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../pudu-ui" }
 dependencies = [
     { name = "pyglet" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/27/1e/a33efbdb78be5463857875a3ecb928292c3496d5d0a2ecc074ac2bae0381/pudu_ui-0.1.3.tar.gz", hash = "sha256:ecd3c93709350ad367b82d32f8436b68c1e3ab77b59ad3cfb91c8bbefa1f7e67", size = 20974, upload-time = "2026-01-13T22:06:27.23Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/94/601a1f78ace45663719b9f4d5e5fd1e43397146448e08b0398eef36a7537/pudu_ui-0.1.3-py3-none-any.whl", hash = "sha256:ad83508a92465f9190be6cd8ca233abec2cfbfb6b26c84f68e9d3a7a971ff2f7", size = 29684, upload-time = "2026-01-13T22:06:25.988Z" },
-]
+
+[package.metadata]
+requires-dist = [{ name = "pyglet" }]
 
 [[package]]
 name = "pyglet"
-version = "2.1.12"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/07/6c/4bf476a1522d8293565f801ef305f2932148950b552df866a771c884ddaf/pyglet-2.1.12.tar.gz", hash = "sha256:bd7a750b2a5beaf0d2dd4bf4052d96e711ecd00ad29dada889b1f8374285b5f6", size = 6594600, upload-time = "2026-01-07T11:45:23.453Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/eb/872c18852bc1b9f39e7a14e992ebdc0bb6535227b2828a2bb737f6aa81b3/pyglet-2.1.12-py3-none-any.whl", hash = "sha256:875052fcfe1fbdd32272b0f57c4b3da908e727da7c98cf29485f10672607d327", size = 1032686, upload-time = "2026-01-07T11:45:18.585Z" },
-]
+source = { editable = "../pyglet" }
 
 [[package]]
 name = "sombra-engine"
@@ -58,10 +52,12 @@ source = { editable = "." }
 dependencies = [
     { name = "psutil" },
     { name = "pudu-ui" },
+    { name = "pyglet" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "psutil", specifier = ">=7.1.3" },
-    { name = "pudu-ui", specifier = ">=0.1.2" },
+    { name = "pudu-ui", editable = "../pudu-ui" },
+    { name = "pyglet", editable = "../pyglet" },
 ]

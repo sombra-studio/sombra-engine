@@ -1,3 +1,4 @@
+from importlib.resources import files
 from pyglet.math import Vec3
 import pyglet
 
@@ -6,8 +7,25 @@ from sombra_engine.models.gltf import GLTFLoader
 from sombra_engine import App, Scene
 
 
+pyglet.options['debug_gl_shaders'] = True
+
+pyglet.resource.path.append("./tests/data/")
+pyglet.resource.path.append("./tests/data/Avocado/")
+pyglet.resource.reindex()
+
 app = App(is_debug=True)
-shader_program = None
+
+vs_src = files('sombra_engine.shaders').joinpath(
+    'skeletal.vert'
+).read_text()
+vert_shader = pyglet.graphics.Shader(vs_src, 'vertex')
+
+fs_src = files('sombra_engine.shaders').joinpath(
+    # 'blinn_barycentric.frag'
+    'normals_with_map.frag'
+).read_text()
+frag_shader = pyglet.graphics.Shader(fs_src, 'fragment')
+shader_program = pyglet.graphics.ShaderProgram(vert_shader, frag_shader)
 
 
 def update(dt: float):
@@ -22,8 +40,13 @@ def update(dt: float):
 if __name__ == '__main__':
     batch = app.batch
     model = GLTFLoader.load(
-        filename='tests/data/yoda/yoda.glb',
-        scale=0.001,
+        # filename='tests/data/yoda/yoda.glb',
+        # scale=0.001,
+        # filename='zombie.glb',
+        # filename='plane.gltf',
+        program=shader_program,
+        filename='Avocado.gltf',
+        scale=20.0,
         batch=batch
     )
 
@@ -32,7 +55,7 @@ if __name__ == '__main__':
     scene.create_light(Vec3(10.0, 8.0, 0.0), Vec3(1.0, 1.0, 1.0))
 
     program = model.meshes[0].program
-    shader_program = program
+    # shader_program = program
     if 'light.position' in program._uniforms:
         program['light.position'] = scene.lights[0].position
     if 'light.color' in program._uniforms:
