@@ -149,22 +149,10 @@ class GLTFLoader:
                 # iterate bones hierarchy
 
             # Create mesh
-            mesh = Mesh(
-                name=mesh_name,
-                vertex_groups=vertex_groups,
-                materials=materials,
-                mode=mode,
-                batch=batch,
-                group=group,
-                program=program,
-                transform=transform,
-                parent=parent
-            )
-            # mesh = SkeletalMesh(
+            # mesh = Mesh(
             #     name=mesh_name,
             #     vertex_groups=vertex_groups,
             #     materials=materials,
-            #     root_bone=root,
             #     mode=mode,
             #     batch=batch,
             #     group=group,
@@ -172,6 +160,18 @@ class GLTFLoader:
             #     transform=transform,
             #     parent=parent
             # )
+            mesh = SkeletalMesh(
+                name=mesh_name,
+                vertex_groups=vertex_groups,
+                materials=materials,
+                root_bone=root,
+                mode=mode,
+                batch=batch,
+                group=group,
+                program=program,
+                transform=transform,
+                parent=parent
+            )
             meshes.append(mesh)
 
         model = Model(

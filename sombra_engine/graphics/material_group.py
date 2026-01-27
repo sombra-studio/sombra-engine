@@ -1,5 +1,6 @@
 from pyglet.graphics import Group, ShaderGroup, ShaderProgram
 from pyglet.math import Mat4
+from typing import Any
 
 
 from sombra_engine.primitives import Material
@@ -49,6 +50,10 @@ class MaterialGroup(ShaderGroup):
                 self.normal_map = create_blue_tex()
             self.set_texture(self.normal_map, 3)
 
+        uniforms = self.get_uniforms()
+        self.set_shader_uniforms(program, uniforms)
+
+    def get_uniforms(self) -> dict[str, Any]:
         # Uniforms from material
         uniforms = {}
         if 'material.ambient' in self.program._uniforms:
@@ -80,6 +85,4 @@ class MaterialGroup(ShaderGroup):
 
         if 'model' in self.program._uniforms:
             uniforms['model'] = self.matrix
-
-        self.set_shader_uniforms(program, uniforms)
-
+        return uniforms
