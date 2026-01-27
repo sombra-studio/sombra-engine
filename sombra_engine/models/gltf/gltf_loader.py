@@ -4,7 +4,7 @@ from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3
 
-from sombra_engine.models import Bone, Model, SkeletalMesh
+from sombra_engine.models import Bone, Model, SkeletalMesh, Mesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform,
     Triangle, Vertex, VertexGroup
@@ -55,7 +55,7 @@ class GLTFLoader:
         filename: str,
         name: str | None = None,
         scale: float = 1.0,
-        mode: int = GeometryMode.TRIANGLES,
+        mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch = None,
         group: Group = None,
         program: ShaderProgram = None,
@@ -149,11 +149,10 @@ class GLTFLoader:
                 # iterate bones hierarchy
 
             # Create mesh
-            mesh = SkeletalMesh(
+            mesh = Mesh(
                 name=mesh_name,
                 vertex_groups=vertex_groups,
                 materials=materials,
-                root_bone=root,
                 mode=mode,
                 batch=batch,
                 group=group,
@@ -161,6 +160,18 @@ class GLTFLoader:
                 transform=transform,
                 parent=parent
             )
+            # mesh = SkeletalMesh(
+            #     name=mesh_name,
+            #     vertex_groups=vertex_groups,
+            #     materials=materials,
+            #     root_bone=root,
+            #     mode=mode,
+            #     batch=batch,
+            #     group=group,
+            #     program=program,
+            #     transform=transform,
+            #     parent=parent
+            # )
             meshes.append(mesh)
 
         model = Model(

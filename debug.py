@@ -15,17 +15,20 @@ pyglet.resource.reindex()
 
 app = App(is_debug=True)
 
-vs_src = files('sombra_engine.shaders').joinpath(
-    'skeletal.vert'
-).read_text()
-vert_shader = pyglet.graphics.Shader(vs_src, 'vertex')
-
-fs_src = files('sombra_engine.shaders').joinpath(
-    # 'blinn_barycentric.frag'
-    'normals_with_map.frag'
-).read_text()
-frag_shader = pyglet.graphics.Shader(fs_src, 'fragment')
-shader_program = pyglet.graphics.ShaderProgram(vert_shader, frag_shader)
+# vs_src = files('sombra_engine.shaders').joinpath(
+#     'skeletal.vert'
+#     # 'normals.vert'
+# ).read_text()
+# vert_shader = pyglet.graphics.Shader(vs_src, 'vertex')
+#
+# fs_src = files('sombra_engine.shaders').joinpath(
+#     # 'blinn_barycentric.frag'
+#     'normals_with_map.frag'
+#     # 'normals.frag'
+# ).read_text()
+# frag_shader = pyglet.graphics.Shader(fs_src, 'fragment')
+# shader_program = pyglet.graphics.ShaderProgram(vert_shader, frag_shader)
+shader_program = None
 
 
 def update(dt: float):
@@ -42,11 +45,11 @@ if __name__ == '__main__':
     model = GLTFLoader.load(
         # filename='tests/data/yoda/yoda.glb',
         # scale=0.001,
-        # filename='zombie.glb',
+        filename='zombie.glb',
         # filename='plane.gltf',
-        program=shader_program,
-        filename='Avocado.gltf',
-        scale=20.0,
+        # program=shader_program,
+        # filename='Avocado.gltf',
+        # scale=20.0,
         batch=batch
     )
 
