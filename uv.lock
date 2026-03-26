@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyglet" }]
+requires-dist = [{ name = "pyglet", editable = "../pyglet" }]
 
 [[package]]
 name = "pyglet"
