@@ -2,9 +2,9 @@ from collections.abc import Callable
 
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
-from pyglet.math import Mat4, Vec2, Vec3
+from pyglet.math import Mat4, Vec2, Vec3, Vec4
 
-from sombra_engine.models import Bone, Model, SkeletalMesh, Mesh
+from sombra_engine.models import Bone, Model, SkeletalMesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform,
     Triangle, Vertex, VertexGroup
@@ -26,10 +26,23 @@ def get_triangles_from_data(data: dict) -> list[Triangle]:
             uvs = data["tex_coords"][index]
             v_coord = int(uvs[1]) + (1 - (uvs[1] % 1))
             tex_coords: Vec2 = Vec2(uvs[0], v_coord)
+
+            if "joints" in data:
+                bones_ids: tuple = tuple(data["joints"][index][:4])
+            else:
+                bones_ids: tuple = (0, 0, 0, 0)
+
+            if "weights" in data:
+                weights: Vec4 = Vec4(*data["weights"][index])
+            else:
+                weights: Vec4 = Vec4(1.0)
+
             vertex = Vertex(
                 position=position,
                 normal=normal,
                 tex_coords=tex_coords,
+                bones_ids=bones_ids[:4],
+                weights=weights
             )
             new_vertices.append(vertex)
         new_triangle = Triangle(new_vertices)
@@ -148,18 +161,6 @@ class GLTFLoader:
             root = Bone(idx=1, name="root", local_bind_transform=Mat4())
                 # iterate bones hierarchy
 
-            # Create mesh
-            # mesh = Mesh(
-            #     name=mesh_name,
-            #     vertex_groups=vertex_groups,
-            #     materials=materials,
-            #     mode=mode,
-            #     batch=batch,
-            #     group=group,
-            #     program=program,
-            #     transform=transform,
-            #     parent=parent
-            # )
             mesh = SkeletalMesh(
                 name=mesh_name,
                 vertex_groups=vertex_groups,

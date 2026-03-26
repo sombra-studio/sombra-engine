@@ -49,6 +49,14 @@ class GLTFParser:
                             primitive_data['tex_coords'] = group_in_2s(
                                 attribute.array
                             )
+                        case 'WEIGHTS_0':
+                            primitive_data['weights'] = group_in_ms(
+                                attribute.array, 4
+                            )
+                        case 'JOINTS_0':
+                            primitive_data['joints'] = group_in_ms(
+                                attribute.array, 4
+                            )
 
                 if scale != 1.0:
                     primitive_data['positions'] = [
