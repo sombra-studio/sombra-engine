@@ -30,6 +30,8 @@ class GLTFParser:
         for mesh in scene.meshes:
             mesh_data = {
                 "primitives": [],
+                "skins": scene.skins,
+                "animations": scene.animations,
                 "name": mesh.name or "unnamed"
             }
             for primitive in mesh.primitives:

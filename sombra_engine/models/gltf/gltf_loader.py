@@ -62,6 +62,27 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
         data[map_name] = default_tex_func()
 
 
+def create_skeleton(data: dict) -> Bone:
+    root = Bone(idx=0, name="root", local_bind_transform=Mat4())
+    return root
+
+
+def load_animations(data: dict):
+    animations = []
+    for anim_data in data:
+        bones_count = len(anim_data.channels)
+        timesteps = anim_data.
+
+        rotations = np.zeros((bones_count, 4), dtype=np.float32)
+        translations = np.zeros((bones_count, 3), dtype=np.float32)
+        scales = np.zeros((bones_count, 3), dtype=np.float32)
+        for channel in anim_data.channels:
+            if channel.target.path == 'translation':
+                translations
+
+    return animations
+
+
 class GLTFLoader:
     @staticmethod
     def load(
@@ -141,8 +162,18 @@ class GLTFLoader:
                     "material": materials_dict[primitive_data['material_name']]
                 }
                 vertex_groups_data[vg_name] = vg_data
+
+            # Create bones
+            root = create_skeleton(data['skins'])
+            # iterate bones hierarchy
+
+            # Create animations
+            animations = load_animations(data['animations'])
+
             meshes_data[name] = {
-                'vertex_groups': vertex_groups_data
+                'vertex_groups': vertex_groups_data,
+                'root': root,
+                'animations': animations
             }
         meshes = []
 
@@ -157,15 +188,11 @@ class GLTFLoader:
                 )
                 materials[material.name] = material
 
-            # Create skeleton
-            root = Bone(idx=1, name="root", local_bind_transform=Mat4())
-                # iterate bones hierarchy
-
             mesh = SkeletalMesh(
                 name=mesh_name,
                 vertex_groups=vertex_groups,
                 materials=materials,
-                root_bone=root,
+                root_bone=mesh_data['root'],
                 mode=mode,
                 batch=batch,
                 group=group,
