@@ -4,21 +4,12 @@ from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Mat4
 
 
-from sombra_engine.animations import Animation
+from sombra_engine.animations import Animation, Skeleton
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, VertexGroup
 )
-
-
-class Bone:
-    def __init__(self, idx: int, name: str, local_bind_transform: Mat4):
-        self.idx = idx
-        self.name = name
-        self.local_bind_transform = local_bind_transform
-        self.inverse_bind_transform = None
-        self.children: list[Bone] = []
 
 
 class SkeletalMesh(Mesh):
@@ -27,7 +18,7 @@ class SkeletalMesh(Mesh):
         name: str,
         vertex_groups: dict[str, VertexGroup] = None,
         materials: dict[str, Material] = None,
-        root_bone: Bone = None,
+        skeleton: Skeleton = None,
         mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch = None,
         group: Group = None,
@@ -59,7 +50,7 @@ class SkeletalMesh(Mesh):
             transform=transform,
             parent=parent
         )
-        self.root_bone = root_bone
+        self.skeleton = skeleton
         self.time = 0.0
         self.animations: dict[str, Animation] = {}
         self.current_animation: Animation | None = None
@@ -175,13 +166,8 @@ class SkeletalMesh(Mesh):
         next_pose = self.current_animation.keyframes[next_idx].pose
 
         # interpolate between the two poses
-        bones_transforms = []
-        n = len(prev_pose.bones_transforms)
-        for i in range(n):
-            transform = Transform.interpolate(
-                prev_pose.bones_transforms[i],
-                next_pose.bones_transforms[i],
-                t
-            )
-            bones_transforms.append(transform)
+        curr_pose_translations = (
+            (1 - t) * prev_pose.translations + t * next_pose.translations
+        )
+        bones_transforms = [Mat4()]
         return bones_transforms

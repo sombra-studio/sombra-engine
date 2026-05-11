@@ -1,4 +1,5 @@
 from pudu_ui import Params
+import pudu_ui
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
@@ -6,7 +7,7 @@ from pyglet.graphics.api.gl.gl import (
 )
 from pyglet.graphics import Batch, Group
 from pyglet.math import Mat4, Vec3
-from pyglet.window import key, Window
+from pyglet.window import key
 import pyglet
 
 
@@ -15,7 +16,7 @@ from sombra_engine.debug import Gizmo, Stats
 from sombra_engine.models import Model
 
 
-class App(Window):
+class App(pudu_ui.App):
     def __init__(
         self,
         caption: str = "Sombra Engine",

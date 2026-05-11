@@ -12,9 +12,10 @@ description = "Small 3D game engine used at Sombra Studio"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "psutil>=7.1.3",
-    "pudu-ui",
-    "pyglet",
+    "numpy>=2.4.4",
+    "psutil==7.2.2",
+    "pudu-ui==0.2.1",
+    "pyglet>=3.0.dev3",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

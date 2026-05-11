@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-
-
-from sombra_engine.primitives import Transform
+import numpy as np
 
 
 @dataclass
 class Pose:
-    bones_transforms: list[Transform]
+    translations: np.ndarray
+    scales: np.ndarray
+    rotations: np.ndarray
 
 
 @dataclass

@@ -1,10 +1,12 @@
 from collections.abc import Callable
-
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3, Vec4
+from pyglet.model.codecs.gltf import Animation as AnimationData
 
-from sombra_engine.models import Bone, Model, SkeletalMesh
+
+from sombra_engine.animations import Animation, Bone, Keyframe, Skeleton
+from sombra_engine.models import Model, SkeletalMesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform,
     Triangle, Vertex, VertexGroup
@@ -62,23 +64,31 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
         data[map_name] = default_tex_func()
 
 
-def create_skeleton(data: dict) -> Bone:
-    root = Bone(idx=0, name="root", local_bind_transform=Mat4())
-    return root
+def create_skeleton(data: dict) -> Skeleton:
+    root = Bone(
+        idx=0,
+        name="root",
+        local_bind_transform=Mat4(),
+        inverse_bind_transform=Mat4(),
+        children=None
+    )
+    skeleton = Skeleton(bones=[root], root_idx=0)
+    return skeleton
+
+
+def parse_animation(anim_data: AnimationData) -> Animation:
+    length = 3.0
+    keyframes: list[Keyframe] = []
+    #for anim_channel
+    animation = Animation(keyframes, length)
+    return animation
 
 
 def load_animations(data: dict):
     animations = []
     for anim_data in data:
-        bones_count = len(anim_data.channels)
-        timesteps = anim_data.
-
-        rotations = np.zeros((bones_count, 4), dtype=np.float32)
-        translations = np.zeros((bones_count, 3), dtype=np.float32)
-        scales = np.zeros((bones_count, 3), dtype=np.float32)
-        for channel in anim_data.channels:
-            if channel.target.path == 'translation':
-                translations
+        animation = parse_animation(anim_data)
+        animations.append(animation)
 
     return animations
 
@@ -164,7 +174,7 @@ class GLTFLoader:
                 vertex_groups_data[vg_name] = vg_data
 
             # Create bones
-            root = create_skeleton(data['skins'])
+            skeleton = create_skeleton(data['skins'])
             # iterate bones hierarchy
 
             # Create animations
@@ -172,7 +182,7 @@ class GLTFLoader:
 
             meshes_data[name] = {
                 'vertex_groups': vertex_groups_data,
-                'root': root,
+                'skeleton': skeleton,
                 'animations': animations
             }
         meshes = []
@@ -192,7 +202,7 @@ class GLTFLoader:
                 name=mesh_name,
                 vertex_groups=vertex_groups,
                 materials=materials,
-                root_bone=mesh_data['root'],
+                skeleton=mesh_data['skeleton'],
                 mode=mode,
                 batch=batch,
                 group=group,

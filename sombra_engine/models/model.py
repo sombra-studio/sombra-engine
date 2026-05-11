@@ -1,10 +1,13 @@
-from sombra_engine.primitives import *
+from sombra_engine.primitives import Transform, SceneObject
 from .mesh import Mesh
 
 
 class Model:
     def __init__(
-        self, name: str, meshes: list[Mesh], transform: Transform = Transform(),
+        self,
+        name: str | None,
+        meshes: list[Mesh],
+        transform: Transform = Transform(),
         parent: SceneObject = None
     ):
         self.name = name
