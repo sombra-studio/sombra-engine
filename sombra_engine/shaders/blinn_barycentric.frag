@@ -1,9 +1,9 @@
-#version 420
+#version 410 core
 
-layout(binding = 0) uniform sampler2D ambient_map;
-layout(binding = 1) uniform sampler2D diffuse_map;
-layout(binding = 2) uniform sampler2D specular_map;
-layout(binding = 3) uniform sampler2D bump_map;
+uniform sampler2D ambient_map;
+uniform sampler2D diffuse_map;
+uniform sampler2D specular_map;
+uniform sampler2D bump_map;
 
 struct Material {
     vec3 diffuse;
