@@ -11,8 +11,12 @@ from sombra_engine.utils import (
 
 class MaterialGroup(ShaderGroup):
     def __init__(
-        self, material: Material, program: ShaderProgram, matrix: Mat4,
-        order: int = 0, parent: Group | None = None
+        self,
+        material: Material,
+        program: ShaderProgram,
+        matrix: Mat4 = Mat4(),
+        order: int = 0,
+        parent: Group | None = None
     ):
         super().__init__(program, order, parent)
         self.program = program

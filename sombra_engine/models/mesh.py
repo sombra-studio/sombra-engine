@@ -14,18 +14,22 @@ class Mesh(SceneObject):
     def __init__(
         self,
         name: str,
-        vertex_groups: dict[str, VertexGroup] = None,
-        materials: dict[str, Material] = None,
+        vertex_groups: dict[str, VertexGroup] | None = None,
+        materials: dict[str, Material] | None = None,
         mode: GeometryMode = GeometryMode.TRIANGLES,
-        batch: Batch = None,
-        group: Group = None,
-        program: ShaderProgram = None,
+        batch: Batch | None = None,
+        group: Group | None = None,
+        program: ShaderProgram | None = None,
         transform: Transform = Transform(),
-        parent: SceneObject = None
+        parent: SceneObject | None = None
     ):
         super().__init__(transform)
         self.name = name
+        if vertex_groups is None:
+            vertex_groups = {}
         self.vertex_groups = vertex_groups
+        if materials is None:
+            materials = {}
         self.materials = materials
         self.mode = mode
         self.batch = batch or pyglet.graphics.get_default_batch()

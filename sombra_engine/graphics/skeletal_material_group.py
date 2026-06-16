@@ -12,8 +12,12 @@ MAX_BONES = 100
 
 class SkeletalMaterialGroup(MaterialGroup):
     def __init__(
-        self, material: Material, program: ShaderProgram, matrix: Mat4,
-        order: int = 0, parent: Group = None
+        self,
+        material: Material,
+        program: ShaderProgram,
+        matrix: Mat4 = Mat4(),
+        order: int = 0,
+        parent: Group | None = None
     ):
         self.bones_transforms = []
         for i in range(MAX_BONES):

@@ -24,7 +24,7 @@ class SkeletalMesh(Mesh):
         group: Group = None,
         program: ShaderProgram = None,
         transform: Transform = Transform(),
-        parent: SceneObject = None
+        parent: SceneObject | None = None
     ):
         if not program:
             vs_src = files('sombra_engine.shaders').joinpath(
