@@ -60,6 +60,17 @@ class MaterialGroup(ShaderGroup):
     def get_uniforms(self) -> dict[str, Any]:
         # Uniforms from material
         uniforms = {}
+        # Explicitly assign sampler uniforms to their texture units
+        # (Required for GLSL 4.10 Core)
+        if 'ambient_map' in self.program._uniforms:
+            uniforms['ambient_map'] = 0
+        if 'diffuse_map' in self.program._uniforms:
+            uniforms['diffuse_map'] = 1
+        if 'specular_map' in self.program._uniforms:
+            uniforms['specular_map'] = 2
+        if 'bump_map' in self.program._uniforms:
+            uniforms['bump_map'] = 3
+
         if 'material.ambient' in self.program._uniforms:
             uniforms['material.ambient'] = self.material.ambient
 
