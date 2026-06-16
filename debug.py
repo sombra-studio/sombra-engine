@@ -45,7 +45,8 @@ if __name__ == '__main__':
     model = GLTFLoader.load(
         # filename='tests/data/yoda/yoda.glb',
         # scale=0.001,
-        filename='zombie.glb',
+        # filename='zombie.glb',
+        filename='box.glb',
         # filename='plane.gltf',
         # program=shader_program,
         # filename='Avocado.gltf',
