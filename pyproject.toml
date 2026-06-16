@@ -14,7 +14,7 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.4.4",
     "psutil==7.2.2",
-    "pudu-ui==0.2.1",
+    "pudu-ui>=0.2.3",
     "pyglet>=3.0.dev3",
 ]
 classifiers = [
@@ -32,10 +32,6 @@ Issues = "https://github.com/sombra-studio/sombra-engine/issues"
 [tool.uv.build-backend]
 module-name = "sombra_engine"
 module-root = ""
-
-[tool.uv.sources]
-pyglet = { path = "../pyglet", editable = true }
-pudu-ui = { path = "../pudu-ui", editable = true }
 #source-include = ["sombra_engine/shaders/**"]
 #source-exclude = ["tests/**", ]
 
