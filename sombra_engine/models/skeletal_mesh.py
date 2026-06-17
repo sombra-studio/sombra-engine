@@ -16,13 +16,13 @@ class SkeletalMesh(Mesh):
     def __init__(
         self,
         name: str,
-        vertex_groups: dict[str, VertexGroup] = None,
-        materials: dict[str, Material] = None,
-        skeleton: Skeleton = None,
+        vertex_groups: dict[str, VertexGroup],
+        materials: dict[str, Material],
+        skeleton: Skeleton,
         mode: GeometryMode = GeometryMode.TRIANGLES,
-        batch: Batch = None,
-        group: Group = None,
-        program: ShaderProgram = None,
+        batch: Batch | None = None,
+        group: Group | None = None,
+        program: ShaderProgram | None = None,
         transform: Transform = Transform(),
         parent: SceneObject | None = None
     ):
@@ -124,6 +124,27 @@ class SkeletalMesh(Mesh):
             bones_ids_list, weights_list
         )
 
+    def compute_bones_transforms(self):
+        # traverse skeleton
+        bone_transforms = [Mat4() for _ in range(len(self.skeleton.bones))]
+        queue = [self.skeleton.bones[self.skeleton.root_idx]]
+        parent_transform = Mat4()
+        while queue:
+            curr_bone = queue.pop(0)
+            queue += curr_bone.children
+            local_transform = self.current_animation.get_local_transform(
+                curr_bone.idx, self.time
+            )
+            world_transform = (
+                parent_transform *
+                local_transform *
+                curr_bone.inverse_bind_transform
+            )
+            bone_transforms[curr_bone.idx] = world_transform
+            parent_transform = world_transform
+        return bone_transforms
+
+
     def set_bones_transforms(self, bones_transforms: list[Mat4]):
         # This is not convenient because it has a copy of all the transforms
         # for all material groups
@@ -134,11 +155,6 @@ class SkeletalMesh(Mesh):
         if name in self.animations:
             self.time = 0.0
             self.current_animation = self.animations[name]
-            self.keyframes_count = len(self.current_animation.keyframes)
-            # Here we are using the same duration for every keyframe
-            self.keyframe_duration = (
-                self.current_animation.length / self.keyframes_count
-            )
 
     def update(self, dt: float):
         if not self.current_animation or self.is_paused:
@@ -148,9 +164,7 @@ class SkeletalMesh(Mesh):
         if self.time > self.current_animation.length:
             self.time = self.time % self.current_animation.length
 
-        # Get the poses in between
-        t = self.time % self.keyframe_duration
-        bones_transforms = self.interpolate(t)
+        bones_transforms = self.compute_bones_transforms()
         self.set_bones_transforms(bones_transforms)
 
     def pause(self):
@@ -158,16 +172,3 @@ class SkeletalMesh(Mesh):
 
     def play(self):
         self.is_paused = False
-
-    def interpolate(self, t: float) -> list[Mat4]:
-        idx = int(self.time // self.keyframe_duration)
-        prev_pose = self.current_animation.keyframes[idx].pose
-        next_idx = idx + 1 if idx + 1 < self.keyframes_count else 0
-        next_pose = self.current_animation.keyframes[next_idx].pose
-
-        # interpolate between the two poses
-        curr_pose_translations = (
-            (1 - t) * prev_pose.translations + t * next_pose.translations
-        )
-        bones_transforms = [Mat4()]
-        return bones_transforms
