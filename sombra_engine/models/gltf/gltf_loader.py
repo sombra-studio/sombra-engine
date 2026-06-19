@@ -63,18 +63,36 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
         data[map_name] = default_tex_func()
 
 
-def create_skeleton(data: dict) -> Skeleton:
-    skin_data: Skin = data[0]
+def create_skeleton(skin: Skin) -> Skeleton:
     bones: list[Bone] = []
-    for idx, bone_data in enumerate(skin_data.joints):
-        bone = Bone(
-            idx=idx,
-            name=bone_data.name,
-            local_bind_transform=Mat4(),
-            inverse_bind_transform=skin_data.inverse_bind_matrices[idx]
+
+    node = skin.skeleton
+    bone = Bone(
+        idx=node.index,
+        name=node.name,
+        local_bind_transform=Mat4(),
+        inverse_bind_transform=Mat4(
+            *skin.inverse_bind_matrices[node.index].tolist()
         )
-        bones.append(bone)
-    skeleton = Skeleton(bones=bones, root_idx=skin_data.skeleton_index)
+    )
+    queue = [skin.skeleton]
+    while queue:
+        node = queue.pop(0)
+        # Create bones for children
+        children = []
+        for child in node.children:
+            child_bone = Bone(
+                idx=node.index,
+                name=node.name,
+                local_bind_transform=Mat4(),
+                inverse_bind_transform=Mat4(
+                    *skin.inverse_bind_matrices[child.index].tolist()
+                )
+            )
+            children.append(child_bone)
+
+        bone.children += children
+    skeleton = Skeleton(bones=bones, root_idx=skin.skeleton.index)
     return skeleton
 
 
