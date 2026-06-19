@@ -2,10 +2,9 @@ from collections.abc import Callable
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3, Vec4
-from pyglet.model.codecs.gltf import Animation as AnimationData
+from pyglet.model.codecs.gltf import Animation as AnimationData, Skin
 
-
-from sombra_engine.animations import Animation, Bone, Keyframe, Skeleton
+from sombra_engine.animations import Animation, Bone, Skeleton
 from sombra_engine.models import Model, SkeletalMesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform,
@@ -65,29 +64,24 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
 
 
 def create_skeleton(data: dict) -> Skeleton:
-    root = Bone(
-        idx=0,
-        name="root",
-        local_bind_transform=Mat4(),
-        inverse_bind_transform=Mat4(),
-        children=None
-    )
-    skeleton = Skeleton(bones=[root], root_idx=0)
+    skin_data: Skin = data[0]
+    bones: list[Bone] = []
+    for idx, bone_data in enumerate(skin_data.joints):
+        bone = Bone(
+            idx=idx,
+            name=bone_data.name,
+            local_bind_transform=Mat4(),
+            inverse_bind_transform=skin_data.inverse_bind_matrices[idx]
+        )
+        bones.append(bone)
+    skeleton = Skeleton(bones=bones, root_idx=skin_data.skeleton_index)
     return skeleton
-
-
-def parse_animation(anim_data: AnimationData) -> Animation:
-    length = 3.0
-    keyframes: list[Keyframe] = []
-    #for anim_channel
-    animation = Animation(keyframes, length)
-    return animation
 
 
 def load_animations(data: dict):
     animations = []
     for anim_data in data:
-        animation = parse_animation(anim_data)
+        animation = Animation(anim_data)
         animations.append(animation)
 
     return animations

@@ -1,5 +1,5 @@
-import math as _math
-from pyglet.math import Mat4
+import math
+import numpy as np
 import pyglet
 
 def create_color_tex(color: tuple[int, int, int, int]) -> pyglet.image.Texture:
@@ -20,50 +20,43 @@ def create_gray_tex() -> pyglet.image.Texture:
     return create_color_tex((123, 123, 123, 255))
 
 
-class Quaternion(pyglet.math.Quaternion):
-    @classmethod
-    def from_mat4(cls, matrix: Mat4) -> 'Quaternion':
+def slerp(a: np.ndarray, b: np.ndarray, t: float, out: np.ndarray) -> None:
+    dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]
 
-        # 00: a, 01: b, 02: c, 03: d
-        # 10: e, 11: f, 12: g, 13: h
-        # 20: i, 21: j, 22: k, 23: l
-        # 30: m, 31: n, 32: o, 33: p
+    if dot < 0.0:
+        b0, b1, b2, b3 = -b[0], -b[1], -b[2], -b[3]
+        dot = -dot
+    else:
+        b0, b1, b2, b3 = b[0], b[1], b[2], b[3]
 
-        (a, b, c, d,
-         e, f, g, h,
-         i, j, k, l,
-         m, n, o, p) = matrix
+    if dot > 0.9995:
 
-        (m00, m01, m02, m03,
-         m10, m11, m12, m13,
-         m20, m21, m22, m23,
-         m30, m31, m32, m33) = matrix
+        out[0] = a[0] + t * (b0 - a[0])
+        out[1] = a[1] + t * (b1 - a[1])
+        out[2] = a[2] + t * (b2 - a[2])
+        out[3] = a[3] + t * (b3 - a[3])
 
-        tr = m00 + m11 + m22
+        inv = 1.0 / math.sqrt(
+            out[0] * out[0] +
+            out[1] * out[1] +
+            out[2] * out[2] +
+            out[3] * out[3]
+        )
+        out[0] *= inv
+        out[1] *= inv
+        out[2] *= inv
+        out[3] *= inv
+        return
 
-        if tr > 0:
-            s = _math.sqrt(tr + 1.0) * 2
-            w = 0.25 * s
-            x = (m21 - m12) / s
-            y = (m02 - m20) / s
-            z = (m10 - m01) / s
-        elif (m00 > m11) and (m00 > m22):
-            s = _math.sqrt(1.0 + m00 - m11 - m22) * 2
-            w = (m21 - m12) / s
-            x = 0.25 * s
-            y = (m01 + m10) / s
-            z = (m02 + m20) / s
-        elif m11 > m22:
-            s = _math.sqrt(1.0 + m11 - m00 - m22) * 2
-            w = (m02 - m20) / s
-            x = (m01 + m10) / s
-            y = 0.25 * s
-            z = (m12 + m21) / s
-        else:
-            s = _math.sqrt(1.0 + m22 - m00 - m11) * 2
-            w = (m10 - m01) / s
-            x = (m02 + m20) / s
-            y = (m12 + m21) / s
-            z = 0.25 * s
+    theta_0 = math.acos(dot)
+    sin_theta_0 = math.sin(theta_0)
+    theta = theta_0 * t
+    sin_theta = math.sin(theta)
 
-        return cls(w, x, y, z)
+    s0 = math.cos(theta) - dot * sin_theta / sin_theta_0
+    s1 = sin_theta / sin_theta_0
+
+    out[0] = s0 * a[0] + s1 * b0
+    out[1] = s0 * a[1] + s1 * b1
+    out[2] = s0 * a[2] + s1 * b2
+    out[3] = s0 * a[3] + s1 * b3

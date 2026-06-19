@@ -7,12 +7,43 @@ from pyglet.model.codecs.gltf import (
 )
 from pyglet.math import Mat4, Quaternion, Vec3
 
+from sombra_engine import utils
+
 
 @dataclass
 class AnimationChannel:
     timestamps: np.ndarray
     values: np.ndarray
     interpolation: AnimationInterpolation
+
+
+def interpolate_vec3(
+    a: np.ndarray,
+    b: np.ndarray,
+    t: float,
+    interpolation: AnimationInterpolation
+):
+    match interpolation:
+        case AnimationInterpolation.LINEAR:
+            value = (1 - t) * a + t * b
+        case _:
+            value = a
+    return Vec3(value[0], value[1], value[2])
+
+
+def interpolate_vec4(
+    a: np.ndarray,
+    b: np.ndarray,
+    t: float,
+    interpolation: AnimationInterpolation
+):
+    match interpolation:
+        case AnimationInterpolation.LINEAR:
+            value = np.array([0.0, 0.0, 0.0, 0.0], dtype='<f4')
+            utils.slerp(a, b, t, value)
+        case _:
+            value = a
+    return value
 
 
 class Animation:
@@ -51,20 +82,6 @@ class Animation:
             bone_idx = channel.target.node.index
             channels_dict[bone_idx] = new_channel
 
-    def interpolate_vec3(
-        self,
-        a: np.ndarray,
-        b: np.ndarray,
-        t: float,
-        interpolation: AnimationInterpolation
-    ):
-        match interpolation:
-            case AnimationInterpolation.LINEAR:
-                value = (1 - t) * a + t * b
-            case _:
-                value = a
-        return Vec3(value[0], value[1], value[2])
-
     def get_local_transform(self, bone_idx: int, time: float) -> Mat4:
         # Translation
         channel = self.translation_channels[bone_idx]
@@ -78,13 +95,39 @@ class Animation:
         t = time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
         a = channel.values[i]
         b = channel.values[i + 1]
-        translation_vec = self.interpolate_vec3(a, b, t, channel.interpolation)
-        translation = Mat4.from_translation(translation_vec)
+        vec = interpolate_vec3(a, b, t, channel.interpolation)
+        translation = Mat4.from_translation(vec)
 
         # Rotation
-        # TODO
+        channel = self.rotation_channels[bone_idx]
+        timestamps = channel.timestamps
+        n = len(timestamps)
+        i = 0
+        while i < n - 1:
+            if timestamps[i] <= time < timestamps[i + 1]:
+                break
+            i += 1
+        t = time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
+        a = channel.values[i]
+        b = channel.values[i + 1]
+        vec = interpolate_vec4(a, b, t, channel.interpolation)
+        rotation = Quaternion(vec[-1], vec[0], vec[1], vec[2]).to_mat4()
 
         # Scale
+        channel = self.scale_channels[bone_idx]
+        timestamps = channel.timestamps
+        n = len(timestamps)
+        i = 0
+        while i < n - 1:
+            if timestamps[i] <= time < timestamps[i + 1]:
+                break
+            i += 1
+        t = time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
+        a = channel.values[i]
+        b = channel.values[i + 1]
+        vec = interpolate_vec3(a, b, t, channel.interpolation)
+        scale = Mat4.from_scale(vec)
 
-        return translation
+        local_transform = scale @ rotation @ translation
+        return local_transform
 

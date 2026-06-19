@@ -136,8 +136,8 @@ class SkeletalMesh(Mesh):
                 curr_bone.idx, self.time
             )
             world_transform = (
-                parent_transform *
-                local_transform *
+                parent_transform @
+                local_transform @
                 curr_bone.inverse_bind_transform
             )
             bone_transforms[curr_bone.idx] = world_transform
