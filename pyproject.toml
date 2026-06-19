@@ -32,6 +32,9 @@ Issues = "https://github.com/sombra-studio/sombra-engine/issues"
 [tool.uv.build-backend]
 module-name = "sombra_engine"
 module-root = ""
+
+[tool.uv.sources]
+pyglet = { path = "../pyglet", editable = true }
 #source-include = ["sombra_engine/shaders/**"]
 #source-exclude = ["tests/**", ]
 

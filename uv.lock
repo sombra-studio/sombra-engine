@@ -123,12 +123,7 @@ wheels = [
 
 [[package]]
 name = "pyglet"
-version = "3.0.dev3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a4/18/b7bca811bc8c16ce4073b006dd06762c59589f81a65e8dd461cffba8e214/pyglet-3.0.dev3.tar.gz", hash = "sha256:b0121bf0d3a98743d17ed6f53001f7be17aaf4b0245c0b22105a4a4e77005822", size = 7128311, upload-time = "2026-04-18T10:55:28.599Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/b0/8c6402b68b14f1e8151c46f096dff7875050bd30c69f31cf814efa83aba6/pyglet-3.0.dev3-py3-none-any.whl", hash = "sha256:56ceb7a7420b43e6f8805d4b9a2bea9e45f9938d0d91650a472e4c0997b96368", size = 1505495, upload-time = "2026-04-18T10:55:23.312Z" },
-]
+source = { editable = "../pyglet" }
 
 [[package]]
 name = "sombra-engine"
@@ -146,5 +141,5 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.4.6" },
     { name = "psutil", specifier = "==7.2.2" },
     { name = "pudu-ui", specifier = ">=0.2.3" },
-    { name = "pyglet", specifier = ">=3.0.dev3" },
+    { name = "pyglet", editable = "../pyglet" },
 ]
