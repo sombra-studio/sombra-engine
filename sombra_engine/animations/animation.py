@@ -16,6 +16,7 @@ class AnimationChannel:
     max_time: float
     values: np.ndarray
     interpolation: AnimationInterpolation
+    path: AnimationChannelTargetPath
 
 
 def interpolate_vec3(
@@ -47,6 +48,40 @@ def interpolate_vec4(
     return value
 
 
+def get_transform(channel: AnimationChannel, time: float) -> Mat4:
+    timestamps = channel.timestamps
+    channel_time = time % channel.max_time
+    n = len(timestamps)
+    i = 0
+    match channel.interpolation:
+        case AnimationInterpolation.LINEAR:
+            while i < n - 1:
+                if timestamps[i] <= channel_time < timestamps[i + 1]:
+                    break
+                i += 1
+            t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
+            a = channel.values[i]
+            b = channel.values[i + 1]
+        case _:
+            while channel_time > timestamps[i]:
+                i += 1
+            t = timestamps[i - 1] - channel_time
+            a = channel.values[i - 1]
+            b = channel.values[i]
+
+    match channel.path:
+        case AnimationChannelTargetPath.TRANSLATION:
+            vec = interpolate_vec3(a, b, t, channel.interpolation)
+            return Mat4.from_translation(vec)
+        case AnimationChannelTargetPath.ROTATION:
+            vec = interpolate_vec4(a, b, t, channel.interpolation)
+            return Quaternion(vec[-1], vec[0], vec[1], vec[2]).to_mat4()
+        case AnimationChannelTargetPath.SCALE:
+            vec = interpolate_vec3(a, b, t, channel.interpolation)
+            return Mat4.from_scale(vec)
+        case _:
+            raise ValueError(f"Unknown channel path {channel.path}")
+
 class Animation:
     def __init__(self, animation_data: PygletAnimation):
         self.translation_channels: dict[int, AnimationChannel] = {}
@@ -76,9 +111,10 @@ class Animation:
                     )
             new_channel = AnimationChannel(
                 timestamps=timestamps,
-                max_time=channel.sampler.input.max,
+                max_time=channel.sampler.input.max[0],
                 values=values,
-                interpolation=channel.sampler.interpolation
+                interpolation=channel.sampler.interpolation,
+                path=channel.target.path
             )
             bone_idx = channel.target.node.index
             channels_dict[bone_idx] = new_channel
@@ -86,51 +122,15 @@ class Animation:
     def get_local_transform(self, bone_idx: int, time: float) -> Mat4:
         # Translation
         channel = self.translation_channels[bone_idx]
-        timestamps = channel.timestamps
-        channel_time = time % channel.max_time
-        n = len(timestamps)
-        i = 0
-        while i < n - 1:
-            if timestamps[i] <= channel_time < timestamps[i + 1]:
-                break
-            i += 1
-        t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
-        a = channel.values[i]
-        b = channel.values[i + 1]
-        vec = interpolate_vec3(a, b, t, channel.interpolation)
-        translation = Mat4.from_translation(vec)
+        translation = get_transform(channel, time)
 
         # Rotation
         channel = self.rotation_channels[bone_idx]
-        timestamps = channel.timestamps
-        channel_time = time % channel.max_time
-        n = len(timestamps)
-        i = 0
-        while i < n - 1:
-            if timestamps[i] <= channel_time < timestamps[i + 1]:
-                break
-            i += 1
-        t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
-        a = channel.values[i]
-        b = channel.values[i + 1]
-        vec = interpolate_vec4(a, b, t, channel.interpolation)
-        rotation = Quaternion(vec[-1], vec[0], vec[1], vec[2]).to_mat4()
+        rotation = get_transform(channel, time)
 
         # Scale
         channel = self.scale_channels[bone_idx]
-        timestamps = channel.timestamps
-        channel_time = time % channel.max_time
-        n = len(timestamps)
-        i = 0
-        while i < n - 1:
-            if timestamps[i] <= channel_time < timestamps[i + 1]:
-                break
-            i += 1
-        t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
-        a = channel.values[i]
-        b = channel.values[i + 1]
-        vec = interpolate_vec3(a, b, t, channel.interpolation)
-        scale = Mat4.from_scale(vec)
+        scale = get_transform(channel, time)
 
         local_transform = scale @ rotation @ translation
         return local_transform
