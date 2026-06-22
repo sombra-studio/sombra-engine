@@ -13,6 +13,7 @@ from sombra_engine import utils
 @dataclass
 class AnimationChannel:
     timestamps: np.ndarray
+    max_time: float
     values: np.ndarray
     interpolation: AnimationInterpolation
 
@@ -47,12 +48,11 @@ def interpolate_vec4(
 
 
 class Animation:
-    translation_channels: dict[int, AnimationChannel]
-    rotation_channels: dict[int, AnimationChannel]
-    scale_channels: dict[int, AnimationChannel]
-    length: float
-
     def __init__(self, animation_data: PygletAnimation):
+        self.translation_channels: dict[int, AnimationChannel] = {}
+        self.rotation_channels: dict[int, AnimationChannel] = {}
+        self.scale_channels: dict[int, AnimationChannel] = {}
+
         for channel in animation_data.channels:
             sampler: AnimationSampler = channel.sampler
             timestamps_bytes = sampler.input.read()
@@ -61,13 +61,13 @@ class Animation:
             values = np.frombuffer(values_bytes, dtype='<f4')
             match channel.target.path:
                 case AnimationChannelTargetPath.TRANSLATION:
-                    values.reshape(-1, 3)
+                    values = values.reshape(-1, 3)
                     channels_dict = self.translation_channels
                 case AnimationChannelTargetPath.ROTATION:
-                    values.reshape(-1, 4)
+                    values = values.reshape(-1, 4)
                     channels_dict = self.rotation_channels
                 case AnimationChannelTargetPath.SCALE:
-                    values.reshape(-1, 3)
+                    values = values.reshape(-1, 3)
                     channels_dict = self.scale_channels
                 case _:
                     raise Exception(
@@ -76,6 +76,7 @@ class Animation:
                     )
             new_channel = AnimationChannel(
                 timestamps=timestamps,
+                max_time=channel.sampler.input.max,
                 values=values,
                 interpolation=channel.sampler.interpolation
             )
@@ -86,13 +87,14 @@ class Animation:
         # Translation
         channel = self.translation_channels[bone_idx]
         timestamps = channel.timestamps
+        channel_time = time % channel.max_time
         n = len(timestamps)
         i = 0
         while i < n - 1:
-            if timestamps[i] <= time < timestamps[i + 1]:
+            if timestamps[i] <= channel_time < timestamps[i + 1]:
                 break
             i += 1
-        t = time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
+        t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
         a = channel.values[i]
         b = channel.values[i + 1]
         vec = interpolate_vec3(a, b, t, channel.interpolation)
@@ -101,13 +103,14 @@ class Animation:
         # Rotation
         channel = self.rotation_channels[bone_idx]
         timestamps = channel.timestamps
+        channel_time = time % channel.max_time
         n = len(timestamps)
         i = 0
         while i < n - 1:
-            if timestamps[i] <= time < timestamps[i + 1]:
+            if timestamps[i] <= channel_time < timestamps[i + 1]:
                 break
             i += 1
-        t = time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
+        t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
         a = channel.values[i]
         b = channel.values[i + 1]
         vec = interpolate_vec4(a, b, t, channel.interpolation)
@@ -116,13 +119,14 @@ class Animation:
         # Scale
         channel = self.scale_channels[bone_idx]
         timestamps = channel.timestamps
+        channel_time = time % channel.max_time
         n = len(timestamps)
         i = 0
         while i < n - 1:
-            if timestamps[i] <= time < timestamps[i + 1]:
+            if timestamps[i] <= channel_time < timestamps[i + 1]:
                 break
             i += 1
-        t = time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
+        t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
         a = channel.values[i]
         b = channel.values[i + 1]
         vec = interpolate_vec3(a, b, t, channel.interpolation)

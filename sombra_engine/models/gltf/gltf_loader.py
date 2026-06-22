@@ -2,7 +2,7 @@ from collections.abc import Callable
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3, Vec4
-from pyglet.model.codecs.gltf import Animation as AnimationData, Skin
+from pyglet.model.codecs.gltf import Node, Skin
 
 from sombra_engine.animations import Animation, Bone, Skeleton
 from sombra_engine.models import Model, SkeletalMesh
@@ -62,45 +62,50 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
     else:
         data[map_name] = default_tex_func()
 
-
-def create_skeleton(skin: Skin) -> Skeleton:
-    bones: list[Bone] = []
-
-    node = skin.skeleton
+def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
+    # create current bone
+    offset = node.index * 16
     bone = Bone(
         idx=node.index,
         name=node.name,
         local_bind_transform=Mat4(),
         inverse_bind_transform=Mat4(
-            *skin.inverse_bind_matrices[node.index].tolist()
+            *(skin.inverse_bind_matrices[offset:offset + 16].tolist())
         )
     )
-    queue = [skin.skeleton]
-    while queue:
-        node = queue.pop(0)
-        # Create bones for children
-        children = []
-        for child in node.children:
-            child_bone = Bone(
-                idx=node.index,
-                name=node.name,
-                local_bind_transform=Mat4(),
-                inverse_bind_transform=Mat4(
-                    *skin.inverse_bind_matrices[child.index].tolist()
-                )
-            )
-            children.append(child_bone)
+    bones.append(bone)
+    # for each child create their bones
+    children = []
+    for child in node.children:
+        new_bone = create_bones(child, bones, skin)
+        children.append(new_bone)
 
-        bone.children += children
-    skeleton = Skeleton(bones=bones, root_idx=skin.skeleton.index)
+    if children:
+        bone.children = children
+
+    return bone
+
+
+def create_skeleton(skin: Skin) -> Skeleton:
+    bones: list[Bone] = []
+
+    node = skin.skeleton
+    if not node:
+        # If the skin doesn't use the skeleton property assume first joint is
+        # the root
+        node = skin.joints[0]
+    root_idx = node.index
+    create_bones(node, bones, skin)
+
+    skeleton = Skeleton(bones=bones, root_idx=root_idx)
     return skeleton
 
 
-def load_animations(data: dict):
-    animations = []
+def load_animations(data: dict) -> dict[str, Animation]:
+    animations = {}
     for anim_data in data:
         animation = Animation(anim_data)
-        animations.append(animation)
+        animations[anim_data.name]  = animation
 
     return animations
 
@@ -186,7 +191,7 @@ class GLTFLoader:
                 vertex_groups_data[vg_name] = vg_data
 
             # Create bones
-            skeleton = create_skeleton(data['skins'])
+            skeleton = create_skeleton(data['skins'][0])
             # iterate bones hierarchy
 
             # Create animations
@@ -215,6 +220,7 @@ class GLTFLoader:
                 vertex_groups=vertex_groups,
                 materials=materials,
                 skeleton=mesh_data['skeleton'],
+                animations=mesh_data['animations'],
                 mode=mode,
                 batch=batch,
                 group=group,

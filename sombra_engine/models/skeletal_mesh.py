@@ -19,6 +19,7 @@ class SkeletalMesh(Mesh):
         vertex_groups: dict[str, VertexGroup],
         materials: dict[str, Material],
         skeleton: Skeleton,
+        animations: dict[str, Animation],
         mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
@@ -52,7 +53,7 @@ class SkeletalMesh(Mesh):
         )
         self.skeleton = skeleton
         self.time = 0.0
-        self.animations: dict[str, Animation] = {}
+        self.animations: dict[str, Animation] = animations
         self.current_animation: Animation | None = None
         self.is_paused = False
         self.keyframes_count = 0
@@ -131,7 +132,8 @@ class SkeletalMesh(Mesh):
         parent_transform = Mat4()
         while queue:
             curr_bone = queue.pop(0)
-            queue += curr_bone.children
+            if curr_bone.children:
+                queue += curr_bone.children
             local_transform = self.current_animation.get_local_transform(
                 curr_bone.idx, self.time
             )
@@ -159,11 +161,7 @@ class SkeletalMesh(Mesh):
     def update(self, dt: float):
         if not self.current_animation or self.is_paused:
             return
-
         self.time += dt
-        if self.time > self.current_animation.length:
-            self.time = self.time % self.current_animation.length
-
         bones_transforms = self.compute_bones_transforms()
         self.set_bones_transforms(bones_transforms)
 
