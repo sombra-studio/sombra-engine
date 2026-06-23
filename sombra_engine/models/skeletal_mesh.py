@@ -128,6 +128,7 @@ class SkeletalMesh(Mesh):
     def compute_bones_transforms(self):
         # traverse skeleton
         bone_transforms = [Mat4() for _ in range(len(self.skeleton.bones))]
+
         queue = [self.skeleton.bones[self.skeleton.root_idx]]
         parent_transform = Mat4()
         while queue:
@@ -137,13 +138,15 @@ class SkeletalMesh(Mesh):
             local_transform = self.current_animation.get_local_transform(
                 curr_bone.idx, self.time
             )
-            world_transform = (
-                parent_transform @
-                local_transform @
-                curr_bone.inverse_bind_transform
+            transform = parent_transform @ local_transform
+            bone_transforms[curr_bone.idx] = transform
+            parent_transform = transform
+
+        for i in range(len(self.skeleton.bones)):
+            bone = self.skeleton.bones[i]
+            bone_transforms[i] = (
+                bone_transforms[i] @ bone.inverse_bind_transform
             )
-            bone_transforms[curr_bone.idx] = world_transform
-            parent_transform = world_transform
         return bone_transforms
 
 
@@ -162,7 +165,9 @@ class SkeletalMesh(Mesh):
         if not self.current_animation or self.is_paused:
             return
         self.time += dt
-        bones_transforms = self.compute_bones_transforms()
+        # bones_transforms = self.compute_bones_transforms()
+        # DEBUGGING -- REMOVE THIS LINE
+        bones_transforms = [Mat4() for _ in range(len(self.skeleton.bones))]
         self.set_bones_transforms(bones_transforms)
 
     def pause(self):

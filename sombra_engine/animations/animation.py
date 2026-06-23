@@ -51,23 +51,29 @@ def interpolate_vec4(
 def get_transform(channel: AnimationChannel, time: float) -> Mat4:
     timestamps = channel.timestamps
     channel_time = time % channel.max_time
-    n = len(timestamps)
     i = 0
-    match channel.interpolation:
-        case AnimationInterpolation.LINEAR:
-            while i < (n - 1):
-                if timestamps[i] <= channel_time < timestamps[i + 1]:
-                    break
-                i += 1
-            t = channel_time - timestamps[i] / (timestamps[i + 1] - timestamps[i])
-            a = channel.values[i]
-            b = channel.values[i + 1]
-        case _:
-            while channel_time > timestamps[i]:
-                i += 1
-            t = timestamps[i - 1] - channel_time
-            a = channel.values[i - 1]
-            b = channel.values[i]
+    if channel_time < timestamps[0]:
+        # Clamp animation to first value until first keyframe timestamp is
+        # reached
+        t = 0
+        a = channel.values[0]
+        b = channel.values[0]
+    else:
+        while timestamps[i] > channel_time:
+            i += 1
+        match channel.interpolation:
+            case AnimationInterpolation.LINEAR:
+                t = (channel_time - timestamps[i]) / (
+                    timestamps[i + 1] - timestamps[i]
+                )
+            case AnimationInterpolation.STEP:
+                t = 0
+            case _:
+                raise ValueError(
+                    f"Unknown channel interpolation {channel.interpolation}"
+                )
+        a = channel.values[i]
+        b = channel.values[i + 1]
 
     match channel.path:
         case AnimationChannelTargetPath.TRANSLATION:
