@@ -64,16 +64,16 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
 
 def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
     # create current bone
-    offset = node.index * 16
-    bone = Bone(
-        idx=node.index,
-        name=node.name,
-        local_bind_transform=Mat4(),
-        inverse_bind_transform=Mat4(
-            *(skin.inverse_bind_matrices[offset:offset + 16].tolist())
-        )
+    idx: int = node.index
+    offset = idx * 16
+    bone = bones[idx]
+    bone.name = node.name
+    # TEMPORAL FOR NOW WE ARE NOT USING LOCAL BIND TRANSFORM
+    bone.local_bind_transform = Mat4()
+    bone.inverse_bind_transform = Mat4(
+        *(skin.inverse_bind_matrices[offset:offset + 16].tolist())
     )
-    bones.append(bone)
+
     # for each child create their bones
     children = []
     for child in node.children:
@@ -87,7 +87,7 @@ def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
 
 
 def create_skeleton(skin: Skin) -> Skeleton:
-    bones: list[Bone] = []
+    bones: list[Bone] = [Bone(idx=i) for i in range(len(skin.joints))]
 
     node = skin.skeleton
     if not node:

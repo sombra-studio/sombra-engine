@@ -53,9 +53,9 @@ if __name__ == '__main__':
         # scale=20.0,
         batch=batch
     )
-    # mesh: SkeletalMesh = model.meshes[0]
-    # animation_name = [k for k in mesh.animations.keys()][0]
-    # mesh.set_animation(animation_name)
+    mesh: SkeletalMesh = model.meshes[0]
+    animation_name = [k for k in mesh.animations.keys()][0]
+    mesh.set_animation(animation_name)
 
     scene = Scene()
     # scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))

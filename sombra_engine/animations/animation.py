@@ -55,7 +55,7 @@ def get_transform(channel: AnimationChannel, time: float) -> Mat4:
     i = 0
     match channel.interpolation:
         case AnimationInterpolation.LINEAR:
-            while i < n - 1:
+            while i < (n - 1):
                 if timestamps[i] <= channel_time < timestamps[i + 1]:
                     break
                 i += 1
@@ -75,7 +75,8 @@ def get_transform(channel: AnimationChannel, time: float) -> Mat4:
             return Mat4.from_translation(vec)
         case AnimationChannelTargetPath.ROTATION:
             vec = interpolate_vec4(a, b, t, channel.interpolation)
-            return Quaternion(vec[-1], vec[0], vec[1], vec[2]).to_mat4()
+            quat = Quaternion(vec[-1], vec[0], vec[1], vec[2])
+            return quat.normalize().to_mat4()
         case AnimationChannelTargetPath.SCALE:
             vec = interpolate_vec3(a, b, t, channel.interpolation)
             return Mat4.from_scale(vec)
