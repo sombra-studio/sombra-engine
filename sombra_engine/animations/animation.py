@@ -139,6 +139,6 @@ class Animation:
         channel = self.scale_channels[bone_idx]
         scale = get_transform(channel, time)
 
-        local_transform = scale @ rotation @ translation
+        local_transform = translation @ rotation @ scale
         return local_transform
 

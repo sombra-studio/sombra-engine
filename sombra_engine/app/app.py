@@ -1,5 +1,6 @@
 from pudu_ui import Params
 import pudu_ui
+from pyglet import options
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
@@ -8,12 +9,14 @@ from pyglet.graphics.api.gl.gl import (
 from pyglet.graphics import Batch, Group
 from pyglet.math import Mat4, Vec3
 from pyglet.window import key
+from pyglet.window.camera import FPSCamera
 import pyglet
 
 
-from sombra_engine.camera import FPSCamera
+# from sombra_engine.camera import FPSCamera
 from sombra_engine.debug import Gizmo, Stats
 from sombra_engine.models import Model
+from sombra_engine.fpscamera import FPSCameraControls
 
 
 class App(pudu_ui.App):
@@ -24,9 +27,19 @@ class App(pudu_ui.App):
     ):
         super().__init__(caption=caption, vsync=False)
         self.is_debug = is_debug
+        # self.camera = FPSCamera(
+        #     self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
+        # )
         self.camera = FPSCamera(
-            self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
+            self,
+            position=Vec3(0.0, 1.0, 6.0),
+            target=Vec3(0.0, 1.0, 0.0),
         )
+        self.controls = FPSCameraControls(self, self.camera)
+        if controllers := pyglet.input.get_controllers():
+            controller = controllers[0]
+            controller.open()
+            controller.push_handlers(self.controls)
         self.batch = Batch()
         self.debug_group = Group()
         self.debug_group.visible = is_debug
@@ -67,15 +80,17 @@ class App(pudu_ui.App):
         glClearColor(0.0, 0.0, 0.0, 1.0)
         self.clear()
 
-        # Draw gizmo first
-        glDisable(GL_DEPTH_TEST)
-        self.gizmo.draw()
-
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LESS)
 
-        self.batch.draw()
+        if self.is_debug:
+            with self.gizmo.batch.draw_with_options() as options:
+                options.camera = self.camera
+
+        with self.batch.draw_with_options() as options:
+            options.camera = self.camera
+
         if self.is_debug:
             # Use 2D UI here
             self.draw_2d_debug_ui()
@@ -85,7 +100,7 @@ class App(pudu_ui.App):
         handled = super().on_key_press(symbol, mod)
         if not handled:
             if mod & key.MOD_SHIFT and symbol == key.P:
-                pyglet.image.get_buffer_manager().get_color_buffer().save(
+                pyglet.graphics.framebuffer.get_screenshot().save(
                     'docs/screenshot.png'
                 )
                 handled = EVENT_HANDLED
