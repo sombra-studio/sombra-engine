@@ -191,11 +191,17 @@ class GLTFLoader:
                 vertex_groups_data[vg_name] = vg_data
 
             # Create bones
-            skeleton = create_skeleton(data['skins'][0])
+            if data.get('skins'):
+                skeleton = create_skeleton(data['skins'][0])
+            else:
+                skeleton = None
             # iterate bones hierarchy
 
             # Create animations
-            animations = load_animations(data['animations'])
+            if data.get('animations'):
+                animations = load_animations(data['animations'])
+            else:
+                animations = []
 
             meshes_data[name] = {
                 'vertex_groups': vertex_groups_data,
