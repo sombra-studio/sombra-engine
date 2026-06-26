@@ -1,10 +1,10 @@
 from importlib.resources import files
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, Shader, ShaderProgram
-from pyglet.math import Mat4
-
+from pyglet.math import Mat4, Vec3
 
 from sombra_engine.animations import Animation, Skeleton
+from sombra_engine.constants import MAX_BONES
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
@@ -116,10 +116,12 @@ class SkeletalMesh(Mesh):
                 normal_list += [v.normal.x, v.normal.y, v.normal.z]
                 tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
                 tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
-                bones_ids_list += [*v.bones_ids]
-                weights_list += [
-                    v.weights.x, v.weights.y, v.weights.z, v.weights.w
-                ]
+                # bones_ids_list += [*v.bones_ids]
+                bones_ids_list += [0, 1, 2, 3]
+                # weights_list += [
+                #     v.weights.x, v.weights.y, v.weights.z, v.weights.w
+                # ]
+                weights_list += [0.25, 0.25, 0.25, 0.25]
         return (
             position_list, normal_list, tangent_list, tex_coords_list,
             bones_ids_list, weights_list
@@ -127,7 +129,7 @@ class SkeletalMesh(Mesh):
 
     def compute_bones_transforms(self):
         # traverse skeleton
-        bone_transforms = [Mat4() for _ in range(len(self.skeleton.bones))]
+        bone_transforms = [Mat4() for _ in range(MAX_BONES)]
 
         queue = [self.skeleton.bones[self.skeleton.root_idx]]
         parent_transform = Mat4()
@@ -155,6 +157,8 @@ class SkeletalMesh(Mesh):
         # for all material groups
         for mg in self.material_groups.values():
             mg.bones_transforms = bones_transforms
+            uniforms = mg.get_uniforms()
+            mg.set_shader_uniforms(mg.program, uniforms)
 
     def set_animation(self, name: str):
         if name in self.animations:
@@ -167,7 +171,10 @@ class SkeletalMesh(Mesh):
         self.time += dt
         # bones_transforms = self.compute_bones_transforms()
         # DEBUGGING -- REMOVE THIS LINE
-        bones_transforms = [Mat4() for _ in range(len(self.skeleton.bones))]
+        matrix = Mat4.from_translation(Vec3(0.0, 1.0, 0.0))
+        bones_transforms = [
+            matrix for _ in range(MAX_BONES)
+        ]
         self.set_bones_transforms(bones_transforms)
 
     def pause(self):
