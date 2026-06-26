@@ -157,8 +157,7 @@ class SkeletalMesh(Mesh):
         # for all material groups
         for mg in self.material_groups.values():
             mg.bones_transforms = bones_transforms
-            uniforms = mg.get_uniforms()
-            mg.set_shader_uniforms(mg.program, uniforms)
+            mg.uniforms['bones_transforms'] = bones_transforms
 
     def set_animation(self, name: str):
         if name in self.animations:

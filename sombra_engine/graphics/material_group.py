@@ -57,8 +57,8 @@ class MaterialGroup(ShaderGroup):
 
         self.set_textures(textures, program)
 
-        uniforms = self.get_uniforms()
-        self.set_shader_uniforms(program, uniforms)
+        self.uniforms = self.get_uniforms()
+        self.set_shader_uniforms(program, self.uniforms)
 
     def get_uniforms(self) -> dict[str, Any]:
         # Uniforms from material
