@@ -116,12 +116,12 @@ class SkeletalMesh(Mesh):
                 normal_list += [v.normal.x, v.normal.y, v.normal.z]
                 tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
                 tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
-                # bones_ids_list += [*v.bones_ids]
-                bones_ids_list += [0, 1, 2, 3]
-                # weights_list += [
-                #     v.weights.x, v.weights.y, v.weights.z, v.weights.w
-                # ]
-                weights_list += [0.25, 0.25, 0.25, 0.25]
+                bones_ids_list += [*v.bones_ids]
+                # bones_ids_list += [0, 1, 2, 3]
+                weights_list += [
+                    v.weights.x, v.weights.y, v.weights.z, v.weights.w
+                ]
+                # weights_list += [0.25, 0.25, 0.25, 0.25]
         return (
             position_list, normal_list, tangent_list, tex_coords_list,
             bones_ids_list, weights_list
@@ -168,12 +168,12 @@ class SkeletalMesh(Mesh):
         if not self.current_animation or self.is_paused:
             return
         self.time += dt
-        # bones_transforms = self.compute_bones_transforms()
+        bones_transforms = self.compute_bones_transforms()
         # DEBUGGING -- REMOVE THIS LINE
-        matrix = Mat4.from_translation(Vec3(0.0, 1.0, 0.0))
-        bones_transforms = [
-            matrix for _ in range(MAX_BONES)
-        ]
+        # matrix = Mat4.from_translation(Vec3(0.0, 1.0, 0.0))
+        # bones_transforms = [
+        #     matrix for _ in range(MAX_BONES)
+        # ]
         self.set_bones_transforms(bones_transforms)
 
     def pause(self):
