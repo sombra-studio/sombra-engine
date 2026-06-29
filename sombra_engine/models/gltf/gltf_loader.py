@@ -71,7 +71,7 @@ def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
     # TEMPORAL FOR NOW WE ARE NOT USING LOCAL BIND TRANSFORM
     bone.local_bind_transform = Mat4()
     bone.inverse_bind_transform = Mat4(
-        *(skin.inverse_bind_matrices[offset:offset + 16].tolist())
+        *skin.inverse_bind_matrices[offset:offset + 16]
     )
 
     # for each child create their bones
