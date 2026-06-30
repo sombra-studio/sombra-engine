@@ -152,7 +152,7 @@ class GLTFLoader:
         #     }
         # }
         parsed_data = GLTFParser.parse(filename)
-        transform.scale += Vec3(scale, scale, scale)
+        transform.scale *= Vec3(scale, scale, scale)
         meshes_data = {}
 
         # Create materials
