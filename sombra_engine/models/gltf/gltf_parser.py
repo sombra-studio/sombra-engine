@@ -17,7 +17,7 @@ def group_in_2s(l: list) -> list:
 
 class GLTFParser:
     @staticmethod
-    def parse(filename: str, scale: float = 1.0) -> dict:
+    def parse(filename: str) -> dict:
         idx = filename[::-1].find('/')
         root_path = filename[:-idx]
         model_data = {
@@ -59,13 +59,6 @@ class GLTFParser:
                             primitive_data['joints'] = group_in_ms(
                                 attribute.array, 4
                             )
-
-                if scale != 1.0:
-                    primitive_data['positions'] = [
-                        tuple(
-                            value * scale for value in pos
-                        ) for pos in primitive_data['positions']
-                    ]
 
                 primitive_data['material_name'] = primitive.material.name
 

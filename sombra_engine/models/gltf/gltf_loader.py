@@ -70,15 +70,22 @@ def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
     bone.name = node.name
     # TEMPORAL FOR NOW WE ARE NOT USING LOCAL BIND TRANSFORM
     bone.local_bind_transform = Mat4()
-    bone.inverse_bind_transform = Mat4(
-        *skin.inverse_bind_matrices[offset:offset + 16]
-    )
+    if skin.inverse_bind_matrices:
+        bone.inverse_bind_transform = Mat4(
+            *skin.inverse_bind_matrices[offset:offset + 16]
+        )
+    else:
+        raise NotImplementedError(
+            f"Couldn't create bones for skin {skin.name}, because it doesn't "
+            f"have inverse bind transforms"
+        )
 
     # for each child create their bones
     children = []
-    for child in node.children:
-        new_bone = create_bones(child, bones, skin)
-        children.append(new_bone)
+    if node.children:
+        for child in node.children:
+            new_bone = create_bones(child, bones, skin)
+            children.append(new_bone)
 
     if children:
         bone.children = children
@@ -117,11 +124,11 @@ class GLTFLoader:
         name: str | None = None,
         scale: float = 1.0,
         mode: GeometryMode = GeometryMode.TRIANGLES,
-        batch: Batch = None,
-        group: Group = None,
-        program: ShaderProgram = None,
+        batch: Batch | None = None,
+        group: Group | None = None,
+        program: ShaderProgram | None = None,
         transform: Transform = Transform(),
-        parent: SceneObject = None
+        parent: SceneObject | None = None
     ) -> Model:
 
 
@@ -144,7 +151,8 @@ class GLTFLoader:
         #       }
         #     }
         # }
-        parsed_data = GLTFParser.parse(filename, scale=scale)
+        parsed_data = GLTFParser.parse(filename)
+        transform.scale += Vec3(scale, scale, scale)
         meshes_data = {}
 
         # Create materials
