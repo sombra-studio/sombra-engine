@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
-from pyglet.math import Mat4, Vec2, Vec3, Vec4
+from pyglet.math import Mat4, Quaternion, Vec2, Vec3, Vec4
 from pyglet.model.codecs.gltf import Node, Skin
 
 from sombra_engine.animations import Animation, Bone, Skeleton
@@ -68,8 +68,24 @@ def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
     offset = idx * 16
     bone = bones[idx]
     bone.name = node.name
-    # TEMPORAL FOR NOW WE ARE NOT USING LOCAL BIND TRANSFORM
-    bone.local_bind_transform = Mat4()
+
+    if node.translation:
+        t = Mat4.from_translation(Vec3(*node.translation))
+    else:
+        t = Mat4()
+
+    if node.rotation:
+        r = Quaternion(node.rotation[3], *node.rotation[:3]).to_mat4()
+    else:
+        r = Mat4()
+
+    if node.scale:
+        s = Mat4.from_scale(Vec3(*node.scale))
+    else:
+        s = Mat4()
+
+
+    bone.local_bind_transform = t @ r @ s
     if skin.inverse_bind_matrices:
         bone.inverse_bind_transform = Mat4(
             *skin.inverse_bind_matrices[offset:offset + 16]
