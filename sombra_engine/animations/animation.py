@@ -1,20 +1,19 @@
 from dataclasses import dataclass
-import numpy as np
 from pyglet.enums import AnimationChannelTargetPath, AnimationInterpolation
 from pyglet.model.codecs.gltf import (
     Animation as PygletAnimation,
     AnimationSampler
 )
-from pyglet.math import Mat4, Quaternion, Vec3
+from pyglet.math import Mat4, Quaternion, Vec3, Vec4
 
 from sombra_engine import utils
 
 
 @dataclass
 class AnimationChannel:
-    timestamps: np.ndarray
+    timestamps: array
     max_time: float
-    values: np.ndarray
+    values: array
     interpolation: AnimationInterpolation
     path: AnimationChannelTargetPath
 
@@ -34,14 +33,14 @@ def interpolate_vec3(
 
 
 def interpolate_vec4(
-    a: np.ndarray,
-    b: np.ndarray,
+    a: Vec4,
+    b: Vec4,
     t: float,
     interpolation: AnimationInterpolation
 ):
     match interpolation:
         case AnimationInterpolation.LINEAR:
-            value = np.array([0.0, 0.0, 0.0, 0.0], dtype='<f4')
+            value = Vec4
             utils.slerp(a, b, t, value)
         case _:
             value = a
@@ -82,7 +81,7 @@ def get_transform(channel: AnimationChannel, time: float) -> Mat4:
         case AnimationChannelTargetPath.ROTATION:
             vec = interpolate_vec4(a, b, t, channel.interpolation)
             quat = Quaternion(vec[-1], vec[0], vec[1], vec[2])
-            return quat.normalize().to_mat4()
+            return quat.to_mat4()
         case AnimationChannelTargetPath.SCALE:
             vec = interpolate_vec3(a, b, t, channel.interpolation)
             return Mat4.from_scale(vec)
@@ -97,19 +96,14 @@ class Animation:
 
         for channel in animation_data.channels:
             sampler: AnimationSampler = channel.sampler
-            timestamps_bytes = sampler.input.read()
-            timestamps = np.frombuffer(timestamps_bytes, dtype='<f4')
-            values_bytes = sampler.output.read()
-            values = np.frombuffer(values_bytes, dtype='<f4')
+            timestamps = sampler.input.as_array()
+            values = sampler.output.as_array()
             match channel.target.path:
                 case AnimationChannelTargetPath.TRANSLATION:
-                    values = values.reshape(-1, 3)
                     channels_dict = self.translation_channels
                 case AnimationChannelTargetPath.ROTATION:
-                    values = values.reshape(-1, 4)
                     channels_dict = self.rotation_channels
                 case AnimationChannelTargetPath.SCALE:
-                    values = values.reshape(-1, 3)
                     channels_dict = self.scale_channels
                 case _:
                     raise Exception(
