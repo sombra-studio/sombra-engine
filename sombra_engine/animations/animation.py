@@ -4,23 +4,24 @@ from pyglet.model.codecs.gltf import (
     Animation as PygletAnimation,
     AnimationSampler
 )
-from pyglet.math import Mat4, Quaternion, Vec3, Vec4
+from pyglet.math import Mat4, Quaternion, Vec3
+
 
 from sombra_engine import utils
 
 
 @dataclass
 class AnimationChannel:
-    timestamps: array
+    timestamps: list[float]
     max_time: float
-    values: array
+    values: list[Vec3] | list[Quaternion]
     interpolation: AnimationInterpolation
     path: AnimationChannelTargetPath
 
 
 def interpolate_vec3(
-    a: np.ndarray,
-    b: np.ndarray,
+    a: Vec3,
+    b: Vec3,
     t: float,
     interpolation: AnimationInterpolation
 ):
@@ -29,19 +30,18 @@ def interpolate_vec3(
             value = (1 - t) * a + t * b
         case _:
             value = a
-    return Vec3(value[0], value[1], value[2])
+    return value
 
 
-def interpolate_vec4(
-    a: Vec4,
-    b: Vec4,
+def interpolate_quat(
+    a: Quaternion,
+    b: Quaternion,
     t: float,
     interpolation: AnimationInterpolation
 ):
     match interpolation:
         case AnimationInterpolation.LINEAR:
-            value = Vec4
-            utils.slerp(a, b, t, value)
+            value = utils.slerp(a, b, t)
         case _:
             value = a
     return value
@@ -79,14 +79,14 @@ def get_transform(channel: AnimationChannel, time: float) -> Mat4:
             vec = interpolate_vec3(a, b, t, channel.interpolation)
             return Mat4.from_translation(vec)
         case AnimationChannelTargetPath.ROTATION:
-            vec = interpolate_vec4(a, b, t, channel.interpolation)
-            quat = Quaternion(vec[-1], vec[0], vec[1], vec[2])
+            quat = interpolate_quat(a, b, t, channel.interpolation)
             return quat.to_mat4()
         case AnimationChannelTargetPath.SCALE:
             vec = interpolate_vec3(a, b, t, channel.interpolation)
             return Mat4.from_scale(vec)
         case _:
             raise ValueError(f"Unknown channel path {channel.path}")
+
 
 class Animation:
     def __init__(self, animation_data: PygletAnimation):
@@ -96,15 +96,41 @@ class Animation:
 
         for channel in animation_data.channels:
             sampler: AnimationSampler = channel.sampler
-            timestamps = sampler.input.as_array()
-            values = sampler.output.as_array()
+            timestamps = sampler.input.as_array().tolist()
+            values_arr = sampler.output.as_array()
+
             match channel.target.path:
                 case AnimationChannelTargetPath.TRANSLATION:
                     channels_dict = self.translation_channels
+                    values = []
+                    for i in range(0, len(values_arr), 3):
+                        vec = Vec3(
+                            values_arr[i],
+                            values_arr[i + 1],
+                            values_arr[i + 2]
+                        )
+                        values.append(vec)
                 case AnimationChannelTargetPath.ROTATION:
                     channels_dict = self.rotation_channels
+                    values = []
+                    for i in range(0, len(values_arr), 4):
+                        quat = Quaternion(
+                            values_arr[i + 3],
+                            values_arr[i],
+                            values_arr[i + 1],
+                            values_arr[i + 2],
+                        )
+                        values.append(quat)
                 case AnimationChannelTargetPath.SCALE:
                     channels_dict = self.scale_channels
+                    values = []
+                    for i in range(0, len(values_arr), 3):
+                        vec = Vec3(
+                            values_arr[i],
+                            values_arr[i + 1],
+                            values_arr[i + 2]
+                        )
+                        values.append(vec)
                 case _:
                     raise Exception(
                         f"Animation channel target path invalid "
