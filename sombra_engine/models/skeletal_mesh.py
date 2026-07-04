@@ -1,7 +1,7 @@
 from importlib.resources import files
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, Shader, ShaderProgram
-from pyglet.math import Mat4, Vec3
+from pyglet.math import Mat4
 
 from sombra_engine.animations import Animation, Skeleton
 from sombra_engine.constants import MAX_BONES
@@ -131,18 +131,22 @@ class SkeletalMesh(Mesh):
         # traverse skeleton
         bone_transforms = [Mat4() for _ in range(MAX_BONES)]
 
-        queue = [self.skeleton.bones[self.skeleton.root_idx]]
         parent_transform = Mat4()
+        queue = [(self.skeleton.bones[self.skeleton.root_idx], parent_transform)]
+
         while queue:
-            curr_bone = queue.pop(0)
-            if curr_bone.children:
-                queue += curr_bone.children
+            curr_bone, parent_transform = queue.pop(0)
+
             local_transform = self.current_animation.get_local_transform(
                 curr_bone.idx, self.time
             )
-            transform = parent_transform @ local_transform
-            bone_transforms[curr_bone.idx] = transform
-            parent_transform = transform
+
+            global_transform = parent_transform @ local_transform
+            bone_transforms[curr_bone.idx] = global_transform
+
+            if curr_bone.children:
+                for child in curr_bone.children:
+                    queue.append((child, global_transform))
 
         for i in range(len(self.skeleton.bones)):
             bone = self.skeleton.bones[i]
