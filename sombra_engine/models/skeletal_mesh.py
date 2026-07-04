@@ -3,7 +3,7 @@ from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Mat4
 
-from sombra_engine.animations import Animation, Skeleton
+from sombra_engine.animations import Animation, Bone, Skeleton
 from sombra_engine.constants import MAX_BONES
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
@@ -142,7 +142,7 @@ class SkeletalMesh(Mesh):
             )
 
             global_transform = parent_transform @ local_transform
-            bone_transforms[curr_bone.idx] = global_transform
+            bone_transforms[curr_bone.bone_idx] = global_transform
 
             if curr_bone.children:
                 for child in curr_bone.children:

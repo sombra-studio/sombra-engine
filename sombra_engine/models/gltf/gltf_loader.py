@@ -62,13 +62,8 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
     else:
         data[map_name] = default_tex_func()
 
-def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
-    # create current bone
-    idx: int = node.index
-    offset = idx * 16
-    bone = bones[idx]
-    bone.name = node.name
 
+def get_node_local_transform(node: Node) -> Mat4:
     if node.translation:
         t = Mat4.from_translation(Vec3(*node.translation))
     else:
@@ -85,40 +80,41 @@ def create_bones(node: Node, bones: list[Bone], skin: Skin) -> Bone:
         s = Mat4()
 
 
-    bone.local_bind_transform = t @ r @ s
-    if skin.inverse_bind_matrices:
-        bone.inverse_bind_transform = Mat4(
-            *skin.inverse_bind_matrices[offset:offset + 16]
-        )
-    else:
-        raise NotImplementedError(
-            f"Couldn't create bones for skin {skin.name}, because it doesn't "
-            f"have inverse bind transforms"
-        )
-
-    # for each child create their bones
-    children = []
-    if node.children:
-        for child in node.children:
-            new_bone = create_bones(child, bones, skin)
-            children.append(new_bone)
-
-    if children:
-        bone.children = children
-
-    return bone
+    local_transform = t @ r @ s
+    return local_transform
 
 
 def create_skeleton(skin: Skin) -> Skeleton:
-    bones: list[Bone] = [Bone(idx=i) for i in range(len(skin.joints))]
+    bones: list[Bone] = []
 
-    node = skin.skeleton
-    if not node:
+    for i, joint in enumerate(skin.joints):
+        offset = i * 16
+        local_transform = get_node_local_transform(joint)
+        bone = Bone(
+            idx=joint.index,
+            bone_idx=i,
+            name=joint.name,
+            local_bind_transform=local_transform,
+            inverse_bind_transform=Mat4(
+                *skin.inverse_bind_matrices[offset:offset+16]
+            )
+        )
+        bones.append(bone)
+
+    # Set children
+    for i, joint in enumerate(skin.joints):
+        if joint.children:
+            for child_node in joint.children:
+                child_bone = [
+                    bone for bone in bones if bone.idx == child_node.index
+                ][0]
+                bones[i].children.append(child_bone)
+
+    root_idx = skin.skeleton_index
+    if not skin.skeleton_index:
         # If the skin doesn't use the skeleton property assume first joint is
         # the root
-        node = skin.joints[0]
-    root_idx = node.index
-    create_bones(node, bones, skin)
+        root_idx = 0
 
     skeleton = Skeleton(bones=bones, root_idx=root_idx)
     return skeleton

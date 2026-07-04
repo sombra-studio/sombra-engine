@@ -44,13 +44,11 @@ if __name__ == '__main__':
     batch = app.batch
     model = GLTFLoader.load(
         # filename='tests/data/yoda/yoda.glb',
-        # scale=0.001,
         filename='zombie.glb',
         # filename='box.glb',
         # filename='plane.gltf',
         # program=shader_program,
         # filename='Avocado.gltf',
-        # scale=20.0,
         batch=batch
     )
     mesh: SkeletalMesh = model.meshes[0]

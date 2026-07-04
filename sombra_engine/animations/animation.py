@@ -143,20 +143,20 @@ class Animation:
                 interpolation=channel.sampler.interpolation,
                 path=channel.target.path
             )
-            bone_idx = channel.target.node.index
-            channels_dict[bone_idx] = new_channel
+            node_idx = channel.target.node.index
+            channels_dict[node_idx] = new_channel
 
-    def get_local_transform(self, bone_idx: int, time: float) -> Mat4:
+    def get_local_transform(self, node_idx: int, time: float) -> Mat4:
         # Translation
-        channel = self.translation_channels[bone_idx]
+        channel = self.translation_channels[node_idx]
         translation = get_transform(channel, time)
 
         # Rotation
-        channel = self.rotation_channels[bone_idx]
+        channel = self.rotation_channels[node_idx]
         rotation = get_transform(channel, time)
 
         # Scale
-        channel = self.scale_channels[bone_idx]
+        channel = self.scale_channels[node_idx]
         scale = get_transform(channel, time)
 
         local_transform = translation @ rotation @ scale
