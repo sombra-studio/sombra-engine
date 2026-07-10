@@ -26,7 +26,7 @@ def slerp(a: Quaternion , b: Quaternion , t: float) -> Quaternion:
     dot = a.dot(b)
 
     if dot < 0.0:
-        b.conjugate()
+        b = b * -1
         dot = -dot
 
     if dot > 0.9995:
