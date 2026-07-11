@@ -3,7 +3,8 @@ from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Mat4
 
-from sombra_engine.animations import Animation, Bone, Skeleton
+
+from sombra_engine.animations import Animation, Skeleton
 from sombra_engine.constants import MAX_BONES
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
@@ -117,29 +118,32 @@ class SkeletalMesh(Mesh):
                 tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
                 tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
                 bones_ids_list += [*v.bones_ids]
-                # bones_ids_list += [0, 1, 2, 3]
                 weights_list += [
                     v.weights.x, v.weights.y, v.weights.z, v.weights.w
                 ]
-                # weights_list += [0.25, 0.25, 0.25, 0.25]
         return (
             position_list, normal_list, tangent_list, tex_coords_list,
             bones_ids_list, weights_list
         )
 
     def compute_bones_transforms(self):
-        # traverse skeleton
+
         bone_transforms = [Mat4() for _ in range(MAX_BONES)]
 
         parent_transform = Mat4()
-        queue = [(self.skeleton.bones[self.skeleton.root_idx], parent_transform)]
+        # traverse skeleton starting from the root
+        queue = [
+            (self.skeleton.bones[self.skeleton.root_idx], parent_transform)
+        ]
 
         while queue:
             curr_bone, parent_transform = queue.pop(0)
-
-            local_transform = self.current_animation.get_local_transform(
-                curr_bone.idx, self.time
-            )
+            if self.current_animation:
+                local_transform = self.current_animation.get_local_transform(
+                    curr_bone.idx, self.time
+                )
+            else:
+                local_transform = curr_bone.local_bind_transform
 
             global_transform = parent_transform @ local_transform
             bone_transforms[curr_bone.bone_idx] = global_transform
@@ -169,15 +173,10 @@ class SkeletalMesh(Mesh):
             self.current_animation = self.animations[name]
 
     def update(self, dt: float):
-        if not self.current_animation or self.is_paused:
+        if self.is_paused:
             return
         self.time += dt
         bones_transforms = self.compute_bones_transforms()
-        # DEBUGGING -- REMOVE THIS LINE
-        # matrix = Mat4.from_translation(Vec3(0.0, 1.0, 0.0))
-        # bones_transforms = [
-        #     matrix for _ in range(MAX_BONES)
-        # ]
         self.set_bones_transforms(bones_transforms)
 
     def pause(self):

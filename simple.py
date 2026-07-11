@@ -25,8 +25,8 @@ def main():
     model_group = Group()
     model = OBJLoader.load(
         # filename="tests/data/cube.obj",
-        filename="tests/data/yoda/yoda.obj",
-        # filename="tests/data/shoe_box2.obj",
+        # filename="tests/data/yoda/yoda.obj",
+        filename="tests/data/shoe_box2.obj",
         name="model",
         group=model_group,
         batch=app.batch
