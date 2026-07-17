@@ -24,7 +24,10 @@ def get_triangles_from_data(data: dict) -> list[Triangle]:
             position: Vec3 = Vec3(*data["positions"][index])
             normal: Vec3 = Vec3(*data["normals"][index])
             # Flip Vertical texture coordinates!
-            uvs = data["tex_coords"][index]
+            if data.get("tex_coords"):
+                uvs: list[float] = data["tex_coords"][index]
+            else:
+                uvs = [0.0, 0.0]
             v_coord = int(uvs[1]) + (1 - (uvs[1] % 1))
             tex_coords: Vec2 = Vec2(uvs[0], v_coord)
 
