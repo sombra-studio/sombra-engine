@@ -21,6 +21,22 @@ def create_gray_tex() -> pyglet.graphics.Texture:
     return create_color_tex((123, 123, 123, 255))
 
 
+def book_slerp(a: Quaternion , b: Quaternion , t: float) -> Quaternion:
+    dot = a.dot(b)
+
+    if dot > 0.9995:
+        return a * (1 - t) + b * t
+
+    abs_dot = abs(dot)
+    x = math.acos(abs_dot)
+    s = dot / abs_dot
+
+    v = (
+        a * (math.sin(x * (1 - t)) / math.sin(x)) +
+        b * s * (math.sin(x * t) / math.sin(x))
+    )
+    return v
+
 
 def slerp(a: Quaternion , b: Quaternion , t: float) -> Quaternion:
     dot = a.dot(b)
