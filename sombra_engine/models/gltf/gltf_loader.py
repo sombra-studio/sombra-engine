@@ -121,7 +121,31 @@ def create_skeleton(skin: Skin) -> Skeleton:
         root = bones[0]
     else:
         root_idx = skin.skeleton_index
-        root = [bone for bone in bones if bone.idx == root_idx][0]
+        root = None
+        for bone in bones:
+            if bone.idx == root_idx:
+                root_found = True
+                root = bone
+        if root is None:
+            # In this case the root is a simple node
+            joint = skin.skeleton
+            if joint:
+                local_transform = get_node_local_transform(joint)
+            else:
+                local_transform = Mat4()
+            root = Bone(
+                idx=joint.index,
+                bone_idx=-1,
+                name=joint.name,
+                local_bind_transform=local_transform,
+                inverse_bind_transform=Mat4()
+            )
+            # Add children
+            for child_node in joint.children:
+                child_bone = [
+                    bone for bone in bones if bone.idx == child_node.index
+                ][0]
+                root.children.append(child_bone)
 
     skeleton = Skeleton(bones=bones, root=root)
     return skeleton
