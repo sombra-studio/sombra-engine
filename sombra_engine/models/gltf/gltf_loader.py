@@ -74,8 +74,7 @@ def get_node_local_transform(node: Node) -> Mat4:
 
     if node.rotation:
         quat = Quaternion(node.rotation[3], *node.rotation[:3])
-        r = quat.to_mat4()
-        # r = Mat4()
+        r = quat.to_mat4().transpose()
     else:
         r = Mat4()
 
