@@ -133,7 +133,7 @@ class SkeletalMesh(Mesh):
         parent_transform = Mat4()
         # traverse skeleton starting from the root
         queue = [
-            (self.skeleton.bones[self.skeleton.root_idx], parent_transform)
+            (self.skeleton.root, parent_transform)
         ]
 
         while queue:

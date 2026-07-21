@@ -115,13 +115,15 @@ def create_skeleton(skin: Skin) -> Skeleton:
                 ][0]
                 bones[i].children.append(child_bone)
 
-    root_idx = skin.skeleton_index
-    if not skin.skeleton_index:
+    if skin.skeleton_index is None:
         # If the skin doesn't use the skeleton property assume first joint is
         # the root
-        root_idx = 0
+        root = bones[0]
+    else:
+        root_idx = skin.skeleton_index
+        root = [bone for bone in bones if bone.idx == root_idx][0]
 
-    skeleton = Skeleton(bones=bones, root_idx=root_idx)
+    skeleton = Skeleton(bones=bones, root=root)
     return skeleton
 
 

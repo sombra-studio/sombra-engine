@@ -17,4 +17,4 @@ class Bone:
 @dataclass
 class Skeleton:
     bones: list[Bone]
-    root_idx: int
+    root: Bone
