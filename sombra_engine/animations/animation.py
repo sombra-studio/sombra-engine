@@ -58,7 +58,7 @@ def get_transform(channel: AnimationChannel, time: float) -> Mat4:
         a = channel.values[0]
         b = channel.values[0]
     else:
-        while timestamps[i] > channel_time:
+        while channel_time > timestamps[i] and i < len(timestamps) - 2:
             i += 1
         match channel.interpolation:
             case AnimationInterpolation.LINEAR:
