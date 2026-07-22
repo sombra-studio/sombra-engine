@@ -153,7 +153,7 @@ class Animation:
 
         # Rotation
         channel = self.rotation_channels[node_idx]
-        rotation = get_transform(channel, time)
+        rotation = get_transform(channel, time).transpose()
 
         # Scale
         channel = self.scale_channels[node_idx]
