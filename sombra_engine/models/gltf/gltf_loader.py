@@ -117,13 +117,17 @@ def create_skeleton(skin: Skin) -> Skeleton:
     if skin.skeleton_index is None:
         # If the skin doesn't use the skeleton property assume first joint is
         # the root
-        root = bones[0]
+        if bones:
+            root = bones[0]
+        else:
+            raise Exception(
+                f"Can't create skeleton from empty skin: {skin.joints}"
+            )
     else:
         root_idx = skin.skeleton_index
         root = None
         for bone in bones:
             if bone.idx == root_idx:
-                root_found = True
                 root = bone
         if root is None:
             # In this case the root is a simple node
