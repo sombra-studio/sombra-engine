@@ -176,6 +176,8 @@ class SkeletalMesh(Mesh):
         if self.is_paused:
             return
         self.time += dt
+
+        # Update skeleton
         bones_transforms = self.compute_bones_transforms()
         self.set_bones_transforms(bones_transforms)
 

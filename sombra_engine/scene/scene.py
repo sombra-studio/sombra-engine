@@ -9,7 +9,7 @@ class Scene:
     def __init__(self):
         self.lights: list[Light] = []
         self.meshes: list[Mesh | SkeletalMesh] = []
-        self.animations: list[Animation] = []
+        self.animations: dict[str, Animation] = {}
         self.skins: list[Skeleton] = []
 
     def create_light(self, position: Vec3, color: Vec3):

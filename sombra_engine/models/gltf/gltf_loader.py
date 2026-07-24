@@ -5,7 +5,7 @@ from pyglet.math import Mat4, Vec2, Vec3, Vec4
 from pyglet.model.codecs.gltf import Skin
 
 from sombra_engine.animations import Animation, Bone, Skeleton
-from sombra_engine.models import Model, SkeletalMesh
+from sombra_engine.models import SkeletalMesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform,
     Triangle, Vertex, VertexGroup
@@ -75,6 +75,32 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
             data["has_normal_map"] = True
     else:
         data[map_name] = default_tex_func()
+
+
+def create_material(material_data: dict, idx: int) -> Material:
+    set_map(
+        material_data,
+        map_name='ambient_map',
+        default_tex_func=utils.create_white_tex
+    )
+    set_map(
+        material_data,
+        map_name='diffuse_map',
+        default_tex_func=utils.create_white_tex
+    )
+    set_map(
+        material_data,
+        map_name='specular_map',
+        default_tex_func=utils.create_black_tex
+    )
+    set_map(
+        material_data,
+        map_name='normal_map',
+        default_tex_func=utils.create_blue_tex
+    )
+
+    material = Material(material_id=idx, **material_data)
+    return material
 
 
 def create_skeleton(skin: Skin) -> Skeleton:
@@ -156,16 +182,13 @@ class GLTFLoader:
     @staticmethod
     def load(
         filename: str,
-        name: str | None = None,
         scale: float = 1.0,
         mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
         program: ShaderProgram | None = None,
-        transform: Transform = Transform(),
         parent: SceneObject | None = None
     ) -> Scene:
-
 
         # We need a dict with data
         # meshes_data has a shape like this:
@@ -176,7 +199,8 @@ class GLTFLoader:
         #           "primitives": [
         #               {
         #                   "indices": [1, 2, 3, ...],
-        #                   "positions": [(132.4, 427.2, 12.3), (...), ...]
+        #                   "positions": [(132.4, 427.2, 12.3), (...), ...],
+        #                   "material_name": "Wood"
         #               }
         #           ]
         #       }
@@ -187,56 +211,33 @@ class GLTFLoader:
         #           "diffuse_color": (1.0, 1.0, 1.0, 1.0)
         #       },
         #       "Stone": {
-        #           ....
+        #           "name": "Stone",
+        #           "diffuse_color": (0.98, 0.73, 0.56, 1.0)
         #       }
         #     }
         # }
         parsed_data = GLTFParser.parse(filename)
-        transform.scale *= Vec3(scale, scale, scale)
         meshes_data = {}
 
         scene = Scene()
         # Create skins
         if parsed_data.get('skins_data'):
             for skeleton_data in parsed_data['skins_data']:
-                skeleton = create_skeleton(data['skins'][0])
-
-        # iterate bones hierarchy
+                skeleton = create_skeleton(skeleton_data)
+                scene.skins.append(skeleton)
 
         # Create animations
-        if data.get('animations_data'):
-            animations = load_animations(data['animations'])
-        else:
-            animations = []
+        if parsed_data.get('animations_data'):
+            animations = load_animations(parsed_data['animations_data'])
+            scene.animations = animations
 
         # Create materials
         materials_dict = {}
         idx = 1
         for name, material_data in parsed_data["materials_data"].items():
-            set_map(
-                material_data,
-                map_name='ambient_map',
-                default_tex_func=utils.create_white_tex
-            )
-            set_map(
-                material_data,
-                map_name='diffuse_map',
-                default_tex_func=utils.create_white_tex
-            )
-            set_map(
-                material_data,
-                map_name='specular_map',
-                default_tex_func=utils.create_black_tex
-            )
-            set_map(
-                material_data,
-                map_name='normal_map',
-                default_tex_func=utils.create_blue_tex
-            )
-
-            material = Material(material_id=idx, **material_data)
-            idx += 1
+            material = create_material(material_data, idx)
             materials_dict[name] = material
+            idx += 1
 
         # Create vertex group data
         for data in parsed_data["meshes_data"]:
