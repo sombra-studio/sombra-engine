@@ -207,6 +207,3 @@ class Mesh(SceneObject):
                 tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
                 tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
         return position_list, normal_list, tangent_list, tex_coords_list
-
-    def update(self, dt):
-        pass
