@@ -56,6 +56,16 @@ def get_triangles_from_data(data: dict) -> list[Triangle]:
 
 
 def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
+    """
+    Set a texture mapping some material property, like "normal_map",
+    "diffuse_map", etc.
+
+    Args:
+        data: A dictionary with the material properties
+        map_name: The name of the texture map
+        default_tex_func: A reference to the function that creates the
+            default texture in case the map is not found in the data
+    """
     if map_name in data and data[map_name]:
         if map_name == 'bump_map':
             data["has_bump_map"] = True
