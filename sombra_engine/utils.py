@@ -77,13 +77,28 @@ def quaternion_slerp(q1: Quaternion, q2: Quaternion, t: float) -> Quaternion:
 
 
 def book_slerp(a: Quaternion , b: Quaternion , t: float) -> Quaternion:
+    """
+    This function uses the equations from the GLTF 2.0 Specification book.
+    https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-slerp
+
+    Args:
+        a: The first quaternion to interpolate
+        b: The second quaternion
+        t: The parametric variable in the range [0, 1]
+
+    Returns:
+        Quaternion: The value of the spherical interpolation between the two
+        given quaternions
+
+    """
     dot = a.dot(b)
 
-    if dot > 0.9995:
+    abs_dot = min(abs(dot), 0.999)
+    x = math.acos(abs_dot)
+
+    if x < 0.005:
         return a * (1 - t) + b * t
 
-    abs_dot = abs(dot)
-    x = math.acos(abs_dot)
     s = dot / abs_dot
 
     v = (
