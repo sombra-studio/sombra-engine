@@ -41,7 +41,7 @@ def interpolate_quat(
 ):
     match interpolation:
         case AnimationInterpolation.LINEAR:
-            value = utils.book_slerp(a, b, t)
+            value = a.slerp(b, t)
         case _:
             value = a
     return value

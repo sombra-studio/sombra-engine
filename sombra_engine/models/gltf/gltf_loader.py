@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
-from pyglet.math import Mat4, Quaternion, Vec2, Vec3, Vec4
-from pyglet.model.codecs.gltf import Node, Skin
+from pyglet.math import Mat4, Vec2, Vec3, Vec4
+from pyglet.model.codecs.gltf import Skin
 
 from sombra_engine.animations import Animation, Bone, Skeleton
 from sombra_engine.models import Model, SkeletalMesh
@@ -11,7 +11,8 @@ from sombra_engine.primitives import (
     Triangle, Vertex, VertexGroup
 )
 from sombra_engine.models.gltf import GLTFParser
-from sombra_engine import utils
+from sombra_engine.models.gltf.gltf_parser import get_node_local_transform
+from sombra_engine import Scene, utils
 
 
 def get_triangles_from_data(data: dict) -> list[Triangle]:
@@ -64,28 +65,6 @@ def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
             data["has_normal_map"] = True
     else:
         data[map_name] = default_tex_func()
-
-
-def get_node_local_transform(node: Node) -> Mat4:
-    if node.translation:
-        t = Mat4.from_translation(Vec3(*node.translation))
-    else:
-        t = Mat4()
-
-    if node.rotation:
-        quat = Quaternion(node.rotation[3], *node.rotation[:3])
-        r = quat.to_mat4().transpose()
-    else:
-        r = Mat4()
-
-    if node.scale:
-        s = Mat4.from_scale(Vec3(*node.scale))
-    else:
-        s = Mat4()
-
-
-    local_transform = t @ r @ s
-    return local_transform
 
 
 def create_skeleton(skin: Skin) -> Skeleton:
@@ -175,7 +154,7 @@ class GLTFLoader:
         program: ShaderProgram | None = None,
         transform: Transform = Transform(),
         parent: SceneObject | None = None
-    ) -> Model:
+    ) -> Scene:
 
 
         # We need a dict with data
@@ -183,8 +162,13 @@ class GLTFLoader:
         # {
         #     "meshes_data": [
         #       {
-        #           "indices": [1, 2, 3, ...],
-        #           "positions": [(132.4, 427.2, 12.3), (...), ...]
+        #           "name": "Knight",
+        #           "primitives": [
+        #               {
+        #                   "indices": [1, 2, 3, ...],
+        #                   "positions": [(132.4, 427.2, 12.3), (...), ...]
+        #               }
+        #           ]
         #       }
         #     ],
         #     "materials_data": {
@@ -200,6 +184,20 @@ class GLTFLoader:
         parsed_data = GLTFParser.parse(filename)
         transform.scale *= Vec3(scale, scale, scale)
         meshes_data = {}
+
+        scene = Scene()
+        # Create skins
+        if parsed_data.get('skins_data'):
+            for skeleton_data in parsed_data['skins_data']:
+                skeleton = create_skeleton(data['skins'][0])
+
+        # iterate bones hierarchy
+
+        # Create animations
+        if data.get('animations_data'):
+            animations = load_animations(data['animations'])
+        else:
+            animations = []
 
         # Create materials
         materials_dict = {}
@@ -244,23 +242,8 @@ class GLTFLoader:
                 }
                 vertex_groups_data[vg_name] = vg_data
 
-            # Create bones
-            if data.get('skins'):
-                skeleton = create_skeleton(data['skins'][0])
-            else:
-                skeleton = None
-            # iterate bones hierarchy
-
-            # Create animations
-            if data.get('animations'):
-                animations = load_animations(data['animations'])
-            else:
-                animations = []
-
             meshes_data[name] = {
-                'vertex_groups': vertex_groups_data,
-                'skeleton': skeleton,
-                'animations': animations
+                'vertex_groups': vertex_groups_data
             }
         meshes = []
 
@@ -290,10 +273,5 @@ class GLTFLoader:
             )
             meshes.append(mesh)
 
-        model = Model(
-            name=name,
-            meshes=meshes,
-            transform=transform,
-            parent=parent
-        )
+
         return model

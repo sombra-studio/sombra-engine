@@ -43,17 +43,19 @@ def update(dt: float):
 if __name__ == '__main__':
     batch = app.batch
     model = GLTFLoader.load(
-        # filename='tests/data/yoda/yoda.glb',
-        filename='zombie.glb',
+        # filename='yoda/yoda.glb',
+        filename='CesiumMan.glb',
+        # filename='BrainStem.glb',
+        # filename='zombie.glb',
         # filename='box.glb',
         # filename='plane.gltf',
         # program=shader_program,
         # filename='Avocado.gltf',
         batch=batch
     )
-    # mesh: SkeletalMesh = model.meshes[0]
-    # animation_name = [k for k in mesh.animations.keys()][0]
-    # mesh.set_animation(animation_name)
+    mesh: SkeletalMesh = model.meshes[0]
+    animation_name = [k for k in mesh.animations.keys()][0]
+    mesh.set_animation(animation_name)
 
     scene = Scene()
     # scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
