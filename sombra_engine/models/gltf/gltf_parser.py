@@ -17,27 +17,6 @@ def group_in_2s(l: list) -> list:
     return group_in_ms(l=l, m=2)
 
 
-def get_node_local_transform(node: gltf.Node) -> Mat4:
-    if node.translation:
-        t = Mat4.from_translation(Vec3(*node.translation))
-    else:
-        t = Mat4()
-
-    if node.rotation:
-        quat = Quaternion(node.rotation[3], *node.rotation[:3])
-        r = quat.to_mat4().transpose()
-    else:
-        r = Mat4()
-
-    if node.scale:
-        s = Mat4.from_scale(Vec3(*node.scale))
-    else:
-        s = Mat4()
-
-    local_transform = t @ r @ s
-    return local_transform
-
-
 def parse_material(
     material: gltf.Material, textures: list[gltf.Texture]
 ) -> dict[str, Any]:
@@ -151,9 +130,7 @@ def parse_node(node: gltf.Node) -> list[dict[str, Any]]:
     """
     meshes_data = []
     if node.mesh:
-        # this is not optimized but since there aren't many nodes, who cares
-        # O(65^2)
-        transform = get_transform_for_node(node)
+        transform = node.global_transform
         mesh_data = parse_mesh(node.mesh)
         mesh_data["matrix"] = transform
         meshes_data.append(mesh_data)
@@ -161,18 +138,6 @@ def parse_node(node: gltf.Node) -> list[dict[str, Any]]:
     for child_node in node.children:
         meshes_data += parse_node(child_node)
     return meshes_data
-
-
-def get_transform_for_node(node: gltf.Node) -> Mat4:
-    if node.matrix:
-       transform = Mat4(*node.matrix)
-    else:
-        transform = get_node_local_transform(node)
-
-    if node.parent:
-        transform = get_transform_for_node(node.parent) @ transform
-
-    return transform
 
 
 class GLTFParser:
@@ -188,15 +153,15 @@ class GLTFParser:
 
         for scene in data.scenes:
             for node in scene:
-                mesh_data = parse_node(node)
-                if mesh_data:
-                    scene_data["meshes_data"].append(mesh_data)
+                meshes_data = parse_node(node)
+                if meshes_data:
+                    scene_data["meshes_data"] += meshes_data
 
         for material in data.materials:
             material_data = parse_material(material, data.textures)
             scene_data["materials_data"][material.name] = material_data
 
-        scene_data["skins_data"] = data.get("skins")
-        scene_data["animations_data"] = data.get("animations")
+        scene_data["skins_data"] = data.skins
+        scene_data["animations_data"] = data.animations
 
         return scene_data

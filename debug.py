@@ -36,41 +36,40 @@ def update(dt: float):
     if shader_program is not None:
         if 'eye' in shader_program._uniforms:
             shader_program['eye'] = app.camera.position
-        app.update(dt)
+    app.update(dt)
 
 
 
 if __name__ == '__main__':
     batch = app.batch
-    model = GLTFLoader.load(
+    meshes, skeletons, animations = GLTFLoader.load(
         # filename='yoda/yoda.glb',
-        filename='CesiumMan.glb',
+        # filename='CesiumMan.glb',
         # filename='BrainStem.glb',
-        # filename='zombie.glb',
+        filename='zombie.glb',
         # filename='box.glb',
         # filename='plane.gltf',
         # program=shader_program,
         # filename='Avocado.gltf',
         batch=batch
     )
-    mesh: SkeletalMesh = model.meshes[0]
-    animation_name = [k for k in mesh.animations.keys()][0]
-    mesh.set_animation(animation_name)
+
+    mesh = meshes[0]
+    if isinstance(mesh, SkeletalMesh):
+        if mesh.animations:
+            animation_name = [k for k in mesh.animations.keys()][0]
+            mesh.set_animation(animation_name)
 
     scene = Scene()
     # scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
     scene.create_light(Vec3(10.0, 8.0, 0.0), Vec3(1.0, 1.0, 1.0))
+    scene.add_mesh(mesh)
 
-    program = model.meshes[0].program
-    # shader_program = program
-    if 'light.position' in program._uniforms:
-        program['light.position'] = scene.lights[0].position
-    if 'light.color' in program._uniforms:
-        program['light.color'] = scene.lights[0].color
+    program = mesh.program
     if 'eye' in program._uniforms:
         program['eye'] = app.camera.position
-
-    app.add_model(model)
+    # shader_program = program
+    app.set_scene(scene)
 
     pyglet.clock.schedule(update)
     app.run(0)

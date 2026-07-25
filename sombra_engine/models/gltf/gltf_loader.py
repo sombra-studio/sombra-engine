@@ -1,18 +1,19 @@
 from collections.abc import Callable
+from typing import Any
+
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3, Vec4
 from pyglet.model.codecs.gltf import Skin
 
 from sombra_engine.animations import Animation, Bone, Skeleton
-from sombra_engine.models import SkeletalMesh
+from sombra_engine.models import Mesh, SkeletalMesh
 from sombra_engine.primitives import (
     Material, SceneObject, Transform,
     Triangle, Vertex, VertexGroup
 )
 from sombra_engine.models.gltf import GLTFParser
-from sombra_engine.models.gltf.gltf_parser import get_node_local_transform
-from sombra_engine import Scene, utils
+from sombra_engine import utils
 
 
 def get_triangles_from_data(data: dict) -> list[Triangle]:
@@ -108,7 +109,7 @@ def create_skeleton(skin: Skin) -> Skeleton:
 
     for i, joint in enumerate(skin.joints):
         offset = i * 16
-        local_transform = get_node_local_transform(joint)
+        local_transform = joint.local_transform
         bone = Bone(
             idx=joint.index,
             bone_idx=i,
@@ -148,7 +149,7 @@ def create_skeleton(skin: Skin) -> Skeleton:
             # In this case the root is a simple node
             joint = skin.skeleton
             if joint:
-                local_transform = get_node_local_transform(joint)
+                local_transform = joint.local_transform
             else:
                 local_transform = Mat4()
             root = Bone(
@@ -178,6 +179,56 @@ def load_animations(data: dict) -> dict[str, Animation]:
     return animations
 
 
+def create_mesh(
+    mesh_name: str,
+    mesh_data: dict[str, Any],
+    mode: GeometryMode = GeometryMode.TRIANGLES,
+    batch: Batch | None = None,
+    group: Group | None = None,
+    program: ShaderProgram | None = None,
+    transform: Transform = Transform(),
+    parent: SceneObject | None = None
+):
+    # Create vertex groups
+    vertex_groups: dict[str, VertexGroup] = {}
+    materials: dict[str, Material] = {}
+    for vg_name, vg_data in mesh_data['vertex_groups'].items():
+        material = vg_data['material']
+        vertex_groups[vg_name] = VertexGroup(
+            vg_name, vg_data['triangles'], material
+        )
+        materials[material.name] = material
+
+
+    if mesh_data['skeleton'] and mesh_data['animations']:
+        mesh = SkeletalMesh(
+            name=mesh_name,
+            vertex_groups=vertex_groups,
+            materials=materials,
+            skeleton=mesh_data['skeleton'],
+            animations=mesh_data['animations'],
+            mode=mode,
+            batch=batch,
+            group=group,
+            program=program,
+            transform=transform,
+            parent=parent
+        )
+    else:
+        mesh = Mesh(
+            name=mesh_name,
+            vertex_groups=vertex_groups,
+            materials=materials,
+            mode=mode,
+            batch=batch,
+            group=group,
+            program=program,
+            transform=transform,
+            parent=parent
+        )
+    return mesh
+
+
 class GLTFLoader:
     @staticmethod
     def load(
@@ -187,8 +238,9 @@ class GLTFLoader:
         batch: Batch | None = None,
         group: Group | None = None,
         program: ShaderProgram | None = None,
+        transform: Transform = Transform(),
         parent: SceneObject | None = None
-    ) -> Scene:
+    ) -> tuple[list[Mesh | SkeletalMesh], list[Skeleton], dict[str, Animation]]:
 
         # We need a dict with data
         # meshes_data has a shape like this:
@@ -217,19 +269,19 @@ class GLTFLoader:
         #     }
         # }
         parsed_data = GLTFParser.parse(filename)
-        meshes_data = {}
+        meshes: list[Mesh | SkeletalMesh] = []
+        skeletons: list[Skeleton] = []
+        animations: dict[str, Animation] = {}
 
-        scene = Scene()
         # Create skins
         if parsed_data.get('skins_data'):
             for skeleton_data in parsed_data['skins_data']:
                 skeleton = create_skeleton(skeleton_data)
-                scene.skins.append(skeleton)
+                skeletons.append(skeleton)
 
         # Create animations
         if parsed_data.get('animations_data'):
-            animations = load_animations(parsed_data['animations_data'])
-            scene.animations = animations
+            animations.update(load_animations(parsed_data['animations_data']))
 
         # Create materials
         materials_dict = {}
@@ -240,6 +292,7 @@ class GLTFLoader:
             idx += 1
 
         # Create vertex group data
+        meshes_data = {}
         for data in parsed_data["meshes_data"]:
             name = data["name"]
             vertex_groups_data = {}
@@ -256,25 +309,19 @@ class GLTFLoader:
             meshes_data[name] = {
                 'vertex_groups': vertex_groups_data
             }
-        meshes = []
 
+            if skeletons:
+                # TODO Fix this
+                meshes_data[name]['skeleton'] = skeletons[0]
+
+            if animations:
+                meshes_data[name]['animations'] = animations
+
+        # Create meshes
         for mesh_name, mesh_data in meshes_data.items():
-            # Create vertex groups
-            vertex_groups: dict[str, VertexGroup] = {}
-            materials: dict[str, Material] = {}
-            for vg_name, vg_data in mesh_data['vertex_groups'].items():
-                material = vg_data['material']
-                vertex_groups[vg_name] = VertexGroup(
-                    vg_name, vg_data['triangles'], material
-                )
-                materials[material.name] = material
-
-            mesh = SkeletalMesh(
-                name=mesh_name,
-                vertex_groups=vertex_groups,
-                materials=materials,
-                skeleton=mesh_data['skeleton'],
-                animations=mesh_data['animations'],
+            mesh = create_mesh(
+                mesh_name,
+                mesh_data,
                 mode=mode,
                 batch=batch,
                 group=group,
@@ -284,5 +331,4 @@ class GLTFLoader:
             )
             meshes.append(mesh)
 
-
-        return model
+        return (meshes, skeletons, animations)

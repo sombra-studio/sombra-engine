@@ -1,6 +1,5 @@
 from pudu_ui import Params
 import pudu_ui
-from pyglet import options
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
@@ -12,10 +11,10 @@ from pyglet.window import key
 from pyglet.window.camera import FPSCamera
 import pyglet
 
-
+from sombra_engine import Scene
 # from sombra_engine.camera import FPSCamera
 from sombra_engine.debug import Gizmo, Stats
-from sombra_engine.models import Model
+from sombra_engine.models import SkeletalMesh
 from sombra_engine.fpscamera import FPSCameraControls
 
 
@@ -25,7 +24,7 @@ class App(pudu_ui.App):
         caption: str = "Sombra Engine",
         is_debug: bool = False
     ):
-        super().__init__(caption=caption, vsync=False)
+        super().__init__(caption=caption, vsync=not is_debug)
         self.is_debug = is_debug
         # self.camera = FPSCamera(
         #     self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
@@ -55,12 +54,15 @@ class App(pudu_ui.App):
             self, stats_params, self.debug_ui_batch, self.debug_group
         )
 
-        self.models: list[Model] = []
+        self.scenes: list[Scene] = []
+        self.current_scene: Scene | None = None
         self.tri_count = 0
 
-    def add_model(self, model: Model):
-        self.models.append(model)
-        self.tri_count += model.tri_count
+    def set_scene(self, scene: Scene):
+        self.current_scene = scene
+        self.tri_count = 0
+        for mesh in scene.meshes:
+            self.tri_count += mesh.tri_count
         self.stats.set_tri_counts(self.tri_count)
 
     def draw_2d_debug_ui(self):
@@ -110,10 +112,12 @@ class App(pudu_ui.App):
         self.stats.update(dt)
 
         # Update models
-        for model in self.models:
-            model.update(dt)
+        if self.current_scene and self.current_scene.meshes:
+            for mesh in self.current_scene.meshes:
+                if isinstance(mesh, SkeletalMesh):
+                    mesh.update(dt)
 
-    def run(self, interval: float = 1.0 / 60.0):
+    def run(self, interval: float = 1.0 / 144.0):
         if not interval:
             pyglet.clock.schedule(self.update)
         else:
