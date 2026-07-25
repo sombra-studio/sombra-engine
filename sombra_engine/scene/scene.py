@@ -21,9 +21,9 @@ class Scene:
         # change the group of each mesh so that includes the light
 
         program = mesh.program
-        if 'light.position' in program._uniforms:
+        if 'light.position' in program.uniforms:
             program['light.position'] = self.lights[0].position
-        if 'light.color' in program._uniforms:
+        if 'light.color' in program.uniforms:
             program['light.color'] = self.lights[0].color
 
         self.meshes.append(mesh)

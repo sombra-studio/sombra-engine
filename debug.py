@@ -32,12 +32,7 @@ shader_program = None
 
 
 def update(dt: float):
-    global shader_program
-    if shader_program is not None:
-        if 'eye' in shader_program._uniforms:
-            shader_program['eye'] = app.camera.position
     app.update(dt)
-
 
 
 if __name__ == '__main__':
@@ -46,7 +41,7 @@ if __name__ == '__main__':
         # filename='yoda/yoda.glb',
         # filename='CesiumMan.glb',
         # filename='BrainStem.glb',
-        filename='zombie.glb',
+        filename='zombie2.glb',
         # filename='box.glb',
         # filename='plane.gltf',
         # program=shader_program,
@@ -65,9 +60,6 @@ if __name__ == '__main__':
     scene.create_light(Vec3(10.0, 8.0, 0.0), Vec3(1.0, 1.0, 1.0))
     scene.add_mesh(mesh)
 
-    program = mesh.program
-    if 'eye' in program._uniforms:
-        program['eye'] = app.camera.position
     # shader_program = program
     app.set_scene(scene)
 

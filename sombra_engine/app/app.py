@@ -115,7 +115,12 @@ class App(pudu_ui.App):
         if self.current_scene and self.current_scene.meshes:
             for mesh in self.current_scene.meshes:
                 if isinstance(mesh, SkeletalMesh):
+                    # Update skeletal meshes
                     mesh.update(dt)
+
+                # Update eye uniform from camera
+                if 'eye' in mesh.program.uniforms:
+                    mesh.program['eye'] = self.camera.position
 
     def run(self, interval: float = 1.0 / 144.0):
         if not interval:
