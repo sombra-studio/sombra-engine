@@ -1,9 +1,10 @@
 from collections.abc import Callable
+import math
 from typing import Any
 
 from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, ShaderProgram, Texture
-from pyglet.math import Mat4, Vec2, Vec3, Vec4
+from pyglet.math import Mat4, Quaternion, Vec2, Vec3, Vec4
 from pyglet.model.codecs.gltf import Skin
 
 from sombra_engine.animations import Animation, Bone, Skeleton
@@ -13,7 +14,7 @@ from sombra_engine.primitives import (
     Triangle, Vertex, VertexGroup
 )
 from sombra_engine.models.gltf import GLTFParser
-from sombra_engine import utils
+from sombra_engine import Scene, utils
 
 
 def get_triangles_from_data(data: dict) -> list[Triangle]:
@@ -179,9 +180,120 @@ def load_animations(data: dict) -> dict[str, Animation]:
     return animations
 
 
+def get_euler_angles(q: Quaternion):
+    """
+    Extracts Euler angles (rot_x, rot_y, rot_z) in radians from a pyglet Quaternion.
+    """
+    # rot_x / Roll (X-axis rotation)
+    sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
+    cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
+    rot_x = math.atan2(sinr_cosp, cosr_cosp)
+
+    # rot_y / Pitch (Y-axis rotation)
+    sinp = 2.0 * (q.w * q.y - q.z * q.x)
+    if abs(sinp) >= 1.0:
+        # Use exactly 90 degrees (pi/2) if the math drifts slightly out of bounds
+        rot_y = math.copysign(math.pi / 2, sinp)
+    else:
+        rot_y = math.asin(sinp)
+
+    # rot_z / Yaw (Z-axis rotation)
+    siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+    cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+    rot_z = math.atan2(siny_cosp, cosy_cosp)
+
+    return rot_x, rot_y, rot_z
+
+
+def create_object(
+    node_data: dict[str, Any],
+    materials: dict[str, Material],
+    skeleton: Skeleton | None,
+    animations: dict[str, Animation],
+    scene: Scene,
+    mode: GeometryMode = GeometryMode.TRIANGLES,
+    batch: Batch | None = None,
+    group: Group | None = None,
+    program: ShaderProgram | None = None,
+    parent: SceneObject | None = None
+) -> SceneObject:
+    transform = get_transform_from_node_data(node_data)
+    matrix = Mat4(*node_data["matrix"]) if node_data["matrix"] else Mat4()
+
+    scene_obj = SceneObject(
+        name=node_data["name"],
+        transform=transform,
+        matrix=matrix,
+        parent=parent
+    )
+
+    if node_data.get("mesh"):
+        mesh_data = node_data["mesh"]
+        vertex_groups_data = {}
+        for i, primitive_data in enumerate(mesh_data["primitives"]):
+            triangles = get_triangles_from_data(primitive_data)
+            vg_name = str(i)
+            vg_data = {
+                "name": vg_name,
+                "triangles": triangles,
+                "material": materials[primitive_data['material_name']]
+            }
+            vertex_groups_data[vg_name] = vg_data
+        mesh_data["vertex_groups"] = vertex_groups_data
+
+        mesh = create_mesh(
+            mesh_data=mesh_data,
+            materials=materials,
+            skeleton=skeleton,
+            animations=animations,
+            mode=mode,
+            batch=batch,
+            group=group,
+            program=program,
+            parent=scene_obj
+        )
+        scene_obj.children.append(mesh)
+        scene.add_mesh(mesh)
+
+    if node_data.get("children"):
+        for child_data in node_data["children"]:
+            child_obj = create_object(
+                child_data,
+                materials=materials,
+                skeleton=skeleton,
+                animations=animations,
+                scene=scene,
+                mode=mode,
+                batch=batch,
+                group=group,
+                program=program,
+                parent=scene_obj
+            )
+            scene_obj.children.append(child_obj)
+
+    return scene_obj
+
+
+def get_transform_from_node_data(node_data):
+    transform = Transform()
+    if node_data["translation"]:
+        transform.translation = Vec3(*node_data["translation"])
+
+    if node_data["rotation"]:
+        q = Quaternion(node_data["rotation"][3], *node_data["rotation"][:3])
+        rot_x, rot_y, rot_z = get_euler_angles(q)
+        transform.rotation = Vec3(rot_x, rot_y, rot_z)
+
+    if node_data["scale"]:
+        transform.scale = Vec3(*node_data["scale"])
+    return transform
+
+
 def create_mesh(
-    mesh_name: str,
     mesh_data: dict[str, Any],
+    materials: dict[str, Material],
+    skeleton: Skeleton | None,
+    animations: dict[str, Animation],
     mode: GeometryMode = GeometryMode.TRIANGLES,
     batch: Batch | None = None,
     group: Group | None = None,
@@ -191,22 +303,19 @@ def create_mesh(
 ):
     # Create vertex groups
     vertex_groups: dict[str, VertexGroup] = {}
-    materials: dict[str, Material] = {}
     for vg_name, vg_data in mesh_data['vertex_groups'].items():
         material = vg_data['material']
         vertex_groups[vg_name] = VertexGroup(
             vg_name, vg_data['triangles'], material
         )
-        materials[material.name] = material
 
-
-    if mesh_data['skeleton'] and mesh_data['animations']:
+    if skeleton and animations:
         mesh = SkeletalMesh(
-            name=mesh_name,
+            name=mesh_data["name"],
             vertex_groups=vertex_groups,
             materials=materials,
-            skeleton=mesh_data['skeleton'],
-            animations=mesh_data['animations'],
+            skeleton=skeleton,
+            animations=animations,
             mode=mode,
             batch=batch,
             group=group,
@@ -216,7 +325,7 @@ def create_mesh(
         )
     else:
         mesh = Mesh(
-            name=mesh_name,
+            name=mesh_data["name"],
             vertex_groups=vertex_groups,
             materials=materials,
             mode=mode,
@@ -237,26 +346,40 @@ class GLTFLoader:
         mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
-        program: ShaderProgram | None = None,
-        transform: Transform = Transform(),
-        parent: SceneObject | None = None
-    ) -> tuple[list[Mesh | SkeletalMesh], list[Skeleton], dict[str, Animation]]:
+        program: ShaderProgram | None = None
+    ) -> tuple[list[Scene], list[Skeleton], dict[str, Animation]]:
 
         # We need a dict with data
-        # meshes_data has a shape like this:
+        # parsed_data has a shape like this:
         # {
-        #     "meshes_data": [
+        #    "scenes_data": [
         #       {
-        #           "name": "Knight",
-        #           "primitives": [
+        #           "name": Main,
+        #           "nodes": [
         #               {
-        #                   "indices": [1, 2, 3, ...],
-        #                   "positions": [(132.4, 427.2, 12.3), (...), ...],
-        #                   "material_name": "Wood"
+        #                   "name": "Armature",
+        #                   "matrix": Mat4(),
+        #                   "children": [
+        #                       {
+        #                           "name": "Ch10",
+        #                           "mesh": {
+        #                              "name": "Knight",
+        #                              "primitives": [
+        #                                  {
+        #                                      "indices": [1, 2, 3, ...],
+        #                                      "positions": [(132.4, 427.2,
+        #                                      12.3), (...), ...],
+        #                                      "material_name": "Wood"
+        #                                  }
+        #                              ]
+        #                           }
+        #                           "matrix": Mat4()
+        #                       }
+        #                   ]
         #               }
         #           ]
-        #       }
-        #     ],
+        #
+        #    ],
         #     "materials_data": {
         #       "Wood": {
         #           "name": "Wood",
@@ -269,7 +392,7 @@ class GLTFLoader:
         #     }
         # }
         parsed_data = GLTFParser.parse(filename)
-        meshes: list[Mesh | SkeletalMesh] = []
+        scenes: list[Scene] = []
         skeletons: list[Skeleton] = []
         animations: dict[str, Animation] = {}
 
@@ -284,51 +407,30 @@ class GLTFLoader:
             animations.update(load_animations(parsed_data['animations_data']))
 
         # Create materials
-        materials_dict = {}
+        materials = {}
         idx = 1
         for name, material_data in parsed_data["materials_data"].items():
             material = create_material(material_data, idx)
-            materials_dict[name] = material
+            materials[name] = material
             idx += 1
 
-        # Create vertex group data
-        meshes_data = {}
-        for data in parsed_data["meshes_data"]:
-            name = data["name"]
-            vertex_groups_data = {}
-            for i, primitive_data in enumerate(data["primitives"]):
-                triangles = get_triangles_from_data(primitive_data)
-                vg_name = str(i)
-                vg_data = {
-                    "name": vg_name,
-                    "triangles": triangles,
-                    "material": materials_dict[primitive_data['material_name']]
-                }
-                vertex_groups_data[vg_name] = vg_data
+        # Create scenes
+        skeleton = skeletons[0] if skeletons else None
+        for scene_data in parsed_data["scenes_data"]:
+            scene = Scene(scene_data["name"])
+            for node_data in scene_data["nodes"]:
+                scene_obj = create_object(
+                    node_data,
+                    materials=materials,
+                    skeleton=skeleton,
+                    animations=animations,
+                    scene=scene,
+                    mode=mode,
+                    batch=batch,
+                    group=group,
+                    program=program
+                )
+                scene.objects.append(scene_obj)
+            scenes.append(scene)
 
-            meshes_data[name] = {
-                'vertex_groups': vertex_groups_data
-            }
-
-            if skeletons:
-                # TODO Fix this
-                meshes_data[name]['skeleton'] = skeletons[0]
-
-            if animations:
-                meshes_data[name]['animations'] = animations
-
-        # Create meshes
-        for mesh_name, mesh_data in meshes_data.items():
-            mesh = create_mesh(
-                mesh_name,
-                mesh_data,
-                mode=mode,
-                batch=batch,
-                group=group,
-                program=program,
-                transform=transform,
-                parent=parent
-            )
-            meshes.append(mesh)
-
-        return (meshes, skeletons, animations)
+        return (scenes, skeletons, animations)

@@ -79,11 +79,11 @@ def parse_material(
     return material_data
 
 
-def parse_mesh(mesh) -> dict[str, Any]:
+def parse_mesh(mesh: gltf.Mesh) -> dict[str, Any]:
     # Parse mesh data
     mesh_data = {
         "primitives": [],
-        "name": mesh.name or "unnamed"
+        "name": mesh.name or "undefined"
     }
     for primitive in mesh.primitives:
         primitive_data = {}
@@ -117,34 +117,48 @@ def parse_mesh(mesh) -> dict[str, Any]:
     return mesh_data
 
 
-def parse_node(node: gltf.Node) -> list[dict[str, Any]]:
+def parse_node(node: gltf.Node) -> dict[str, Any]:
     """
-    Parse a node and get the child meshes
+    Parse a node with its child nodes in the children attribute
 
     Args:
-        node:
+        node: A Node object from pyglet gltf decoder that will be parsed
 
     Returns:
-        A list with the mesh data of every mesh that derives from this node (
-        with the transform of all of its parents applied)
+        A dictionary with the node parsed for loading it later
     """
-    meshes_data = []
+    node_data = {
+        "name": node.name,
+        "matrix": node.matrix,
+        "translation": node.translation,
+        "rotation": node.rotation,
+        "scale": node.scale
+    }
     if node.mesh:
-        transform = node.global_transform
         mesh_data = parse_mesh(node.mesh)
-        mesh_data["matrix"] = transform
-        meshes_data.append(mesh_data)
+        node_data["mesh"] = mesh_data
 
-    for child_node in node.children:
-        meshes_data += parse_node(child_node)
-    return meshes_data
+    if node.children:
+        node_data["children"] = []
+        for child_node in node.children:
+            child_data = parse_node(child_node)
+            node_data["children"].append(child_data)
+
+    return node_data
+
+def parse_scene(scene: gltf.Scene) -> dict[str, Any]:
+    scene_data = {
+        "name": scene.name,
+        "nodes": [parse_node(node) for node in scene.nodes]
+    }
+    return scene_data
 
 
 class GLTFParser:
     @staticmethod
     def parse(filename: str) -> dict:
-        scene_data = {
-            "meshes_data": [],
+        parsed_data = {
+            "scenes_data": [],
             "materials_data": {},
             "skins_data": [],
             "animations_data": []
@@ -152,16 +166,14 @@ class GLTFParser:
         data = gltf.load_gltf(filename)
 
         for scene in data.scenes:
-            for node in scene:
-                meshes_data = parse_node(node)
-                if meshes_data:
-                    scene_data["meshes_data"] += meshes_data
+            scene_data = parse_scene(scene)
+            parsed_data["scenes_data"].append(scene_data)
 
         for material in data.materials:
             material_data = parse_material(material, data.textures)
-            scene_data["materials_data"][material.name] = material_data
+            parsed_data["materials_data"][material.name] = material_data
 
-        scene_data["skins_data"] = data.skins
-        scene_data["animations_data"] = data.animations
+        parsed_data["skins_data"] = data.skins
+        parsed_data["animations_data"] = data.animations
 
-        return scene_data
+        return parsed_data

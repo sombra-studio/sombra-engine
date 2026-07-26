@@ -26,6 +26,7 @@ class App(pudu_ui.App):
     ):
         super().__init__(caption=caption, vsync=not is_debug)
         self.is_debug = is_debug
+        self.is_paused = False
         # self.camera = FPSCamera(
         #     self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
         # )
@@ -106,9 +107,14 @@ class App(pudu_ui.App):
                     'docs/screenshot.png'
                 )
                 handled = EVENT_HANDLED
+            if symbol == key.SPACE:
+                self.is_paused = not self.is_paused
+
         return handled
 
     def update(self, dt: float):
+        if self.is_paused:
+            return
         self.stats.update(dt)
 
         # Update models

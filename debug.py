@@ -37,11 +37,11 @@ def update(dt: float):
 
 if __name__ == '__main__':
     batch = app.batch
-    meshes, skeletons, animations = GLTFLoader.load(
+    scenes, skeletons, animations = GLTFLoader.load(
         # filename='yoda/yoda.glb',
         # filename='CesiumMan.glb',
         # filename='BrainStem.glb',
-        filename='zombie2.glb',
+        filename='zombie.glb',
         # filename='box.glb',
         # filename='plane.gltf',
         # program=shader_program,
@@ -49,18 +49,14 @@ if __name__ == '__main__':
         batch=batch
     )
 
-    mesh = meshes[0]
+    scene = scenes[0]
+    mesh = scene.meshes[0]
     if isinstance(mesh, SkeletalMesh):
         if mesh.animations:
             animation_name = [k for k in mesh.animations.keys()][0]
             mesh.set_animation(animation_name)
 
-    scene = Scene()
-    # scene.create_light(Vec3(100.0, 150.0, -7.0), Vec3(1.0, 1.0, 1.0))
     scene.create_light(Vec3(10.0, 8.0, 0.0), Vec3(1.0, 1.0, 1.0))
-    scene.add_mesh(mesh)
-
-    # shader_program = program
     app.set_scene(scene)
 
     pyglet.clock.schedule(update)

@@ -26,6 +26,7 @@ class SkeletalMesh(Mesh):
         group: Group | None = None,
         program: ShaderProgram | None = None,
         transform: Transform = Transform(),
+        matrix: Mat4 = Mat4(),
         parent: SceneObject | None = None
     ):
         if not program:
@@ -50,6 +51,7 @@ class SkeletalMesh(Mesh):
             group=group,
             program=program,
             transform=transform,
+            matrix=matrix,
             parent=parent
         )
         self.skeleton = skeleton

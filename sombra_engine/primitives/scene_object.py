@@ -7,6 +7,7 @@ from sombra_engine.primitives import Transform
 class SceneObject:
     def __init__(
         self,
+        name: str = "undefined",
         transform: Transform = Transform(),
         matrix: Mat4 = Mat4(),
         parent: Self | None = None
@@ -28,6 +29,7 @@ class SceneObject:
                 define the transformation matrix of this object
             parent: A reference to the parent object, it could be null
         """
+        self.name = name
         self.transform = transform
         self.matrix = matrix
         self.parent = parent
