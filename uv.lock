@@ -49,7 +49,7 @@ source = { git = "https://github.com/HenrYxZ/pyglet.git?branch=development#4f54f
 
 [[package]]
 name = "sombra-engine"
-version = "0.3.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "psutil" },
