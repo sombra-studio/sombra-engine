@@ -1,13 +1,15 @@
-from pyglet.gl import *
-from pyglet.graphics import Group
-from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics import Group, ShaderGroup, ShaderProgram
 from pyglet.math import Mat4
+from typing import Any
 
 
 from sombra_engine.primitives import Material
+from sombra_engine.utils import (
+    create_white_tex, create_black_tex, create_gray_tex, create_blue_tex
+)
 
 
-class MaterialGroup(Group):
+class MaterialGroup(ShaderGroup):
     def __init__(
         self,
         material: Material,
@@ -16,92 +18,89 @@ class MaterialGroup(Group):
         order: int = 0,
         parent: Group | None = None
     ):
-        super().__init__(order, parent)
+        super().__init__(program, order, parent)
         self.program = program
         self.material = material
         self.matrix = matrix
-
-        # Set diffuse map
-        self.diffuse_map = material.diffuse_map
-        glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
-        glGenerateMipmap(self.diffuse_map.target)
+        textures = {}
 
         # Set ambient map
         self.ambient_map = material.ambient_map
-        glBindTexture(self.ambient_map.target, self.ambient_map.id)
-        glGenerateMipmap(self.ambient_map.target)
+        if self.ambient_map is None:
+            self.ambient_map = create_white_tex()
+        textures['ambient_map'] = self.ambient_map
+
+        # Set diffuse map
+        self.diffuse_map = material.diffuse_map
+        if self.diffuse_map is None:
+            self.diffuse_map = create_gray_tex()
+        textures['diffuse_map'] = self.diffuse_map
+
 
         # Set specular map
         self.specular_map = material.specular_map
-        glBindTexture(self.specular_map.target, self.specular_map.id)
-        glGenerateMipmap(self.specular_map.target)
+        if self.specular_map is None:
+            self.specular_map = create_black_tex()
+        textures['specular_map'] = self.specular_map
 
         # Set bump map
         if self.material.has_bump_map:
             self.bump_map = material.bump_map
-            glBindTexture(self.bump_map.target, self.bump_map.id)
-            glGenerateMipmap(self.bump_map.target)
+            if self.bump_map is None:
+                self.bump_map = create_black_tex()
+            textures['bump_map'] = self.bump_map
         elif self.material.has_normal_map:
             self.normal_map = material.normal_map
-            glBindTexture(self.normal_map.target, self.normal_map.id)
-            glGenerateMipmap(self.normal_map.target)
+            if self.normal_map is None:
+                self.normal_map = create_blue_tex()
+            textures['bump_map'] = self.normal_map
 
-    def set_state(self):
-        self.program.use()
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(self.ambient_map.target, self.ambient_map.id)
-        glActiveTexture(GL_TEXTURE1)
-        glBindTexture(self.diffuse_map.target, self.diffuse_map.id)
-        glActiveTexture(GL_TEXTURE2)
-        glBindTexture(self.specular_map.target, self.specular_map.id)
-        glActiveTexture(GL_TEXTURE3)
-        if self.material.has_bump_map:
-            glBindTexture(self.bump_map.target, self.bump_map.id)
-        elif self.material.has_normal_map:
-            glBindTexture(self.normal_map.target, self.normal_map.id)
+        self.set_textures(textures, program)
+
+        self.uniforms = self.get_uniforms()
+        self.set_shader_uniforms(program, self.uniforms)
+
+    def get_uniforms(self) -> dict[str, Any]:
+        # Uniforms from material
+        uniforms = {}
+        # Explicitly assign sampler uniforms to their texture units
+        # (Required for GLSL 4.10 Core)
+        # if 'ambient_map' in self.program._uniforms:
+        #     uniforms['ambient_map'] = 0
+        # if 'diffuse_map' in self.program._uniforms:
+        #     uniforms['diffuse_map'] = 1
+        # if 'specular_map' in self.program._uniforms:
+        #     uniforms['specular_map'] = 2
+        # if 'bump_map' in self.program._uniforms:
+        #     uniforms['bump_map'] = 3
+
         if 'material.ambient' in self.program._uniforms:
-            self.program['material.ambient'] = self.material.ambient
+            uniforms['material.ambient'] = self.material.ambient
 
         if 'material.diffuse' in self.program._uniforms:
-            self.program['material.diffuse'] = self.material.diffuse
+            uniforms['material.diffuse'] = self.material.diffuse
 
         if 'material.specular' in self.program._uniforms:
-            self.program['material.specular'] = self.material.specular
+            uniforms['material.specular'] = self.material.specular
 
         if 'material.specular_exponent' in self.program._uniforms:
-            self.program['material.specular_exponent'] = \
+            uniforms['material.specular_exponent'] = \
                 self.material.specular_exponent
 
         if 'material.bump_scale' in self.program._uniforms:
-            self.program['material.bump_scale'] = self.material.bump_scale
+            uniforms['material.bump_scale'] = self.material.bump_scale
 
         if 'material.has_bump_map' in self.program._uniforms:
-            self.program['material.has_bump_map'] = self.material.has_bump_map
+            uniforms['material.has_bump_map'] = self.material.has_bump_map
 
         if 'material.has_normal_map' in self.program._uniforms:
-            self.program['material.has_normal_map'] = \
+            uniforms['material.has_normal_map'] = \
                 self.material.has_normal_map
 
         if 'material.has_specular_map' in self.program._uniforms:
-            self.program['material.has_specular_map'] = \
+            uniforms['material.has_specular_map'] = \
                 self.material.has_specular_map
 
         if 'model' in self.program._uniforms:
-            self.program['model'] = self.matrix
-
-    def unset_state(self):
-        self.program.stop()
-
-    def __hash__(self):
-        return hash(
-            (self.material, self.program, self.order, self.parent)
-        )
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, MaterialGroup) and
-            self.material == other.material and
-            self.program == other.program and
-            self.order == other.order and
-            self.parent == other.parent
-        )
+            uniforms['model'] = self.matrix
+        return uniforms

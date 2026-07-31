@@ -1,9 +1,7 @@
 from importlib.resources import files
-from pyglet.gl import *
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import VertexList
-from pyglet.math import Vec2, Vec3
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram
+from pyglet.math import Mat4, Vec2, Vec3
 import pyglet
 
 from sombra_engine.graphics import MaterialGroup
@@ -12,20 +10,38 @@ from sombra_engine.primitives import (
 )
 
 
+def default_program() -> ShaderProgram:
+    vs_src = files('sombra_engine.shaders').joinpath(
+        'default.vert'
+    ).read_text()
+    vert_shader = Shader(vs_src, 'vertex')
+
+    fs_src = files('sombra_engine.shaders').joinpath(
+        'blinn_barycentric.frag'
+    ).read_text()
+    frag_shader = Shader(fs_src, 'fragment')
+
+    program = ShaderProgram(vert_shader, frag_shader)
+    return program
+
+
 class Mesh(SceneObject):
     def __init__(
         self,
         name: str,
         vertex_groups: dict[str, VertexGroup] | None = None,
         materials: dict[str, Material] | None = None,
-        mode: int = GL_TRIANGLES,
+        mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
         program: ShaderProgram | None = None,
         transform: Transform = Transform(),
+        matrix: Mat4 = Mat4(),
         parent: SceneObject | None = None
     ):
-        super().__init__(transform)
+        super().__init__(
+            name=name, transform=transform, matrix=matrix, parent=parent
+        )
         self.name = name
         if vertex_groups is None:
             vertex_groups = {}
@@ -36,18 +52,8 @@ class Mesh(SceneObject):
         self.mode = mode
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
-        if not program:
-            vs_src = files('sombra_engine.shaders').joinpath(
-                'default.vert'
-            ).read_text()
-            vert_shader = Shader(vs_src, 'vertex')
-
-            fs_src = files('sombra_engine.shaders').joinpath(
-                'blinn_barycentric.frag'
-            ).read_text()
-            frag_shader = Shader(fs_src, 'fragment')
-
-            program = ShaderProgram(vert_shader, frag_shader)
+        if program is None:
+            program = default_program()
         self.program = program
         self.parent = parent
 
@@ -125,7 +131,7 @@ class Mesh(SceneObject):
             groups[name] = new_group
         return groups
 
-    def create_vertex_lists(self) -> list[VertexList]:
+    def create_vertex_lists(self):
         """
         This method creates a vertex list for each vertex group using the
         Shader Program that this Mesh currently has, and returns all
@@ -209,6 +215,3 @@ class Mesh(SceneObject):
                 tangent_list += [v.tangent.x, v.tangent.y, v.tangent.z]
                 tex_coords_list += [v.tex_coords.x, v.tex_coords.y]
         return position_list, normal_list, tangent_list, tex_coords_list
-
-    def update(self, dt):
-        pass

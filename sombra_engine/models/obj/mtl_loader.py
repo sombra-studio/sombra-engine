@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from pyglet.image import Texture
+from pyglet.graphics import Texture
 import pyglet
 
 

@@ -1,0 +1,1 @@
+MAX_BONES: int = 100

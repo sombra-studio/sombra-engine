@@ -33,13 +33,13 @@ void main()
         total_bones_transform += bones_transforms[bones_ids[i]] * weights[i];
     }
 
-    frag_pos = vec3(total_bones_transform * model * vec4(position, 1.0));
+    frag_pos = vec3(model * total_bones_transform * vec4(position, 1.0));
     frag_tex_coords = tex_coords;
     frag_normal = normalize(mat3(transpose(inverse(
-        total_bones_transform * model
+        model * total_bones_transform
     ))) * normal);
     vec3 T = normalize(mat3(transpose(inverse(
-        total_bones_transform * model
+        model * total_bones_transform
     ))) * tangent);
     vec3 N = frag_normal;
     // re-orthogonalize T with respect to N

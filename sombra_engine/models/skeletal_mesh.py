@@ -1,12 +1,11 @@
 from importlib.resources import files
-from pyglet.gl import GL_TRIANGLES
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import Shader, ShaderProgram
-from pyglet.graphics.vertexdomain import VertexList
+from pyglet.enums import GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram
 from pyglet.math import Mat4
 
 
-from sombra_engine.animations import Animation
+from sombra_engine.animations import Animation, Skeleton
+from sombra_engine.constants import MAX_BONES
 from sombra_engine.graphics import SkeletalMaterialGroup
 from sombra_engine.models import Mesh
 from sombra_engine.primitives import (
@@ -14,27 +13,20 @@ from sombra_engine.primitives import (
 )
 
 
-class Bone:
-    def __init__(self, idx: int, name: str, local_bind_transform: Mat4):
-        self.idx = idx
-        self.name = name
-        self.local_bind_transform = local_bind_transform
-        self.inverse_bind_transform = None
-        self.children: list[Bone] = []
-
-
 class SkeletalMesh(Mesh):
     def __init__(
         self,
         name: str,
-        vertex_groups: dict[str, VertexGroup] | None = None,
-        materials: dict[str, Material] | None = None,
-        root_bone: Bone | None = None,
-        mode: int = GL_TRIANGLES,
+        vertex_groups: dict[str, VertexGroup],
+        materials: dict[str, Material],
+        skeleton: Skeleton,
+        animations: dict[str, Animation],
+        mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
         program: ShaderProgram | None = None,
         transform: Transform = Transform(),
+        matrix: Mat4 = Mat4(),
         parent: SceneObject | None = None
     ):
         if not program:
@@ -59,11 +51,12 @@ class SkeletalMesh(Mesh):
             group=group,
             program=program,
             transform=transform,
+            matrix=matrix,
             parent=parent
         )
-        self.root_bone = root_bone
+        self.skeleton = skeleton
         self.time = 0.0
-        self.animations: dict[str, Animation] = {}
+        self.animations: dict[str, Animation] = animations
         self.current_animation: Animation | None = None
         self.is_paused = False
         self.keyframes_count = 0
@@ -79,7 +72,7 @@ class SkeletalMesh(Mesh):
             groups[name] = new_group
         return groups
 
-    def create_vertex_lists(self) -> list[VertexList]:
+    def create_vertex_lists(self):
         # first calculate normals
         self.calculate_normals()
 
@@ -135,33 +128,59 @@ class SkeletalMesh(Mesh):
             bones_ids_list, weights_list
         )
 
+    def compute_bones_transforms(self):
+
+        bone_transforms = [Mat4() for _ in range(MAX_BONES)]
+
+        parent_transform = Mat4()
+        # traverse skeleton starting from the root
+        queue = [
+            (self.skeleton.root, parent_transform)
+        ]
+
+        while queue:
+            curr_bone, parent_transform = queue.pop(0)
+            if self.current_animation:
+                local_transform = self.current_animation.get_local_transform(
+                    curr_bone.idx, self.time
+                )
+            else:
+                local_transform = curr_bone.local_bind_transform
+
+            global_transform = parent_transform @ local_transform
+            bone_transforms[curr_bone.bone_idx] = global_transform
+
+            if curr_bone.children:
+                for child in curr_bone.children:
+                    queue.append((child, global_transform))
+
+        for i in range(len(self.skeleton.bones)):
+            bone = self.skeleton.bones[i]
+            bone_transforms[i] = (
+                bone_transforms[i] @ bone.inverse_bind_transform
+            )
+        return bone_transforms
+
+
     def set_bones_transforms(self, bones_transforms: list[Mat4]):
         # This is not convenient because it has a copy of all the transforms
         # for all material groups
         for mg in self.material_groups.values():
             mg.bones_transforms = bones_transforms
+            mg.uniforms['bones_transforms'] = bones_transforms
 
     def set_animation(self, name: str):
         if name in self.animations:
             self.time = 0.0
             self.current_animation = self.animations[name]
-            self.keyframes_count = len(self.current_animation.keyframes)
-            # Here we are using the same duration for every keyframe
-            self.keyframe_duration = (
-                self.current_animation.length / self.keyframes_count
-            )
 
     def update(self, dt: float):
-        if not self.current_animation or self.is_paused:
+        if self.is_paused:
             return
-
         self.time += dt
-        if self.time > self.current_animation.length:
-            self.time = self.time % self.current_animation.length
 
-        # Get the poses in between
-        t = self.time % self.keyframe_duration
-        bones_transforms = self.interpolate(t)
+        # Update skeleton
+        bones_transforms = self.compute_bones_transforms()
         self.set_bones_transforms(bones_transforms)
 
     def pause(self):
@@ -169,21 +188,3 @@ class SkeletalMesh(Mesh):
 
     def play(self):
         self.is_paused = False
-
-    def interpolate(self, t: float) -> list[Mat4]:
-        idx = int(self.time // self.keyframe_duration)
-        prev_pose = self.current_animation.keyframes[idx].pose
-        next_idx = idx + 1 if idx + 1 < self.keyframes_count else 0
-        next_pose = self.current_animation.keyframes[next_idx].pose
-
-        # interpolate between the two poses
-        bones_transforms = []
-        n = len(prev_pose.bones_transforms)
-        for i in range(n):
-            transform = Transform.interpolate(
-                prev_pose.bones_transforms[i],
-                next_pose.bones_transforms[i],
-                t
-            )
-            bones_transforms.append(transform)
-        return bones_transforms

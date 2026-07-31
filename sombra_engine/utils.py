@@ -1,69 +1,133 @@
-import math as _math
-from pyglet.math import Mat4
+import math
+from pyglet.math import Quaternion
 import pyglet
 
-def create_color_tex(color: tuple[int, int, int, int]) -> pyglet.image.Texture:
+
+def create_color_tex(color: tuple[int, int, int, int]) -> pyglet.graphics.Texture:
     color_pattern = pyglet.image.SolidColorImagePattern(color)
     img = color_pattern.create_image(16, 16)
     return img.get_texture()
 
-def create_black_tex() -> pyglet.image.Texture:
+def create_black_tex() -> pyglet.graphics.Texture:
     return create_color_tex((0, 0, 0, 255))
 
-def create_blue_tex() -> pyglet.image.Texture:
+def create_blue_tex() -> pyglet.graphics.Texture:
     return create_color_tex((0, 0, 255, 255))
 
-def create_white_tex() -> pyglet.image.Texture:
+def create_white_tex() -> pyglet.graphics.Texture:
     return create_color_tex((255, 255, 255, 255))
 
-def create_gray_tex() -> pyglet.image.Texture:
+def create_gray_tex() -> pyglet.graphics.Texture:
     return create_color_tex((123, 123, 123, 255))
 
 
-class Quaternion(pyglet.math.Quaternion):
-    @classmethod
-    def from_mat4(cls, matrix: Mat4) -> 'Quaternion':
+def quaternion_slerp(q1: Quaternion, q2: Quaternion, t: float) -> Quaternion:
+    """
+    Performs Spherical Linear Interpolation between two quaternions.
 
-        # 00: a, 01: b, 02: c, 03: d
-        # 10: e, 11: f, 12: g, 13: h
-        # 20: i, 21: j, 22: k, 23: l
-        # 30: m, 31: n, 32: o, 33: p
+    Args:
+        q1: The starting Pyglet Quaternion.
+        q2: The target Pyglet Quaternion.
+        t: The interpolation parameter between 0.0 and 1.0.
 
-        (a, b, c, d,
-         e, f, g, h,
-         i, j, k, l,
-         m, n, o, p) = matrix
+    Returns:
+        A new interpolated pyglet.math.Quaternion.
+    """
+    # 1. Compute the cosine of the angle between the two vectors (dot product)
+    dot = q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z
 
-        (m00, m01, m02, m03,
-         m10, m11, m12, m13,
-         m20, m21, m22, m23,
-         m30, m31, m32, m33) = matrix
+    # 2. Shortest path check
+    # If the dot product is negative, the quaternions have opposite handedness.
+    # We negate one quaternion to take the shortest path across the sphere.
+    if dot < 0.0:
+        q2_w, q2_x, q2_y, q2_z = -q2.w, -q2.x, -q2.y, -q2.z
+        dot = -dot
+    else:
+        q2_w, q2_x, q2_y, q2_z = q2.w, q2.x, q2.y, q2.z
 
-        tr = m00 + m11 + m22
+    # 3. Lerp fallback for close quaternions
+    # If the inputs are too close, linearly interpolate and normalize
+    # to avoid division by zero in the slerp formula.
+    if dot > 0.9995:
+        w = q1.w + t * (q2_w - q1.w)
+        x = q1.x + t * (q2_x - q1.x)
+        y = q1.y + t * (q2_y - q1.y)
+        z = q1.z + t * (q2_z - q1.z)
 
-        if tr > 0:
-            s = _math.sqrt(tr + 1.0) * 2
-            w = 0.25 * s
-            x = (m21 - m12) / s
-            y = (m02 - m20) / s
-            z = (m10 - m01) / s
-        elif (m00 > m11) and (m00 > m22):
-            s = _math.sqrt(1.0 + m00 - m11 - m22) * 2
-            w = (m21 - m12) / s
-            x = 0.25 * s
-            y = (m01 + m10) / s
-            z = (m02 + m20) / s
-        elif m11 > m22:
-            s = _math.sqrt(1.0 + m11 - m00 - m22) * 2
-            w = (m02 - m20) / s
-            x = (m01 + m10) / s
-            y = 0.25 * s
-            z = (m12 + m21) / s
-        else:
-            s = _math.sqrt(1.0 + m22 - m00 - m11) * 2
-            w = (m10 - m01) / s
-            x = (m02 + m20) / s
-            y = (m12 + m21) / s
-            z = 0.25 * s
+        # Normalize the result
+        length = math.sqrt(w * w + x * x + y * y + z * z)
+        return Quaternion(w / length, x / length, y / length, z / length)
 
-        return cls(w, x, y, z)
+    # 4. Slerp computation
+    # Calculate the angle between the quaternions
+    theta_0 = math.acos(dot)
+    sin_theta_0 = math.sin(theta_0)
+
+    # Calculate the scale factors for the interpolation
+    s0 = math.sin((1.0 - t) * theta_0) / sin_theta_0
+    s1 = math.sin(t * theta_0) / sin_theta_0
+
+    # Compute the interpolated quaternion values
+    w = s0 * q1.w + s1 * q2_w
+    x = s0 * q1.x + s1 * q2_x
+    y = s0 * q1.y + s1 * q2_y
+    z = s0 * q1.z + s1 * q2_z
+
+    return Quaternion(w, x, y, z)
+
+
+def book_slerp(a: Quaternion , b: Quaternion , t: float) -> Quaternion:
+    """
+    This function uses the equations from the GLTF 2.0 Specification book.
+    https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-slerp
+
+    Args:
+        a: The first quaternion to interpolate
+        b: The second quaternion
+        t: The parametric variable in the range [0, 1]
+
+    Returns:
+        Quaternion: The value of the spherical interpolation between the two
+        given quaternions
+
+    """
+    dot = a.dot(b)
+
+    abs_dot = min(abs(dot), 0.999)
+    x = math.acos(abs_dot)
+
+    if x < 0.005:
+        return a * (1 - t) + b * t
+
+    s = dot / abs_dot
+
+    v = (
+        a * (math.sin(x * (1 - t)) / math.sin(x)) +
+        b * s * (math.sin(x * t) / math.sin(x))
+    )
+    return v
+
+
+def slerp(a: Quaternion , b: Quaternion , t: float) -> Quaternion:
+    dot = a.dot(b)
+
+    if dot < 0.0:
+        b = b * -1
+        dot = -dot
+
+    if dot > 0.9995:
+        out = a * (1 - t) + b * t
+        out = out.normalize()
+        return out
+
+    theta_0 = math.acos(dot)
+    sin_theta_0 = math.sin(theta_0)
+    theta = theta_0 * t
+    sin_theta = math.sin(theta)
+
+    s0 = math.cos(theta) - dot * sin_theta / sin_theta_0
+    s1 = sin_theta / sin_theta_0
+
+    out = a * s0 + b * s1
+
+    return out

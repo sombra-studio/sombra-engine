@@ -1,10 +1,10 @@
-from pyglet.graphics import Batch, Group
-from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics import Batch, Group, ShaderProgram
 
 
-from sombra_engine.models import Mesh, Model
+from sombra_engine.models import Mesh
 from .obj_parser import OBJParser
 from sombra_engine.primitives import VertexGroup
+from sombra_engine import Scene
 
 
 class OBJLoader:
@@ -12,17 +12,17 @@ class OBJLoader:
     def load(
         filename: str,
         name: str = "unnamed object",
-        program: ShaderProgram = None,
+        program: ShaderProgram | None = None,
         scale: float = 1.0,
-        batch: Batch = None,
-        group: Group = None
-    ) -> Model:
+        batch: Batch | None = None,
+        group: Group | None = None
+    ) -> Scene:
         obj_parser = OBJParser()
         # Parse the file
         obj_parser.parse(filename, scale=scale)
 
-        # Now create the Model
-        meshes = []
+        # Now create the scene
+        scene = Scene()
         for mesh_data in obj_parser.meshes_data.values():
             # Create Vertex Groups
             vertex_groups: dict[str, VertexGroup] = {}
@@ -39,6 +39,6 @@ class OBJLoader:
                 group=group,
                 program=program
             )
-            meshes.append(new_mesh)
-        model = Model(name, meshes)
-        return model
+            scene.add_mesh(new_mesh)
+
+        return scene

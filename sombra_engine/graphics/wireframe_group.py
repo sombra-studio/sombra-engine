@@ -1,6 +1,5 @@
-from pyglet.gl import *
-from pyglet.graphics import Group
-from pyglet.graphics.shader import ShaderProgram
+from pyglet.graphics.api.gl.gl import *
+from pyglet.graphics import Group, ShaderProgram
 
 
 class WireframeGroup(Group):
