@@ -44,11 +44,12 @@ wheels = [
 
 [[package]]
 name = "pyglet"
-source = { editable = "../pyglet" }
+version = "3.0.dev5"
+source = { git = "https://github.com/HenrYxZ/pyglet.git?branch=development#4f54f16ca4fcd86ec57f518a8bdcb216c7af7efc" }
 
 [[package]]
 name = "sombra-engine"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "psutil" },
@@ -60,5 +61,5 @@ dependencies = [
 requires-dist = [
     { name = "psutil", specifier = "==7.2.2" },
     { name = "pudu-ui", specifier = ">=0.2.3" },
-    { name = "pyglet", editable = "../pyglet" },
+    { name = "pyglet", git = "https://github.com/HenrYxZ/pyglet.git?branch=development" },
 ]

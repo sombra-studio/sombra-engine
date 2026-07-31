@@ -109,16 +109,13 @@ def create_skeleton(skin: Skin) -> Skeleton:
     bones: list[Bone] = []
 
     for i, joint in enumerate(skin.joints):
-        offset = i * 16
         local_transform = joint.local_transform
         bone = Bone(
             idx=joint.index,
             bone_idx=i,
             name=joint.name,
             local_bind_transform=local_transform,
-            inverse_bind_transform=Mat4(
-                *skin.inverse_bind_matrices[offset:offset+16]
-            )
+            inverse_bind_transform=skin.inverse_bind_matrices[i]
         )
         bones.append(bone)
 

@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "sombra-engine"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
   { name="Jesus Henriquez" },
 ]
@@ -33,7 +33,7 @@ module-name = "sombra_engine"
 module-root = ""
 
 [tool.uv.sources]
-pyglet = { path = "../pyglet", editable = true }
+pyglet = { git = "https://github.com/HenrYxZ/pyglet.git", branch = "development" }
 #source-include = ["sombra_engine/shaders/**"]
 #source-exclude = ["tests/**", ]
 

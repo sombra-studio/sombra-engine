@@ -30,12 +30,12 @@ class App(pudu_ui.App):
         # self.camera = FPSCamera(
         #     self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
         # )
-        self.camera = FPSCamera(
+        self.fps_camera = FPSCamera(
             self,
             position=Vec3(0.0, 1.0, 6.0),
             target=Vec3(0.0, 1.0, 0.0),
         )
-        self.controls = FPSCameraControls(self, self.camera)
+        self.controls = FPSCameraControls(self, self.fps_camera)
         if controllers := pyglet.input.get_controllers():
             controller = controllers[0]
             controller.open()
@@ -89,10 +89,10 @@ class App(pudu_ui.App):
 
         if self.is_debug:
             with self.gizmo.batch.draw_with_options() as options:
-                options.camera = self.camera
+                options.camera = self.fps_camera
 
         with self.batch.draw_with_options() as options:
-            options.camera = self.camera
+            options.camera = self.fps_camera
 
         if self.is_debug:
             # Use 2D UI here
@@ -126,7 +126,7 @@ class App(pudu_ui.App):
 
                 # Update eye uniform from camera
                 if 'eye' in mesh.program.uniforms:
-                    mesh.program['eye'] = self.camera.position
+                    mesh.program['eye'] = self.fps_camera.position
 
     def run(self, interval: float = 1.0 / 144.0):
         if not interval:
