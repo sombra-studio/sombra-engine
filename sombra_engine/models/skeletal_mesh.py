@@ -27,15 +27,15 @@ class SkeletalMesh(Mesh):
     def __init__(
         self,
         name: str,
-        vertex_groups: dict[str, VertexGroup] = None,
-        materials: dict[str, Material] = None,
-        root_bone: Bone = None,
+        vertex_groups: dict[str, VertexGroup] | None = None,
+        materials: dict[str, Material] | None = None,
+        root_bone: Bone | None = None,
         mode: int = GL_TRIANGLES,
-        batch: Batch = None,
-        group: Group = None,
-        program: ShaderProgram = None,
+        batch: Batch | None = None,
+        group: Group | None = None,
+        program: ShaderProgram | None = None,
         transform: Transform = Transform(),
-        parent: SceneObject = None
+        parent: SceneObject | None = None
     ):
         if not program:
             vs_src = files('sombra_engine.shaders').joinpath(
