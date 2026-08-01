@@ -14,10 +14,9 @@ app = App(is_debug=True)
 
 
 if __name__ == '__main__':
-    batch = app.batch
     scenes, skeletons, animations = GLTFLoader.load(
         filename='CesiumMan.glb',
-        batch=batch
+        batch=app.batch
     )
 
     scene = scenes[0]
@@ -31,6 +30,4 @@ if __name__ == '__main__':
     light_color = Vec3(1.0, 1.0, 1.0)
     scene.create_light(light_pos, light_color)
     app.set_scene(scene)
-
-    pyglet.clock.schedule(app.update)
     app.run(0)
