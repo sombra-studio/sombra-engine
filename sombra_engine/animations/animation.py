@@ -7,9 +7,6 @@ from pyglet.model.codecs.gltf import (
 from pyglet.math import Mat4, Quaternion, Vec3
 
 
-from sombra_engine import utils
-
-
 @dataclass
 class AnimationChannel:
     timestamps: list[float]
@@ -58,8 +55,9 @@ def get_transform(channel: AnimationChannel, time: float) -> Mat4:
         a = channel.values[0]
         b = channel.values[0]
     else:
-        while channel_time > timestamps[i] and i < len(timestamps) - 2:
+        while channel_time > timestamps[i] and i < len(timestamps) - 1:
             i += 1
+        i -= 1
         match channel.interpolation:
             case AnimationInterpolation.LINEAR:
                 t = (channel_time - timestamps[i]) / (

@@ -1,10 +1,9 @@
-from importlib.resources import files
 from pyglet.math import Vec3
 import pyglet
 
 from sombra_engine.models import SkeletalMesh
 from sombra_engine.models.gltf import GLTFLoader
-from sombra_engine import App, Scene
+from sombra_engine import App
 
 
 pyglet.options['debug_gl_shaders'] = True
@@ -15,25 +14,6 @@ pyglet.resource.reindex()
 
 app = App(is_debug=True)
 
-# vs_src = files('sombra_engine.shaders').joinpath(
-#     'skeletal.vert'
-#     # 'normals.vert'
-# ).read_text()
-# vert_shader = pyglet.graphics.Shader(vs_src, 'vertex')
-#
-# fs_src = files('sombra_engine.shaders').joinpath(
-#     # 'blinn_barycentric.frag'
-#     'normals_with_map.frag'
-#     # 'normals.frag'
-# ).read_text()
-# frag_shader = pyglet.graphics.Shader(fs_src, 'fragment')
-# shader_program = pyglet.graphics.ShaderProgram(vert_shader, frag_shader)
-shader_program = None
-
-
-def update(dt: float):
-    app.update(dt)
-
 
 if __name__ == '__main__':
     batch = app.batch
@@ -41,8 +21,8 @@ if __name__ == '__main__':
         # filename='yoda/yoda.glb',
         # filename='CesiumMan.glb',
         # filename='BrainStem.glb',
-        # filename='zombie.glb',
-        filename='box.glb',
+        filename='zombie_walk.glb',
+        # filename='box.glb',
         # filename='shoe_box.glb',
         # filename='plane.gltf',
         # program=shader_program,
@@ -59,6 +39,4 @@ if __name__ == '__main__':
 
     scene.create_light(Vec3(10.0, 8.0, 0.0), Vec3(1.0, 1.0, 1.0))
     app.set_scene(scene)
-
-    pyglet.clock.schedule(update)
     app.run(0)
