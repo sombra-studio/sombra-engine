@@ -113,6 +113,7 @@ class App(pudu_ui.App):
         return handled
 
     def update(self, dt: float):
+        super().update(dt)
         if self.is_paused:
             return
         self.stats.update(dt)
