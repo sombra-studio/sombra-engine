@@ -129,8 +129,4 @@ class App(pudu_ui.App):
                     mesh.program['eye'] = self.fps_camera.position
 
     def run(self, interval: float = 1.0 / 144.0):
-        if not interval:
-            pyglet.clock.schedule(self.update)
-        else:
-            pyglet.clock.schedule_interval(self.update, interval)
         pyglet.app.run(interval)
