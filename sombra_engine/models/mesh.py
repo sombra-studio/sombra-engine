@@ -62,6 +62,10 @@ class Mesh(SceneObject):
         self.tri_count: int = 0
         self.calculate_tri_count(vertex_groups)
 
+        # Clean up memory of things already loaded
+        self.vertex_groups = None
+        self.materials = None
+
     @staticmethod
     def check_tex_coords(a: Vertex, b: Vertex, c: Vertex):
         empty: Vec2 = Vec2()
