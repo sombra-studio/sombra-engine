@@ -44,8 +44,12 @@ wheels = [
 
 [[package]]
 name = "pyglet"
-version = "3.0.dev5"
-source = { git = "https://github.com/HenrYxZ/pyglet.git?branch=development#4f54f16ca4fcd86ec57f518a8bdcb216c7af7efc" }
+version = "3.0.dev7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/21/95/4eae4ee312841b6ba0c3f8e1c2ba0b6d0997915d6c2588b90f34a02990b4/pyglet-3.0.dev7.tar.gz", hash = "sha256:4b77166153d557a7f8d3e0d1da92a45eb75904f87189495ee1273036c3a4abda", size = 6949681, upload-time = "2026-08-02T06:56:48.153Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ee/73/38a7d046d6041a89c17e6886136a072cee32518539f1e92bf43726330cca/pyglet-3.0.dev7-py3-none-any.whl", hash = "sha256:434cc9aaa17d7eb0d52bd9d8fca54ffca3ca04e20f7dfa9f9abe5df4c306bff6", size = 1548873, upload-time = "2026-08-02T06:56:39.006Z" },
+]
 
 [[package]]
 name = "sombra-engine"
@@ -61,5 +65,5 @@ dependencies = [
 requires-dist = [
     { name = "psutil", specifier = "==7.2.2" },
     { name = "pudu-ui", specifier = ">=0.2.3" },
-    { name = "pyglet", git = "https://github.com/HenrYxZ/pyglet.git?branch=development" },
+    { name = "pyglet", specifier = ">=3.0.dev7" },
 ]
