@@ -31,6 +31,10 @@ You can get it with pip:
 
 `pip install sombra-engine`
 
+or with uv:
+
+`uv add sombra-engine`
+
 
 ## Example
 
