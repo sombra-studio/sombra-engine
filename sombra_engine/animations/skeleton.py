@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pyglet.math import Mat4
-
+from typing import Self
 
 
 
@@ -11,7 +11,7 @@ class Bone:
     name: str = 'undefined'
     local_bind_transform: Mat4 = Mat4()
     inverse_bind_transform: Mat4 = Mat4()
-    children: list[Bone] = field(default_factory=list)
+    children: list[Self] = field(default_factory=list)
 
 
 @dataclass
