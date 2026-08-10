@@ -33,7 +33,7 @@ You can get it with pip:
 
 or with uv:
 
-`uv add sombra-engine`
+`uv add sombra-engine --prerelease allow`
 
 
 ## Example
