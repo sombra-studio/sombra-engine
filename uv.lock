@@ -32,14 +32,17 @@ wheels = [
 
 [[package]]
 name = "pudu-ui"
-version = "0.2.3"
-source = { registry = "https://pypi.org/simple" }
+version = "0.2.4"
+source = { editable = "../pudu-ui" }
 dependencies = [
+    { name = "psutil" },
     { name = "pyglet" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e1/19/3b9f2140ea97d2fc2be520d2d1898f68fd410d2c21a2d46e647526a418db/pudu_ui-0.2.3.tar.gz", hash = "sha256:6acff8e64b94dc62c6536324f67aedcc2bd9538af440188760fde24cd4f5ebed", size = 87714, upload-time = "2026-05-28T00:36:26.05Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/a3/76b0c74edb4325a56122463e9bc0fc1187be74490eb3fcac28ece756ead6/pudu_ui-0.2.3-py3-none-any.whl", hash = "sha256:6013215edfd37c8c98e9efa61380f95579d13e63ad1019da8c370483dec94cf1", size = 100121, upload-time = "2026-05-28T00:36:27.306Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "psutil", specifier = ">=7.2.2" },
+    { name = "pyglet", specifier = ">=3.0.dev3" },
 ]
 
 [[package]]
@@ -64,6 +67,6 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "psutil", specifier = "==7.2.2" },
-    { name = "pudu-ui", specifier = ">=0.2.3" },
+    { name = "pudu-ui", editable = "../pudu-ui" },
     { name = "pyglet", specifier = ">=3.0.dev7" },
 ]

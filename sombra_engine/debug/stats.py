@@ -17,7 +17,9 @@ class Stats(Widget):
         self, window: Window, params: Params, batch: Batch, group: Group
     ):
         super().__init__(params=params, batch=batch, group=group)
-        self.fps_display = FPSDisplay(window, color=(0, 127, 0, 127))
+        self.fps_display = FPSDisplay(
+            window=window, color=(0, 127, 0, 127), batch=batch
+        )
         self.fps_label = self.fps_display.label
         self.fps_label.position = (self.x, self.y, 0.0)
         self.fps_label.font_size = DEBUG_FONT_SIZE

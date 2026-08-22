@@ -1,4 +1,5 @@
 from pudu_ui import Params
+from pudu_ui.colors import Color, BLACK
 import pudu_ui
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
@@ -21,12 +22,23 @@ from sombra_engine.fpscamera import FPSCameraControls
 class App(pudu_ui.App):
     def __init__(
         self,
+        width: int | None = None,
+        height: int | None = None,
         caption: str = "Sombra Engine",
+        update_rate: float = 1.0 / 60.0,
+        background_color: Color = BLACK,
+        vsync: bool = True,
         is_debug: bool = False
     ):
-        super().__init__(caption=caption, vsync=not is_debug)
-        self.is_debug = is_debug
-        self.is_paused = False
+        super().__init__(
+            width=width,
+            height=height,
+            caption=caption,
+            update_rate=update_rate,
+            background_color=background_color,
+            vsync=vsync,
+            is_debug=is_debug
+        )
         # self.camera = FPSCamera(
         #     self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
         # )
@@ -74,7 +86,7 @@ class App(pudu_ui.App):
 
         # Needs to disable DEPTH TEST for 2D UI
         glDisable(GL_DEPTH_TEST)
-        self.stats.draw()
+        self.debug_ui_batch.draw()
 
         self.projection = temp_proj
         self.view = temp_view
@@ -128,6 +140,3 @@ class App(pudu_ui.App):
                 # Update eye uniform from camera
                 if 'eye' in mesh.program.uniforms:
                     mesh.program['eye'] = self.fps_camera.position
-
-    def run(self, interval: float = 1.0 / 144.0):
-        pyglet.app.run(interval)
