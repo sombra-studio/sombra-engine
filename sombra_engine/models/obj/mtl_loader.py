@@ -10,7 +10,7 @@ from sombra_engine import utils
 
 def set_map(data: dict, map_name: str, default_tex_func: Callable[[], Texture]):
     if map_name in data and data[map_name]:
-        img = pyglet.image.load(data[map_name])
+        img = pyglet.resource.image(data[map_name])
         data[map_name] = img.get_texture()
         if map_name == 'bump_map':
             data["has_bump_map"] = True

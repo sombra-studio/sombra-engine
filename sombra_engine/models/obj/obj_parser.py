@@ -1,6 +1,6 @@
 import os
 from pyglet.math import Vec2, Vec3
-
+import pyglet
 
 from sombra_engine.models.obj.mtl_loader import MTLLoader
 from sombra_engine.primitives import Material, Triangle, Vertex
@@ -41,7 +41,7 @@ class OBJParser:
         Args:
             filename: Path of an OBJ file
         """
-        file = open(filename)
+        file = pyglet.resource.file(filename, 'r')
         path = os.path.dirname(filename)
         for line in file:
             if not line or line[0] == '#':

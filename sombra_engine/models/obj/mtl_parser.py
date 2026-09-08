@@ -1,4 +1,5 @@
 import os
+import pyglet
 from pyglet.math import Vec3
 
 
@@ -33,7 +34,7 @@ class MTLParser:
             filename: Path of an MTL file
         """
         self.current_path = os.path.dirname(filename)
-        with open(filename) as file:
+        with pyglet.resource.file(filename, 'r') as file:
             for line in file:
                 if not line or line[0] == '#':
                     continue
