@@ -30,4 +30,4 @@ if __name__ == '__main__':
     light_color = Vec3(1.0, 1.0, 1.0)
     scene.create_light(light_pos, light_color)
     app.set_scene(scene)
-    app.run(0)
+    app.run()

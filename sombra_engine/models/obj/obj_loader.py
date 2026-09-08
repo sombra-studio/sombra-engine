@@ -11,7 +11,6 @@ class OBJLoader:
     @staticmethod
     def load(
         filename: str,
-        name: str = "unnamed object",
         program: ShaderProgram | None = None,
         scale: float = 1.0,
         batch: Batch | None = None,
