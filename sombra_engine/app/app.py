@@ -69,6 +69,8 @@ class App(pudu_ui.App):
 
         self.scenes: list[Scene] = []
         self.current_scene: Scene | None = None
+        self.light_projection: Mat4 = Mat4()
+        self.light_view: Mat4 = Mat4()
         self.tri_count = 0
 
     def set_scene(self, scene: Scene):
