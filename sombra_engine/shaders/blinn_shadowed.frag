@@ -4,6 +4,7 @@ uniform sampler2D ambient_map;
 uniform sampler2D diffuse_map;
 uniform sampler2D specular_map;
 uniform sampler2D bump_map;
+uniform sampler2D shadow_map;
 
 struct Material {
     vec3 diffuse;
@@ -28,6 +29,7 @@ uniform Light light;
 uniform vec3 eye;
 
 in vec3 frag_pos;
+in vec4 frag_pos_light_space;
 in vec2 frag_tex_coords;
 in vec3 frag_normal;
 in mat3 TBN;
@@ -53,6 +55,17 @@ vec3 calculate_normal_from_bump() {
     float dy = (height_up - height_down) * material.bump_scale;
     vec3 normal = vec3(dx, dy, 1.0);
     return normal;
+}
+
+float calculate_shadow() {
+    // perspective divide
+    vec3 projected_pos = frag_pos_light_space.xyz / frag_pos_light_space.w;
+    // Transform to [0 - 1] range
+    projected_pos = projected_pos * 0.5 + 0.5;
+    float closest_depth = texture(shadow_map, projected_pos.xy).r;
+    float current_depth = projected_pos.z;
+    float shadow = closest_depth < current_depth ? 1.0 : 0.0;
+    return shadow;
 }
 
 void main() {
@@ -89,9 +102,14 @@ void main() {
         vec3(1.0, 1.0, 1.0) * Ks * pow(spec_factor, specular_exponent)
     );
 
+    float shadow = calculate_shadow();
     vec3 color = light.color * (
-        ambient * diffuse + (1.0 - ambient_alpha) * lambert * diffuse +
-        specular_intensity
+        ambient * diffuse +
+        (
+            (1.0 - shadow) * (
+                (1.0 - ambient_alpha) * lambert * diffuse + specular_intensity
+            )
+        )
     );
     vec3 result = clamp(color, 0.0, 1.0);
     final_color = vec4(result, 1.0);

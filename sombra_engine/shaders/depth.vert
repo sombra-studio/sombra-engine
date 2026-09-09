@@ -1,5 +1,11 @@
-#version 330 core
+#version 330
 
-void main() {
-    gl_Position = vec4(vec3(0.0), 1.0);
+uniform mat4 light_transform;
+uniform mat4 model;
+
+in vec3 position;
+
+void main()
+{
+  gl_Position = light_transform * model * vec4(position, 1.0);
 }
