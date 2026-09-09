@@ -172,7 +172,7 @@ class Mesh(SceneObject):
     def update_matrix(self):
         matrix = self.get_matrix()
         for material_group in self.material_groups.values():
-            material_group.matrix = matrix
+            material_group.uniforms['model'] = matrix
 
     def rotate_x(self, angle: float):
         self.transform.rotation += Vec3(angle, 0.0, 0.0)
