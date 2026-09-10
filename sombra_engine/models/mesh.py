@@ -200,6 +200,20 @@ class Mesh(SceneObject):
         for vl in self.vertex_lists:
             vl.draw(self.mode)
 
+    def get_position_list_for_vertex_group(self, vertex_group_name: str) -> (
+        list[float]
+    ):
+        if vertex_group_name not in self.vertex_groups:
+            raise IndexError(
+                f"Couldn't find vertex group with name {vertex_group_name}"
+            )
+
+        position_list: list[float] = []
+        for triangle in self.vertex_groups[vertex_group_name].triangles:
+            for v in triangle.vertices:
+                position_list += [v.position.x, v.position.y, v.position.z]
+        return position_list
+
     def get_lists_for_vertex_group(self, vertex_group_name: str) -> tuple[
         list[float], list[float], list[float], list[float]
     ]:
