@@ -73,6 +73,7 @@ if __name__ == '__main__':
 
     # Create mesh and plane using the shadow map program
     shadows_batch = Batch()
+    # Mesh
     for vg_name, vg in mesh.vertex_groups.items():
         position_list = mesh.get_position_list_for_vertex_group(vg_name)
         shadow_map_program.vertex_list(
@@ -82,6 +83,7 @@ if __name__ == '__main__':
             # TODO add shadow groups
             position=('f', position_list)
         )
+    # Plane
     for vg_name, vg in plane_mesh.vertex_groups.items():
         position_list = plane_mesh.get_position_list_for_vertex_group(vg_name)
         shadow_map_program.vertex_list(

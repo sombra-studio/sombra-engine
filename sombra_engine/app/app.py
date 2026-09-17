@@ -1,16 +1,18 @@
 from pudu_ui import Params
 from pudu_ui.colors import Color, BLACK
 import pudu_ui
+from pyglet.enums import ComponentFormat, FramebufferAttachment
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
-    GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, glClearColor, glDepthFunc,
-    glDisable, glEnable
+    GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE, glClearColor, glDepthFunc,
+    glDisable, glDrawBuffer, glEnable
 )
-from pyglet.graphics import Batch, Group
+from pyglet.graphics import Batch, Group, Framebuffer, Renderbuffer
 from pyglet.math import Mat4, Vec3
 from pyglet.window import key
 from pyglet.window.camera import FPSCamera
 import pyglet
+
 
 from sombra_engine import Scene
 # from sombra_engine.camera import FPSCamera
@@ -19,11 +21,15 @@ from sombra_engine.models import SkeletalMesh
 from sombra_engine.fpscamera import FPSCameraControls
 
 
+SHADOWS_MAP_WIDTH = 1024
+SHADOWS_MAP_HEIGHT = 1024
+
+
 class App(pudu_ui.App):
     def __init__(
         self,
-        width: int | None = None,
-        height: int | None = None,
+        width: int = 1280,
+        height: int = 720,
         caption: str = "Sombra Engine",
         update_rate: float = 1.0 / 60.0,
         background_color: Color = BLACK,
@@ -39,9 +45,6 @@ class App(pudu_ui.App):
             vsync=vsync,
             is_debug=is_debug
         )
-        # self.camera = FPSCamera(
-        #     self, position=Vec3(0.0, 0.0, 5.0), pitch=90, yaw=-90
-        # )
         self.fps_camera = FPSCamera(
             self,
             position=Vec3(0.0, 1.0, 6.0),
@@ -53,6 +56,23 @@ class App(pudu_ui.App):
             controller.open()
             controller.push_handlers(self.controls)
         self.batch = Batch()
+        self.shadows_batch = Batch()
+        self.shadows_framebuffer: Framebuffer = Framebuffer()
+        self.depth_buffer = Renderbuffer(
+            context=self,
+            width=SHADOWS_MAP_WIDTH,
+            height=SHADOWS_MAP_HEIGHT,
+            component_format=ComponentFormat.D,
+            bit_size=24
+        )
+        self.shadows_framebuffer.attach_renderbuffer(
+            self.depth_buffer,
+            attachment=FramebufferAttachment.DEPTH
+        )
+        self.shadows_framebuffer.bind()
+        glDrawBuffer(GL_NONE)
+        self.shadows_framebuffer.unbind()
+
         self.debug_group = Group()
         self.debug_group.visible = is_debug
 
