@@ -41,8 +41,21 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "mike", marker = "extra == 'docs'", specifier = ">=2.1.0" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6.0" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5.0" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.27.0" },
     { name = "psutil", specifier = ">=7.2.2" },
     { name = "pyglet", specifier = ">=3.0.dev3" },
+]
+provides-extras = ["docs"]
+
+[package.metadata.requires-dev]
+docs = [
+    { name = "mike", specifier = ">=2.1.0" },
+    { name = "mkdocs", specifier = ">=1.6.0" },
+    { name = "mkdocs-material", specifier = ">=9.5.0" },
+    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.27.0" },
 ]
 
 [[package]]
