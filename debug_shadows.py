@@ -1,10 +1,11 @@
 from importlib.resources import files
 
 import pyglet
-from pyglet.graphics import Batch, Shader, ShaderProgram
+from pyglet.graphics import Shader, ShaderProgram
 from pyglet.math import Mat4, Vec3
 
 from sombra_engine import App, Scene
+from sombra_engine.graphics.shadow_group import ShadowGroup
 from sombra_engine.models import Mesh
 from sombra_engine.models.gltf import GLTFLoader
 from sombra_engine.models.obj import OBJLoader
@@ -69,27 +70,32 @@ if __name__ == '__main__':
     )
     light_transform = light_projection @ light_view
 
-    # We need to pass the light transform uniform to the Material group
-
     # Create mesh and plane using the shadow map program
-    shadows_batch = Batch()
     # Mesh
     for vg_name, vg in mesh.vertex_groups.items():
         position_list = mesh.get_position_list_for_vertex_group(vg_name)
+        shadow_group = ShadowGroup(
+            light_transform, app.shadow_map, shadow_map_program, mesh.matrix
+        )
         shadow_map_program.vertex_list(
-            count=len(vg.triangles),
+            count=len(vg.triangles) * 3,
             mode=mesh.mode,
-            batch=shadows_batch,
-            # TODO add shadow groups
+            batch=app.shadows_batch,
+            group=shadow_group,
             position=('f', position_list)
         )
     # Plane
     for vg_name, vg in plane_mesh.vertex_groups.items():
         position_list = plane_mesh.get_position_list_for_vertex_group(vg_name)
+        shadow_group = ShadowGroup(
+            light_transform, app.shadow_map, shadow_map_program,
+            plane_mesh.matrix
+        )
         shadow_map_program.vertex_list(
-            count=len(vg.triangles),
+            count=len(vg.triangles) * 3,
             mode=plane_mesh.mode,
-            batch=shadows_batch,
+            batch=app.shadows_batch,
+            group=shadow_group,
             position=('f', position_list)
         )
 

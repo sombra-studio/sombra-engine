@@ -1,4 +1,4 @@
-from pyglet.graphics import Group, ShaderProgram
+from pyglet.graphics import Group, ShaderProgram, Texture
 from pyglet.math import Mat4
 from typing import Any
 
@@ -12,11 +12,13 @@ class ShadowedMaterialGroup(MaterialGroup):
         self,
         material: Material,
         program: ShaderProgram,
+        shadow_map: Texture,
         matrix: Mat4 = Mat4(),
         light_transform: Mat4 = Mat4(),
         order: int = 0,
         parent: Group | None = None
     ):
+        self.shadow_map = shadow_map
         self.light_transform = light_transform
         super().__init__(
             material=material,
@@ -25,9 +27,13 @@ class ShadowedMaterialGroup(MaterialGroup):
             order=order,
             parent=parent
         )
-        # TODO add shadow map texture
 
-    def get_uniforms(self) -> dict[str, Any]:
-        uniforms = super().get_uniforms()
+    def create_textures(self) -> dict[str, Texture]:
+        textures = super().create_textures()
+        textures['shadow_map'] = self.shadow_map
+        return textures
+
+    def create_uniforms(self) -> dict[str, Any]:
+        uniforms = super().create_uniforms()
         uniforms['light_transform'] = self.light_transform
         return uniforms

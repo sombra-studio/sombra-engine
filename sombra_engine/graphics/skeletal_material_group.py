@@ -30,7 +30,7 @@ class SkeletalMaterialGroup(MaterialGroup):
             parent=parent
         )
 
-    def get_uniforms(self) -> dict[str, Any]:
-        uniforms = super().get_uniforms()
+    def create_uniforms(self) -> dict[str, Any]:
+        uniforms = super().create_uniforms()
         uniforms['bones_transforms'] = self.bones_transforms
         return uniforms

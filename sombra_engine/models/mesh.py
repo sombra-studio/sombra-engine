@@ -1,10 +1,11 @@
 from importlib.resources import files
-from pyglet.enums import GeometryMode
-from pyglet.graphics import Batch, Group, Shader, ShaderProgram
+from pyglet.enums import ComponentFormat, GeometryMode
+from pyglet.graphics import Batch, Group, Shader, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3
 import pyglet
 
 from sombra_engine.graphics import MaterialGroup
+from sombra_engine.graphics.shadowed_material_group import ShadowedMaterialGroup
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, Vertex, VertexGroup
 )
@@ -12,12 +13,14 @@ from sombra_engine.primitives import (
 
 def default_program() -> ShaderProgram:
     vs_src = files('sombra_engine.shaders').joinpath(
-        'default.vert'
+        # 'default.vert'
+        'default_shadowed.vert'
     ).read_text()
     vert_shader = Shader(vs_src, 'vertex')
 
     fs_src = files('sombra_engine.shaders').joinpath(
-        'blinn_barycentric.frag'
+        # 'blinn_barycentric.frag'
+        'blinn_shadowed.frag'
     ).read_text()
     frag_shader = Shader(fs_src, 'fragment')
 
@@ -31,6 +34,7 @@ class Mesh(SceneObject):
         name: str,
         vertex_groups: dict[str, VertexGroup] | None = None,
         materials: dict[str, Material] | None = None,
+        shadow_map: Texture | None = None,
         mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
@@ -49,6 +53,15 @@ class Mesh(SceneObject):
         if materials is None:
             materials = {}
         self.materials = materials
+        if shadow_map is None:
+            shadow_map = Texture.create(
+                width=1024,
+                height=1024,
+                internal_format=ComponentFormat.D,
+                internal_format_size=32,
+                internal_format_type='f'
+            )
+        self.shadow_map = shadow_map
         self.mode = mode
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
@@ -63,8 +76,8 @@ class Mesh(SceneObject):
         self.calculate_tri_count(vertex_groups)
 
         # Clean up memory of things already loaded
-        self.vertex_groups = None
-        self.materials = None
+        # self.vertex_groups = None
+        # self.materials = None
 
     @staticmethod
     def check_tex_coords(a: Vertex, b: Vertex, c: Vertex):
@@ -128,8 +141,9 @@ class Mesh(SceneObject):
     def create_material_groups(self) -> dict[str, MaterialGroup]:
         groups = {}
         for name, material in self.materials.items():
-            new_group = MaterialGroup(
-                material, self.program, self.get_matrix(),
+            # new_group = MaterialGroup(
+            new_group = ShadowedMaterialGroup(
+                material, self.program, self.shadow_map, self.get_matrix(),
                 order=0, parent=self.group
             )
             groups[name] = new_group

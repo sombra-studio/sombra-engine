@@ -7,7 +7,7 @@ from pyglet.graphics.api.gl.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE, glClearColor, glDepthFunc,
     glDisable, glDrawBuffer, glEnable
 )
-from pyglet.graphics import Batch, Group, Framebuffer, Renderbuffer
+from pyglet.graphics import Batch, Group, Framebuffer, Texture
 from pyglet.math import Mat4, Vec3
 from pyglet.window import key
 from pyglet.window.camera import FPSCamera
@@ -57,16 +57,16 @@ class App(pudu_ui.App):
             controller.push_handlers(self.controls)
         self.batch = Batch()
         self.shadows_batch = Batch()
-        self.shadows_framebuffer: Framebuffer = Framebuffer()
-        self.depth_buffer = Renderbuffer(
-            context=self,
+        self.shadows_framebuffer = Framebuffer()
+        self.shadow_map = Texture.create(
             width=SHADOWS_MAP_WIDTH,
             height=SHADOWS_MAP_HEIGHT,
-            component_format=ComponentFormat.D,
-            bit_size=24
+            internal_format=ComponentFormat.D,
+            internal_format_size=32,
+            internal_format_type='f'
         )
-        self.shadows_framebuffer.attach_renderbuffer(
-            self.depth_buffer,
+        self.shadows_framebuffer.attach_texture(
+            self.shadow_map,
             attachment=FramebufferAttachment.DEPTH
         )
         self.shadows_framebuffer.bind()
@@ -121,6 +121,13 @@ class App(pudu_ui.App):
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LESS)
 
+        # Shadow Pass
+        self.shadows_framebuffer.bind()
+        self.clear()
+        self.shadows_batch.draw()
+        self.shadows_framebuffer.unbind()
+
+        # Normal Pass
         if self.is_debug:
             with self.gizmo.batch.draw_with_options() as options:
                 options.camera = self.fps_camera

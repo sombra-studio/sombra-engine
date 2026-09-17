@@ -1,4 +1,4 @@
-from pyglet.graphics import ShaderGroup, ShaderProgram
+from pyglet.graphics import ShaderGroup, ShaderProgram, Texture
 from pyglet.math import Mat4
 from typing import Any
 
@@ -7,6 +7,7 @@ class ShadowGroup(ShaderGroup):
     def __init__(
         self,
         light_transform: Mat4,
+        shadow_map: Texture,
         program: ShaderProgram,
         matrix: Mat4 = Mat4()
     ):
@@ -16,6 +17,7 @@ class ShadowGroup(ShaderGroup):
         self.matrix = matrix
         self.uniforms = self.get_uniforms()
         self.set_shader_uniforms(program, self.uniforms)
+        self.set_texture(shadow_map)
 
     def get_uniforms(self) -> dict[str, Any]:
         uniforms = {}
