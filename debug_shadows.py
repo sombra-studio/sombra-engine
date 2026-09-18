@@ -71,6 +71,7 @@ if __name__ == '__main__':
     )
     light_view = Mat4.look_at(
         position=light_pos,
+        # position=light_pos * Vec3(-1, -1, -1),
         target=Vec3(),
         up=Vec3(0.0, 1.0, 0.0)
     )

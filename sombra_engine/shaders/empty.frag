@@ -1,3 +1,7 @@
-#version 120
+#version 330
 
-void main() { }
+out float fragment_depth;
+
+void main() {
+    fragment_depth = gl_FragCoord.z;
+}

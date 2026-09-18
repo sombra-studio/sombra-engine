@@ -1,7 +1,7 @@
 from pudu_ui import Params
 from pudu_ui.colors import Color, BLACK
 import pudu_ui
-from pyglet.enums import ComponentFormat, FramebufferAttachment
+from pyglet.enums import ComponentFormat, FramebufferAttachment, TextureFilter, AddressMode
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
     GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE, glClearColor, glDepthFunc,
@@ -63,7 +63,9 @@ class App(pudu_ui.App):
             height=SHADOWS_MAP_HEIGHT,
             internal_format=ComponentFormat.D,
             internal_format_size=32,
-            internal_format_type='f'
+            internal_format_type='f',
+            filters=TextureFilter.NEAREST,
+            address_mode=AddressMode.CLAMP_TO_BORDER
         )
         self.shadows_framebuffer.attach_texture(
             self.shadow_map,
