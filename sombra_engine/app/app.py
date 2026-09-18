@@ -56,7 +56,7 @@ class App(pudu_ui.App):
             controller.open()
             controller.push_handlers(self.controls)
         self.batch = Batch()
-        self.shadows_batch = Batch()
+        self.shadows_batch: Batch = Batch()
         self.shadows_framebuffer = Framebuffer()
         self.shadow_map = Texture.create(
             width=SHADOWS_MAP_WIDTH,
@@ -124,8 +124,10 @@ class App(pudu_ui.App):
         # Shadow Pass
         self.shadows_framebuffer.bind()
         self.clear()
-        self.shadows_batch.draw()
         self.shadows_framebuffer.unbind()
+        with self.shadows_batch.draw_with_options() as options:
+            options.framebuffer = self.shadows_framebuffer
+            options.viewport = (0, 0, SHADOWS_MAP_WIDTH, SHADOWS_MAP_HEIGHT)
 
         # Normal Pass
         if self.is_debug:

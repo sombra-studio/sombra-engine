@@ -46,6 +46,12 @@ if __name__ == '__main__':
     scene.create_light(light_pos, light_color)
 
     # Create Shadow Map
+    # Assign shadow map texture to meshes
+    mesh.shadow_map = app.shadow_map
+    mesh.update_shadow_map()
+    plane_mesh.shadow_map = app.shadow_map
+    plane_mesh.update_shadow_map()
+
     # Create program
     shadow_map_vs_str = files('sombra_engine.shaders').joinpath(
         'depth.vert'

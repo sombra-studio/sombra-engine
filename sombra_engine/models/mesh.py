@@ -210,6 +210,10 @@ class Mesh(SceneObject):
 
     # -------------------------------------------------------------------------
 
+    def update_shadow_map(self):
+        for material_group in self.material_groups.values():
+            material_group.textures['shadow_map'] = self.shadow_map
+
     def draw(self):
         for vl in self.vertex_lists:
             vl.draw(self.mode)
