@@ -8,5 +8,5 @@ out vec4 final_color;
 
 void main() {
     float depth = texture(depth_map, tex_coords).r;
-    final_color = vec4(vec3(depth), 1.0);
+    final_color = vec4(depth, depth, depth, 1.0);
 }

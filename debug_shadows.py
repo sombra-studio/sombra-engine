@@ -41,7 +41,7 @@ if __name__ == '__main__':
         raise Exception("Mesh not found")
 
     # Add light
-    light_pos = Vec3(10.0, 8.0, 0.0)
+    light_pos = Vec3(-2.0, 4.0, -1.0)
     light_color = Vec3(1.0, 1.0, 1.0)
     scene.create_light(light_pos, light_color)
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     # Create light camera
     light_projection = Mat4.orthogonal_projection(
-        left=-10.0, right=10.0, bottom=-10.0, top=10.0, z_near=1.0, z_far=8.0
+        left=-10.0, right=10.0, bottom=-10.0, top=10.0, z_near=1.0, z_far=20.0
     )
     light_view = Mat4.look_at(
         position=light_pos,

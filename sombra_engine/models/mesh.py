@@ -1,7 +1,7 @@
 from importlib.resources import files
 from pyglet.enums import ComponentFormat, GeometryMode
 from pyglet.graphics import Batch, Group, Shader, ShaderProgram, Texture
-from pyglet.math import Mat4, Vec2, Vec3
+from pyglet.math import Mat4, Vec2, Vec3, Vec4
 import pyglet
 
 from sombra_engine.graphics import MaterialGroup
@@ -229,7 +229,10 @@ class Mesh(SceneObject):
         position_list: list[float] = []
         for triangle in self.vertex_groups[vertex_group_name].triangles:
             for v in triangle.vertices:
-                position_list += [v.position.x, v.position.y, v.position.z]
+                real_pos = self.get_matrix() @ Vec4(
+                    v.position.x, v.position.y, v.position.z, 1.0
+                )
+                position_list += [real_pos.x, real_pos.y, real_pos.z]
         return position_list
 
     def get_lists_for_vertex_group(self, vertex_group_name: str) -> tuple[
