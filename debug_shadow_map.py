@@ -1,9 +1,11 @@
 from importlib.resources import files
 
-from pyglet.enums import ComponentFormat, FramebufferAttachment, TextureFilter, AddressMode
+from pyglet.enums import (
+    ComponentFormat, FramebufferAttachment, GeometryMode,
+    TextureFilter, AddressMode
+)
 from pyglet.graphics.framebuffer import Framebuffer
-from pyglet.graphics import Batch, Texture, Shader, ShaderProgram
-from pyglet.sprite import Sprite
+from pyglet.graphics import Batch, ShaderGroup, Texture, Shader, ShaderProgram
 import pyglet
 
 
@@ -39,7 +41,6 @@ if __name__ == '__main__':
         shadow_map,
         attachment=FramebufferAttachment.DEPTH
     )
-    quad = Sprite(shadow_map)
 
     # Shadow Map Program
     # Create program
@@ -55,6 +56,43 @@ if __name__ == '__main__':
         shadow_map_vs, shadow_map_fs
     )
 
+    # Quad program
+    quad_vs_src = files('sombra_engine.shaders').joinpath(
+        'quad.vert'
+    ).read_text()
+    quad_vs = Shader(quad_vs_src, shader_type='vertex')
+    quad_fs_str = files('sombra_engine.shaders').joinpath(
+        'debug_shadow_map.frag'
+    ).read_text()
+    quad_fs = Shader(quad_fs_str, shader_type='fragment')
+    quad_program: ShaderProgram = ShaderProgram(quad_vs, quad_fs)
+
+    # Quad vertex list
+
+    quad_shader_group = ShaderGroup(quad_program)
+    quad_shader_group.set_texture(shadow_map)
+    quad = quad_program.vertex_list(
+        count=4,
+        mode=GeometryMode.TRIANGLE_STRIP,
+        position=(
+            'f', (
+                -1.0, 1.0, 0.0,
+                -1.0, -1.0, 0.0,
+                1.0, 1.0, 0.0,
+                1.0, -1.0, 0.0
+            )
+        ),
+        tex_coords=(
+            'f', (
+                0.0, 1.0,
+                0.0, 0.0,
+                1.0, 1.0,
+                1.0, 0.0
+            )
+        )
+    )
+
+
     @window.event
     def on_draw():
         window.clear()
@@ -65,7 +103,7 @@ if __name__ == '__main__':
             options.viewport = (0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT)
 
         # Normal pass
-        quad.draw()
+        quad.draw(GeometryMode.TRIANGLE_STRIP)
 
     pyglet.app.run()
 
