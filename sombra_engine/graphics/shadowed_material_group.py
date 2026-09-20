@@ -12,13 +12,13 @@ class ShadowedMaterialGroup(MaterialGroup):
         self,
         material: Material,
         program: ShaderProgram,
-        shadow_map: Texture,
+        depth_map: Texture,
         matrix: Mat4 = Mat4(),
         light_transform: Mat4 = Mat4(),
         order: int = 0,
         parent: Group | None = None
     ):
-        self.shadow_map = shadow_map
+        self.depth_map = depth_map
         self.light_transform = light_transform
         super().__init__(
             material=material,
@@ -30,7 +30,7 @@ class ShadowedMaterialGroup(MaterialGroup):
 
     def create_textures(self) -> dict[str, Texture]:
         textures = super().create_textures()
-        textures['shadow_map'] = self.shadow_map
+        textures['depth_map'] = self.depth_map
         return textures
 
     def create_uniforms(self) -> dict[str, Any]:

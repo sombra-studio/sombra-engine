@@ -47,10 +47,10 @@ if __name__ == '__main__':
 
     # Create Shadow Map
     # Assign shadow map texture to meshes
-    mesh.shadow_map = app.shadow_map
-    mesh.update_shadow_map()
-    plane_mesh.shadow_map = app.shadow_map
-    plane_mesh.update_shadow_map()
+    mesh.depth_map = app.depth_map
+    mesh.update_depth_map()
+    plane_mesh.depth_map = app.depth_map
+    plane_mesh.update_depth_map()
 
     # Create program
     shadow_map_vs_str = files('sombra_engine.shaders').joinpath(
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     for vg_name, vg in mesh.vertex_groups.items():
         position_list = mesh.get_position_list_for_vertex_group(vg_name)
         shadow_group = ShadowGroup(
-            light_transform, app.shadow_map, shadow_map_program, mesh.matrix
+            light_transform, shadow_map_program, mesh.matrix
         )
         shadow_map_program.vertex_list(
             count=len(vg.triangles) * 3,
@@ -95,8 +95,7 @@ if __name__ == '__main__':
     for vg_name, vg in plane_mesh.vertex_groups.items():
         position_list = plane_mesh.get_position_list_for_vertex_group(vg_name)
         shadow_group = ShadowGroup(
-            light_transform, app.shadow_map, shadow_map_program,
-            plane_mesh.matrix
+            light_transform, shadow_map_program, plane_mesh.matrix
         )
         shadow_map_program.vertex_list(
             count=len(vg.triangles) * 3,

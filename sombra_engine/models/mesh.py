@@ -34,7 +34,7 @@ class Mesh(SceneObject):
         name: str,
         vertex_groups: dict[str, VertexGroup] | None = None,
         materials: dict[str, Material] | None = None,
-        shadow_map: Texture | None = None,
+        depth_map: Texture | None = None,
         mode: GeometryMode = GeometryMode.TRIANGLES,
         batch: Batch | None = None,
         group: Group | None = None,
@@ -53,15 +53,15 @@ class Mesh(SceneObject):
         if materials is None:
             materials = {}
         self.materials = materials
-        if shadow_map is None:
-            shadow_map = Texture.create(
+        if depth_map is None:
+            depth_map = Texture.create(
                 width=1024,
                 height=1024,
                 internal_format=ComponentFormat.D,
                 internal_format_size=32,
                 internal_format_type='f'
             )
-        self.shadow_map = shadow_map
+        self.depth_map = depth_map
         self.mode = mode
         self.batch = batch or pyglet.graphics.get_default_batch()
         self.group = group
@@ -143,7 +143,7 @@ class Mesh(SceneObject):
         for name, material in self.materials.items():
             # new_group = MaterialGroup(
             new_group = ShadowedMaterialGroup(
-                material, self.program, self.shadow_map, self.get_matrix(),
+                material, self.program, self.depth_map, self.get_matrix(),
                 order=0, parent=self.group
             )
             groups[name] = new_group
@@ -210,9 +210,9 @@ class Mesh(SceneObject):
 
     # -------------------------------------------------------------------------
 
-    def update_shadow_map(self):
+    def update_depth_map(self):
         for material_group in self.material_groups.values():
-            material_group.textures['shadow_map'] = self.shadow_map
+            material_group.textures['depth_map'] = self.depth_map
 
     def draw(self):
         for vl in self.vertex_lists:

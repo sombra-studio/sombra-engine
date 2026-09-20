@@ -58,7 +58,7 @@ class App(pudu_ui.App):
         self.batch = Batch()
         self.shadows_batch: Batch = Batch()
         self.shadows_framebuffer = Framebuffer()
-        self.shadow_map = Texture.create(
+        self.depth_map = Texture.create(
             width=SHADOWS_MAP_WIDTH,
             height=SHADOWS_MAP_HEIGHT,
             internal_format=ComponentFormat.D,
@@ -68,7 +68,7 @@ class App(pudu_ui.App):
             address_mode=AddressMode.CLAMP_TO_BORDER
         )
         self.shadows_framebuffer.attach_texture(
-            self.shadow_map,
+            self.depth_map,
             attachment=FramebufferAttachment.DEPTH
         )
         self.shadows_framebuffer.bind()
