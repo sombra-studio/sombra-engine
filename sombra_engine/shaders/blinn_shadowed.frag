@@ -4,7 +4,7 @@ uniform sampler2D ambient_map;
 uniform sampler2D diffuse_map;
 uniform sampler2D specular_map;
 uniform sampler2D bump_map;
-uniform sampler2D shadow_map;
+uniform sampler2D depth_map;
 
 struct Material {
     vec3 diffuse;
@@ -62,7 +62,7 @@ float calculate_shadow() {
     vec3 projected_pos = frag_pos_light_space.xyz / frag_pos_light_space.w;
     // Transform to [0 - 1] range
     projected_pos = projected_pos * 0.5 + 0.5;
-    float closest_depth = texture(shadow_map, projected_pos.xy).r;
+    float closest_depth = texture(depth_map, projected_pos.xy).r;
     float current_depth = projected_pos.z;
     float shadow = closest_depth < current_depth ? 1.0 : 0.0;
     return shadow;

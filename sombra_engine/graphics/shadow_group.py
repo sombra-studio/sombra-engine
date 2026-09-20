@@ -7,7 +7,6 @@ class ShadowGroup(ShaderGroup):
     def __init__(
         self,
         light_transform: Mat4,
-        shadow_map: Texture,
         program: ShaderProgram,
         matrix: Mat4 = Mat4()
     ):
@@ -15,11 +14,10 @@ class ShadowGroup(ShaderGroup):
         self.light_transform = light_transform
         self.program = program
         self.matrix = matrix
-        self.uniforms = self.get_uniforms()
+        self.uniforms = self.create_uniforms()
         self.set_shader_uniforms(program, self.uniforms)
-        self.set_texture(shadow_map)
 
-    def get_uniforms(self) -> dict[str, Any]:
+    def create_uniforms(self) -> dict[str, Any]:
         uniforms = {}
         uniforms['light_transform'] = self.light_transform
         uniforms['model'] = self.matrix
