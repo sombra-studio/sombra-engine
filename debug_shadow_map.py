@@ -173,7 +173,7 @@ if __name__ == '__main__':
         # Shadow pass
         glViewport(0, 0, DEPTH_MAP_WIDTH, DEPTH_MAP_HEIGHT)
         depth_framebuffer.bind()
-        depth_map.bind()
+        # depth_map.bind()
         glClear(GL_DEPTH_BUFFER_BIT)
         for vl in vlists:
             vl.draw(GeometryMode.TRIANGLES)

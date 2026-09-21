@@ -4,8 +4,9 @@ import pudu_ui
 from pyglet.enums import ComponentFormat, FramebufferAttachment, TextureFilter, AddressMode
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
-    GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE, glClearColor, glDepthFunc,
-    glDisable, glDrawBuffer, glEnable
+    GL_DEPTH_BUFFER_BIT, GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE,
+    glClear, glClearColor, glDepthFunc, glDisable, glDrawBuffer, glEnable,
+    glViewport
 )
 from pyglet.graphics import Batch, Group, Framebuffer, Texture
 from pyglet.math import Mat4, Vec3
@@ -21,8 +22,8 @@ from sombra_engine.models import SkeletalMesh
 from sombra_engine.fpscamera import FPSCameraControls
 
 
-SHADOWS_MAP_WIDTH = 1024
-SHADOWS_MAP_HEIGHT = 1024
+DEPTH_MAP_WIDTH = 1024
+DEPTH_MAP_HEIGHT = 1024
 
 
 class App(pudu_ui.App):
@@ -59,8 +60,8 @@ class App(pudu_ui.App):
         self.shadows_batch: Batch = Batch()
         self.shadows_framebuffer = Framebuffer()
         self.depth_map = Texture.create(
-            width=SHADOWS_MAP_WIDTH,
-            height=SHADOWS_MAP_HEIGHT,
+            width=DEPTH_MAP_WIDTH,
+            height=DEPTH_MAP_HEIGHT,
             internal_format=ComponentFormat.D,
             internal_format_size=32,
             internal_format_type='f',
@@ -124,12 +125,14 @@ class App(pudu_ui.App):
         glDepthFunc(GL_LESS)
 
         # Shadow Pass
+        glViewport(0, 0, DEPTH_MAP_WIDTH, DEPTH_MAP_HEIGHT)
         self.shadows_framebuffer.bind()
-        self.clear()
+        glClear(GL_DEPTH_BUFFER_BIT)
+        self.shadows_batch.draw()
         self.shadows_framebuffer.unbind()
-        with self.shadows_batch.draw_with_options() as options:
-            options.framebuffer = self.shadows_framebuffer
-            options.viewport = (0, 0, SHADOWS_MAP_WIDTH, SHADOWS_MAP_HEIGHT)
+        # with self.shadows_batch.draw_with_options() as options:
+        #     options.framebuffer = self.shadows_framebuffer
+        #     options.viewport = (0, 0, SHADOWS_MAP_WIDTH, SHADOWS_MAP_HEIGHT)
 
         # Normal Pass
         if self.is_debug:
