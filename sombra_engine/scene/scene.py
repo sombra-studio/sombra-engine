@@ -2,6 +2,7 @@ from pyglet.graphics import ShaderProgram
 from pyglet.math import Vec3
 
 
+from sombra_engine.constants import DEPTH_MAP_TEX_UNIT
 from sombra_engine.models import Mesh, SkeletalMesh
 from sombra_engine.primitives import SceneObject
 from sombra_engine.scene import Light
@@ -37,5 +38,7 @@ class Scene:
         if 'light.color' in program.uniforms:
             if self.lights:
                 program['light.color'] = self.lights[0].color
+        if 'depth_map' in program.uniforms:
+            program['depth_map'] = DEPTH_MAP_TEX_UNIT
 
         self.meshes.append(mesh)

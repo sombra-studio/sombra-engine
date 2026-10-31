@@ -32,7 +32,8 @@ if __name__ == '__main__':
     window = pyglet.window.Window(
         width=DEPTH_MAP_WIDTH, height=DEPTH_MAP_HEIGHT
     )
-    box_scenes, _, __ = GLTFLoader.load('box.glb')
+    # box_scenes, _, __ = GLTFLoader.load('box.glb')
+    box_scenes, _, __ = GLTFLoader.load('CesiumMan.glb')
     plane_scene = OBJLoader.load('plane.obj')
 
     if (

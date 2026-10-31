@@ -27,8 +27,8 @@ if __name__ == '__main__':
 
     gltf_scenes, _, __ = GLTFLoader.load(
         # filename='zombie.glb',
-        # filename='CesiumMan.glb',
-        filename='box.glb',
+        filename='CesiumMan.glb',
+        # filename='box.glb',
         batch=app.batch
     )
     if (
@@ -44,13 +44,6 @@ if __name__ == '__main__':
     light_pos = Vec3(-2.0, 4.0, -1.0)
     light_color = Vec3(1.0, 1.0, 1.0)
     scene.create_light(light_pos, light_color)
-
-    # Create Shadow Map
-    # Assign shadow map texture to meshes
-    mesh.depth_map = app.depth_map
-    mesh.update_depth_map()
-    plane_mesh.depth_map = app.depth_map
-    plane_mesh.update_depth_map()
 
     # Create program
     shadow_map_vs_str = files('sombra_engine.shaders').joinpath(
@@ -71,11 +64,13 @@ if __name__ == '__main__':
     )
     light_view = Mat4.look_at(
         position=light_pos,
-        # position=light_pos * Vec3(-1, -1, -1),
         target=Vec3(),
         up=Vec3(0.0, 1.0, 0.0)
     )
     light_transform = light_projection @ light_view
+    app.light_projection = light_projection
+    app.light_view = light_view
+    app.light_transform = light_transform
 
     # Create mesh and plane using the shadow map program
     # Mesh

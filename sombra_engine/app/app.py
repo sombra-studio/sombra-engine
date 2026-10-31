@@ -5,8 +5,9 @@ from pyglet.enums import ComponentFormat, FramebufferAttachment, TextureFilter, 
 from pyglet.event import EVENT_HANDLED
 from pyglet.graphics.api.gl.gl import (
     GL_DEPTH_BUFFER_BIT, GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE,
-    glClear, glClearColor, glDepthFunc, glDisable, glDrawBuffer, glEnable,
-    glViewport
+    GL_TEXTURE4,
+    glActiveTexture, glBindTexture, glClear, glClearColor, glDepthFunc,
+    glDisable, glDrawBuffer, glEnable, glViewport
 )
 from pyglet.graphics import Batch, Group, Framebuffer, Texture
 from pyglet.math import Mat4, Vec3
@@ -16,6 +17,7 @@ import pyglet
 
 
 from sombra_engine import Scene
+from sombra_engine.constants import DEPTH_MAP_TEX_UNIT
 # from sombra_engine.camera import FPSCamera
 from sombra_engine.debug import Gizmo, Stats
 from sombra_engine.models import SkeletalMesh
@@ -94,6 +96,7 @@ class App(pudu_ui.App):
         self.current_scene: Scene | None = None
         self.light_projection: Mat4 = Mat4()
         self.light_view: Mat4 = Mat4()
+        self.light_transform: Mat4 = Mat4()
         self.tri_count = 0
 
     def set_scene(self, scene: Scene):
@@ -101,6 +104,10 @@ class App(pudu_ui.App):
         self.tri_count = 0
         for mesh in scene.meshes:
             self.tri_count += mesh.tri_count
+            if 'depth_map' in mesh.program.uniforms:
+                mesh.program['depth_map'] = DEPTH_MAP_TEX_UNIT
+            if 'light_transform' in mesh.program.uniforms:
+                mesh.program['light_transform'] = self.light_transform
         self.stats.set_tri_counts(self.tri_count)
 
     def draw_2d_debug_ui(self):
@@ -135,6 +142,9 @@ class App(pudu_ui.App):
         #     options.viewport = (0, 0, SHADOWS_MAP_WIDTH, SHADOWS_MAP_HEIGHT)
 
         # Normal Pass
+        glActiveTexture(GL_TEXTURE4)
+        glBindTexture(self.depth_map.target, self.depth_map.id)
+
         if self.is_debug:
             with self.gizmo.batch.draw_with_options() as options:
                 options.camera = self.fps_camera

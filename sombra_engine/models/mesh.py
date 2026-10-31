@@ -1,11 +1,10 @@
 from importlib.resources import files
-from pyglet.enums import ComponentFormat, GeometryMode
+from pyglet.enums import GeometryMode
 from pyglet.graphics import Batch, Group, Shader, ShaderProgram, Texture
 from pyglet.math import Mat4, Vec2, Vec3, Vec4
 import pyglet
 
 from sombra_engine.graphics import MaterialGroup
-from sombra_engine.graphics.shadowed_material_group import ShadowedMaterialGroup
 from sombra_engine.primitives import (
     Material, SceneObject, Transform, Vertex, VertexGroup
 )
@@ -53,14 +52,6 @@ class Mesh(SceneObject):
         if materials is None:
             materials = {}
         self.materials = materials
-        if depth_map is None:
-            depth_map = Texture.create(
-                width=1024,
-                height=1024,
-                internal_format=ComponentFormat.D,
-                internal_format_size=32,
-                internal_format_type='f'
-            )
         self.depth_map = depth_map
         self.mode = mode
         self.batch = batch or pyglet.graphics.get_default_batch()
@@ -141,9 +132,8 @@ class Mesh(SceneObject):
     def create_material_groups(self) -> dict[str, MaterialGroup]:
         groups = {}
         for name, material in self.materials.items():
-            # new_group = MaterialGroup(
-            new_group = ShadowedMaterialGroup(
-                material, self.program, self.depth_map, self.get_matrix(),
+            new_group = MaterialGroup(
+                material, self.program, self.get_matrix(),
                 order=0, parent=self.group
             )
             groups[name] = new_group
@@ -209,10 +199,6 @@ class Mesh(SceneObject):
         self.update_matrix()
 
     # -------------------------------------------------------------------------
-
-    def update_depth_map(self):
-        for material_group in self.material_groups.values():
-            material_group.textures['depth_map'] = self.depth_map
 
     def draw(self):
         for vl in self.vertex_lists:
