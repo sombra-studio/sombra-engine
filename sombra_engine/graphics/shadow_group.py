@@ -1,4 +1,4 @@
-from pyglet.graphics import ShaderGroup, ShaderProgram, Texture
+from pyglet.graphics import ShaderGroup, ShaderProgram
 from pyglet.math import Mat4
 from typing import Any
 
@@ -18,7 +18,8 @@ class ShadowGroup(ShaderGroup):
         self.set_shader_uniforms(program, self.uniforms)
 
     def create_uniforms(self) -> dict[str, Any]:
-        uniforms = {}
-        uniforms['light_transform'] = self.light_transform
-        uniforms['model'] = self.matrix
+        uniforms = {
+            'light_transform': self.light_transform,
+            'model': self.matrix
+        }
         return uniforms
