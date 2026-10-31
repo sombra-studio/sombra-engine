@@ -77,7 +77,7 @@ if __name__ == '__main__':
     for vg_name, vg in mesh.vertex_groups.items():
         position_list = mesh.get_position_list_for_vertex_group(vg_name)
         shadow_group = ShadowGroup(
-            light_transform, shadow_map_program, mesh.matrix
+            light_transform, shadow_map_program, mesh.get_matrix()
         )
         shadow_map_program.vertex_list(
             count=len(vg.triangles) * 3,

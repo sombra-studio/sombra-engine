@@ -4,19 +4,18 @@ from pyglet.enums import (
     TextureFilter, AddressMode
 )
 from pyglet.graphics.api.gl.gl import (
-    GL_CULL_FACE, GL_DEPTH_TEST, GL_LESS, GL_NONE, glClearColor, glDepthFunc,
-    glDisable, glDrawBuffer, glEnable, glViewport, glReadBuffer, glClear,
-    GL_DEPTH_BUFFER_BIT
+    GL_CULL_FACE, GL_DEPTH_TEST, GL_NONE, glDrawBuffer, glEnable, glViewport,
+    glReadBuffer, glClear,  GL_DEPTH_BUFFER_BIT
 )
 from pyglet.graphics.framebuffer import Framebuffer
-from pyglet.graphics import Batch, ShaderGroup, Texture, Shader, ShaderProgram
+from pyglet.graphics import ShaderGroup, Texture, Shader, ShaderProgram
 from pyglet.graphics.vertexdomain import VertexList
 from pyglet.math import Mat4, Vec3
 import pyglet
 
 
 from sombra_engine.graphics.shadow_group import ShadowGroup
-from sombra_engine.models import Mesh
+from sombra_engine.models import Mesh, SkeletalMesh
 from sombra_engine.models.gltf import GLTFLoader
 from sombra_engine.models.obj import OBJLoader
 
@@ -32,8 +31,11 @@ if __name__ == '__main__':
     window = pyglet.window.Window(
         width=DEPTH_MAP_WIDTH, height=DEPTH_MAP_HEIGHT
     )
-    # box_scenes, _, __ = GLTFLoader.load('box.glb')
-    box_scenes, _, __ = GLTFLoader.load('CesiumMan.glb')
+    box_scenes, _, __ = GLTFLoader.load(
+        # filename='box.glb'
+        filename='CesiumMan.glb'
+        # filename = 'zombie.glb'
+    )
     plane_scene = OBJLoader.load('plane.obj')
 
     if (
@@ -101,18 +103,22 @@ if __name__ == '__main__':
     vlists: list[VertexList] = []
     if mesh.vertex_groups is None:
         raise Exception("Empty mesh")
-    for vg_name, vg in mesh.vertex_groups.items():
-        position_list = mesh.get_position_list_for_vertex_group(vg_name)
-        shadow_group = ShadowGroup(
-            light_transform, depth_map_program, mesh.matrix
-        )
-        vl = depth_map_program.vertex_list(
-            count=len(vg.triangles) * 3,
-            mode=mesh.mode,
-            group=shadow_group,
-            position=('f', position_list)
-        )
-        vlists.append(vl)
+    elif isinstance(mesh, Mesh):
+        for vg_name, vg in mesh.vertex_groups.items():
+            position_list = mesh.get_position_list_for_vertex_group(vg_name)
+            shadow_group = ShadowGroup(
+                light_transform, depth_map_program, mesh.get_matrix()
+            )
+            vl = depth_map_program.vertex_list(
+                count=len(vg.triangles) * 3,
+                mode=mesh.mode,
+                group=shadow_group,
+                position=('f', position_list)
+            )
+            vlists.append(vl)
+    elif isinstance(mesh, SkeletalMesh):
+        # TODO Handle skeletal meshes
+        pass
     # Plane
     if plane_mesh.vertex_groups is None:
         raise Exception("Empty plane")
@@ -169,7 +175,7 @@ if __name__ == '__main__':
     @window.event
     def on_draw():
         window.clear()
-        # glEnable(GL_CULL_FACE)
+        glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
         # Shadow pass
         glViewport(0, 0, DEPTH_MAP_WIDTH, DEPTH_MAP_HEIGHT)
