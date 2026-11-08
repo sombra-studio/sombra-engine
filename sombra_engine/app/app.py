@@ -31,8 +31,8 @@ DEPTH_MAP_HEIGHT = 1024
 class App(pudu_ui.App):
     def __init__(
         self,
-        width: int = 1280,
-        height: int = 720,
+        width: int = 854,
+        height: int = 480,
         caption: str = "Sombra Engine",
         update_rate: float = 1.0 / 60.0,
         background_color: Color = BLACK,
@@ -87,7 +87,7 @@ class App(pudu_ui.App):
             0.0, self.width, 0.0, self.height,
             0.0, 1000.0
         )
-        stats_params = Params(x=10.0, y=10.0)
+        stats_params = Params(x=10.0, y=10.0, width=300, height=400)
         self.stats = Stats(
             self, stats_params, self.debug_ui_batch, self.debug_group
         )
